@@ -3,7 +3,6 @@ package net.golbarg.skillassessment.db;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 
 import net.golbarg.skillassessment.models.Config;
 
@@ -15,7 +14,7 @@ public class TableConfig implements CRUDHandler<Config> {
     public static final String KEY_KEY = "key";
     public static final String KEY_VALUE = "value";
     public static final String KEY_UPDATED_AT = "updated_at";
-    private DatabaseHandler dbHandler;
+    private final DatabaseHandler dbHandler;
 
     public TableConfig(DatabaseHandler dbHandler) {
         this.dbHandler = dbHandler;

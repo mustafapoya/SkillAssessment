@@ -17,7 +17,7 @@ public class TableQuestion implements CRUDHandler<Question> {
     public static final String KEY_NUMBER = "number";
     public static final String KEY_TITLE = "title";
 
-    private DatabaseHandler dbHandler;
+    private final DatabaseHandler dbHandler;
 
     public TableQuestion(DatabaseHandler dbHandler) {
         this.dbHandler = dbHandler;
@@ -65,7 +65,7 @@ public class TableQuestion implements CRUDHandler<Question> {
 
     public ArrayList<Question> getContents(int categoryId) {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
-        ArrayList<Question> result = new ArrayList<Question>();
+        ArrayList<Question> result = new ArrayList<>();
         // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_NAME + " WHERE " + KEY_CATEGORY_ID + " = " + categoryId;
 

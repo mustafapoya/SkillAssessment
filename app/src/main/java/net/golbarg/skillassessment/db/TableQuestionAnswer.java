@@ -17,7 +17,11 @@ public class TableQuestionAnswer implements CRUDHandler<QuestionAnswer>{
     public static final String KEY_IS_CORRECT = "is_correct";
     public static final String [] ALL_COLUMNS = {KEY_ID, KEY_QUESTION_ID, KEY_NUMBER, KEY_TITLE, KEY_IS_CORRECT};
 
-    private DatabaseHandler dbHandler;
+    private final DatabaseHandler dbHandler;
+
+    public TableQuestionAnswer(DatabaseHandler dbHandler) {
+        this.dbHandler = dbHandler;
+    }
 
     public static String createTableQuery() {
         return String.format(
@@ -112,7 +116,7 @@ public class TableQuestionAnswer implements CRUDHandler<QuestionAnswer>{
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_QUESTION_ID))),
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_NUMBER))),
                 cursor.getString(cursor.getColumnIndex(KEY_TITLE)),
-                Boolean.valueOf(cursor.getString(cursor.getColumnIndex(KEY_IS_CORRECT)))
+                Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(KEY_IS_CORRECT)))
         );
     }
 
