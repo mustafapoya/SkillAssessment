@@ -61,6 +61,6 @@ public class Category {
     }
 
     public static Category createFromJson(JSONObject json) throws JSONException {
-        return new Category(json.getInt("id"), json.getString("title"), json.getString("description"));
+        return new Category(json.getInt("id"), json.getString("title"), ""/*json.getString("description")*/);
     }
 }
