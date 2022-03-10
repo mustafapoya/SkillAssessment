@@ -1,0 +1,244 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "title": "accounting"
+    },
+    {
+      "id": 2,
+      "title": "adobe-acrobat"
+    },
+    {
+      "id": 3,
+      "title": "agile-methodologies"
+    },
+    {
+      "id": 4,
+      "title": "android"
+    },
+    {
+      "id": 5,
+      "title": "angular"
+    },
+    {
+      "id": 6,
+      "title": "aws"
+    },
+    {
+      "id": 7,
+      "title": "aws-lambda"
+    },
+    {
+      "id": 8,
+      "title": "bash"
+    },
+    {
+      "id": 9,
+      "title": "c"
+    },
+    {
+      "id": 10,
+      "title": "c#"
+    },
+    {
+      "id": 11,
+      "title": "c++"
+    },
+    {
+      "id": 12,
+      "title": "css"
+    },
+    {
+      "id": 13,
+      "title": "cybersecurity"
+    },
+    {
+      "id": 14,
+      "title": "django"
+    },
+    {
+      "id": 15,
+      "title": "dotnet-framework"
+    },
+    {
+      "id": 16,
+      "title": "eclipse"
+    },
+    {
+      "id": 17,
+      "title": "front-end-development"
+    },
+    {
+      "id": 18,
+      "title": "git"
+    },
+    {
+      "id": 19,
+      "title": "go"
+    },
+    {
+      "id": 20,
+      "title": "google-ads"
+    },
+    {
+      "id": 21,
+      "title": "google-analytics"
+    },
+    {
+      "id": 22,
+      "title": "google-cloud-platform"
+    },
+    {
+      "id": 23,
+      "title": "hadoop"
+    },
+    {
+      "id": 24,
+      "title": "html"
+    },
+    {
+      "id": 25,
+      "title": "it-operations"
+    },
+    {
+      "id": 26,
+      "title": "java"
+    },
+    {
+      "id": 27,
+      "title": "javascript"
+    },
+    {
+      "id": 28,
+      "title": "jquery"
+    },
+    {
+      "id": 29,
+      "title": "json"
+    },
+    {
+      "id": 30,
+      "title": "kotlin"
+    },
+    {
+      "id": 31,
+      "title": "linux"
+    },
+    {
+      "id": 32,
+      "title": "machine-learning"
+    },
+    {
+      "id": 33,
+      "title": "matlab"
+    },
+    {
+      "id": 34,
+      "title": "microsoft-access"
+    },
+    {
+      "id": 35,
+      "title": "microsoft-azure"
+    },
+    {
+      "id": 36,
+      "title": "microsoft-power-bi"
+    },
+    {
+      "id": 37,
+      "title": "mongodb"
+    },
+    {
+      "id": 38,
+      "title": "mysql"
+    },
+    {
+      "id": 39,
+      "title": "node.js"
+    },
+    {
+      "id": 40,
+      "title": "nosql"
+    },
+    {
+      "id": 41,
+      "title": "object-oriented-programming"
+    },
+    {
+      "id": 42,
+      "title": "objective-c"
+    },
+    {
+      "id": 43,
+      "title": "php"
+    },
+    {
+      "id": 44,
+      "title": "python"
+    },
+    {
+      "id": 45,
+      "title": "quickbooks"
+    },
+    {
+      "id": 46,
+      "title": "r"
+    },
+    {
+      "id": 47,
+      "title": "react"
+    },
+    {
+      "id": 48,
+      "title": "rest-api"
+    },
+    {
+      "id": 49,
+      "title": "ruby-on-rails"
+    },
+    {
+      "id": 50,
+      "title": "rust"
+    },
+    {
+      "id": 51,
+      "title": "scala"
+    },
+    {
+      "id": 52,
+      "title": "search-engine-optimization"
+    },
+    {
+      "id": 53,
+      "title": "sharepoint"
+    },
+    {
+      "id": 54,
+      "title": "spring-framework"
+    },
+    {
+      "id": 55,
+      "title": "swift"
+    },
+    {
+      "id": 56,
+      "title": "t-sql"
+    },
+    {
+      "id": 57,
+      "title": "unity"
+    },
+    {
+      "id": 58,
+      "title": "vba"
+    },
+    {
+      "id": 59,
+      "title": "wordpress"
+    },
+    {
+      "id": 60,
+      "title": "xml"
+    }
+  ]
+}
