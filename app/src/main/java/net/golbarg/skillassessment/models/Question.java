@@ -9,12 +9,14 @@ public class Question {
     private int id;
     private int number;
     private String title;
+    private Category category;
     private ArrayList<QuestionAnswer> answers;
 
-    public Question(int id, int number, String title) {
+    public Question(int id, int number, String title, Category category) {
         this.id = id;
         this.number = number;
         this.title = title;
+        this.category = category;
         this.answers = new ArrayList<>();
     }
 
@@ -42,6 +44,14 @@ public class Question {
         this.title = title;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     public ArrayList<QuestionAnswer> getAnswers() {
         return answers;
     }
@@ -56,11 +66,12 @@ public class Question {
                 "id=" + id +
                 ", number=" + number +
                 ", title='" + title + '\'' +
+                ", category=" + category +
                 ", answers=" + answers +
                 '}';
     }
 
-    public static Question createFromJson(JSONObject json) throws JSONException {
-        return new Question(json.getInt("id"), json.getInt("number"), json.getString("title"));
+    public static Question createFromJson(JSONObject json, Category category) throws JSONException {
+        return new Question(json.getInt("id"), json.getInt("number"), json.getString("title"), category);
     }
 }
