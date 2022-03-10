@@ -7,89 +7,113 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import net.golbarg.skillassessment.models.Config;
 
-public class TableConfig {
+import java.util.ArrayList;
+
+public class TableConfig implements CRUDHandler<Config> {
     public static final String TABLE_NAME = "configs";
     public static final String KEY_ID = "id";
     public static final String KEY_KEY = "key";
     public static final String KEY_VALUE = "value";
     public static final String KEY_UPDATED_AT = "updated_at";
+    private DatabaseHandler dbHandler;
+
+    public TableConfig(DatabaseHandler dbHandler) {
+        this.dbHandler = dbHandler;
+    }
 
     public static String createTableQuery() {
-        return "CREATE TABLE " + TABLE_NAME +
-                "( " + KEY_ID + " INTEGER PRIMARY KEY," +
-                KEY_KEY + " TEXT, " +
-                KEY_VALUE + " TEXT, " +
-                KEY_UPDATED_AT + " long " +
-                ")";
+        return String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY, %s TEXT, %s TEXT, %s LONG NULLABLE)",
+                TABLE_NAME, KEY_ID, KEY_KEY, KEY_VALUE, KEY_UPDATED_AT);
     }
 
     public static String dropTableQuery() {
         return "DROP TABLE IF EXISTS " + TABLE_NAME;
     }
 
-    /**
-     * add new config to db
-     */
-    public static void create(Config config, SQLiteOpenHelper helper) {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        db.insert(TABLE_NAME, null, putValues(config));
+    @Override
+    public void create(Config object) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        db.insert(TABLE_NAME, null, putValues(object));
         db.close();
     }
 
-    public static Config getById(int id, SQLiteOpenHelper helper) {
-        SQLiteDatabase db = helper.getReadableDatabase();
+    @Override
+    public Config get(int id) {
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NAME, new String[]{KEY_ID, KEY_KEY, KEY_VALUE, KEY_UPDATED_AT}, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
 
         if (cursor != null && cursor.getCount() != 0) {
             cursor.moveToFirst();
-            return mapConfig(cursor);
+            return mapColumn(cursor);
         } else {
             return null;
         }
     }
 
-    public static Config getByKey(String key, SQLiteOpenHelper helper) {
-        SQLiteDatabase db = helper.getReadableDatabase();
+    public Config getByKey(String key) {
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NAME, new String[]{KEY_ID, KEY_KEY, KEY_VALUE, KEY_UPDATED_AT}, KEY_KEY + "=?", new String[]{String.valueOf(key)}, null, null, null, null);
 
         if (cursor != null && cursor.getCount() != 0) {
             cursor.moveToFirst();
-            return mapConfig(cursor);
+            return mapColumn(cursor);
         } else {
             return null;
         }
     }
 
-    public static int updateById(Config config, SQLiteOpenHelper helper) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+    @Override
+    public ArrayList<Config> getAll() {
+        ArrayList<Config> result = new ArrayList<>();
+        String selectQuery = "SELECT  * FROM " + TABLE_NAME;
 
-        return db.update(TABLE_NAME, putValues(config), KEY_ID + "=?", new String[]{String.valueOf(config.getId())});
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if(cursor.moveToFirst()) {
+            do {
+                result.add(mapColumn(cursor));
+            }while(cursor.moveToNext());
+        }
+        return result;
     }
 
-    public static int updateByKey(Config config, SQLiteOpenHelper helper) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+    @Override
+    public int update(Config object) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        return db.update(TABLE_NAME, putValues(object), KEY_ID + "=?", new String[]{String.valueOf(object.getId())});
+    }
+
+    public int updateByKey(Config config) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
         return db.update(TABLE_NAME, putValues(config), KEY_KEY + "=?", new String[]{String.valueOf(config.getKey())});
     }
 
-    public static void deleteById(Config config, SQLiteOpenHelper helper) {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        db.delete(TABLE_NAME, KEY_ID + "= ?", new String[]{String.valueOf(config.getId())});
+    @Override
+    public void delete(Config object) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        db.delete(TABLE_NAME, KEY_ID + "= ?", new String[]{String.valueOf(object.getId())});
     }
 
-    public static void deleteByKey(Config config, SQLiteOpenHelper helper) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+    public void deleteByKey(Config config) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
         db.delete(TABLE_NAME, KEY_KEY + "= ?", new String[]{String.valueOf(config.getKey())});
     }
 
-    public static void clearTable(SQLiteOpenHelper helper) {
-        String query = "DELETE FROM " + TABLE_NAME;
-        SQLiteDatabase db = helper.getWritableDatabase();
-        db.execSQL(query);
+    @Override
+    public int getCount() {
+        String countQuery = "SELECT * FROM " + TABLE_NAME;
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
     }
 
-    private static Config mapConfig(Cursor cursor) {
+    @Override
+    public Config mapColumn(Cursor cursor) {
         return new Config(
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))),
                 cursor.getString(cursor.getColumnIndex(KEY_KEY)),
@@ -98,14 +122,21 @@ public class TableConfig {
         );
     }
 
-    private static ContentValues putValues(Config config) {
+    @Override
+    public ContentValues putValues(Config object) {
         ContentValues values = new ContentValues();
-        if (config.getId() != -1) {
-            values.put(KEY_ID, config.getId());
+        if (object.getId() != -1 || object.getId() != 0) {
+            values.put(KEY_ID, object.getId());
         }
-        values.put(KEY_KEY, config.getKey());
-        values.put(KEY_VALUE, config.getValue());
-        values.put(KEY_UPDATED_AT, config.getUpdatedAt());
+        values.put(KEY_KEY, object.getKey());
+        values.put(KEY_VALUE, object.getValue());
+        values.put(KEY_UPDATED_AT, object.getUpdatedAt());
         return values;
+    }
+
+    @Override
+    public void emptyTable() {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        db.execSQL("DELETE FROM " + TABLE_NAME);
     }
 }
