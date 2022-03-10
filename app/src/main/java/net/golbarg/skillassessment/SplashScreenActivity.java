@@ -30,6 +30,10 @@ public class SplashScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         getSupportActionBar().hide();
 
+        progressLoading = findViewById(R.id.progress_loading);
+        txtStatus = findViewById(R.id.txt_status);
+        txtStatus.setText("");
+
         Thread splashThread = new Thread(){
             @Override
             public void run() {
@@ -77,17 +81,22 @@ public class SplashScreenActivity extends AppCompatActivity {
     private void addDataToDatabase() {
         String categoryAdded = pref.getString(TableCategory.TABLE_NAME, null);
         if(!"added".equals(categoryAdded)) {
+            txtStatus.setText("reading Categories");
             JsonController.insertCategoriesToDB(getApplicationContext());
+            txtStatus.setText("loading Categories");
             UtilController.insertSharedPref(pref, TableCategory.TABLE_NAME, "added");
         }
 
         String questionAdded = pref.getString(TableQuestion.TABLE_NAME, null);
         if(!"added".equals(questionAdded)) {
+            txtStatus.setText("reading questions");
             JsonController.insertQuestionsToDB(getApplicationContext());
+            txtStatus.setText("loading questions");
             UtilController.insertSharedPref(pref, TableQuestion.TABLE_NAME, "added");
         }
 
         // After Successful All Data Insertion
+        txtStatus.setText("Done.");
         UtilController.insertSharedPref(pref, UtilController.KEY_DB_STATUS, "success");
 
     }
