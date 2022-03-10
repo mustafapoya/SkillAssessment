@@ -7,10 +7,12 @@ public class QuestionAnswer {
     private int id;
     private int number;
     private String title;
+    private int questionId;
     private boolean isCorrect;
 
-    public QuestionAnswer(int id, int number, String title, boolean isCorrect) {
+    public QuestionAnswer(int id, int questionId, int number, String title, boolean isCorrect) {
         this.id = id;
+        this.questionId = questionId;
         this.number = number;
         this.title = title;
         this.isCorrect = isCorrect;
@@ -22,6 +24,14 @@ public class QuestionAnswer {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(int questionId) {
+        this.questionId = questionId;
     }
 
     public int getNumber() {
@@ -54,12 +64,14 @@ public class QuestionAnswer {
                 "id=" + id +
                 ", number=" + number +
                 ", title='" + title + '\'' +
+                ", questionId=" + questionId +
                 ", isCorrect=" + isCorrect +
                 '}';
     }
 
     public static QuestionAnswer createFromJson(JSONObject json) throws JSONException {
-        return new QuestionAnswer(json.getInt("id"), json.getInt("number"),
-                                json.getString("title"), json.getBoolean("is_correct"));
+        return new QuestionAnswer(json.getInt("id"), json.getInt("question_id"),
+                        json.getInt("number"), json.getString("title"),
+                        json.getBoolean("is_correct"));
     }
 }
