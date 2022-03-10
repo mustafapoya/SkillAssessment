@@ -7,13 +7,15 @@ import java.util.ArrayList;
 
 public class Question {
     private int id;
+    private int categoryId;
     private int number;
     private String title;
     private Category category;
     private ArrayList<QuestionAnswer> answers;
 
-    public Question(int id, int number, String title, Category category) {
+    public Question(int id, int categoryId, int number, String title) {
         this.id = id;
+        this.categoryId = categoryId;
         this.number = number;
         this.title = title;
         this.category = category;
@@ -26,6 +28,14 @@ public class Question {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public int getNumber() {
@@ -64,6 +74,7 @@ public class Question {
     public String toString() {
         return "Question{" +
                 "id=" + id +
+                ", categoryId=" + categoryId +
                 ", number=" + number +
                 ", title='" + title + '\'' +
                 ", category=" + category +
@@ -71,7 +82,7 @@ public class Question {
                 '}';
     }
 
-    public static Question createFromJson(JSONObject json, Category category) throws JSONException {
-        return new Question(json.getInt("id"), json.getInt("number"), json.getString("title"), category);
+    public static Question createFromJson(JSONObject json) throws JSONException {
+        return new Question(json.getInt("id"), json.getInt("category_id"), json.getInt("number"), json.getString("title"));
     }
 }

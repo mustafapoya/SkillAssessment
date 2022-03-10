@@ -121,9 +121,9 @@ public class TableQuestion implements CRUDHandler<Question> {
     public Question mapColumn(Cursor cursor) {
         return new Question(
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))),
+                Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_CATEGORY_ID))),
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_NUMBER))),
-                cursor.getString(cursor.getColumnIndex(KEY_TITLE)),
-                new Category(Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_CATEGORY_ID))), "", "")
+                cursor.getString(cursor.getColumnIndex(KEY_TITLE))
         );
     }
 
