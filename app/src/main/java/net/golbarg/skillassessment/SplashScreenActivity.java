@@ -17,7 +17,7 @@ import net.golbarg.skillassessment.util.UtilController;
 
 public class SplashScreenActivity extends AppCompatActivity {
     public static final String TAG = SplashScreenActivity.class.getName();
-    SharedPreferences pref = UtilController.getSharedPref(getApplicationContext(), "db_content");
+    SharedPreferences pref;
 
     boolean isActive = true;
 
@@ -27,6 +27,7 @@ public class SplashScreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        pref = UtilController.getSharedPref(getApplicationContext(), "db_content");
         setContentView(R.layout.activity_splash);
         getSupportActionBar().hide();
 
