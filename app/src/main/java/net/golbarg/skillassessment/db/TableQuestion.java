@@ -133,7 +133,7 @@ public class TableQuestion implements CRUDHandler<Question> {
         if (object.getId() != -1 || object.getId() != 0) {
             values.put(KEY_ID, object.getId());
         }
-        values.put(KEY_CATEGORY_ID, object.getCategory().getId());
+        values.put(KEY_CATEGORY_ID, object.getCategoryId());
         values.put(KEY_NUMBER, object.getNumber());
         values.put(KEY_TITLE, object.getTitle());
 
