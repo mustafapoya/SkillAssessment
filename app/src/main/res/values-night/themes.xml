@@ -5,6 +5,14 @@
         <item name="colorPrimary">@color/green_200</item>
         <item name="colorPrimaryVariant">@color/green_700</item>
         <item name="colorOnPrimary">@color/black</item>
+
+        <item name="textColor">@color/white</item>
+        <item name="metaTextColor">@color/gray</item>
+        <item name="backgroundColor">@color/black_500</item>
+        <item name="background">@drawable/custom_list_background_night</item>
+        <item name="content_background">@color/blue_200</item>
+        <item name="tab_color">@drawable/tab_color</item>
+
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/blue_200</item>
         <item name="colorSecondaryVariant">@color/blue_200</item>
