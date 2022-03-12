@@ -63,7 +63,7 @@ public class TableQuestion implements CRUDHandler<Question> {
         }
     }
 
-    public ArrayList<Question> getContents(int categoryId) {
+    public ArrayList<Question> getQuestionsOf(int categoryId) {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
         ArrayList<Question> result = new ArrayList<>();
         // Select All Query
