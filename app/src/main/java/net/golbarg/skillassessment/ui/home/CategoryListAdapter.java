@@ -10,11 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.models.Category;
+import net.golbarg.skillassessment.ui.home.detail.CategoryDetailFragment;
 
 import java.util.ArrayList;
 
@@ -56,14 +58,27 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         txtNumber.setText(String.valueOf(categories.get(position).getId()));
 
         TextView txtTitle = rowView.findViewById(R.id.txt_title);
-        txtTitle.setText(categories.get(position).getTitle());
+        txtTitle.setText(categories.get(position).getTitle().replace("-", " "));
 
         TextView txtContentCount = rowView.findViewById(R.id.txt_content_count);
         txtContentCount.setText(tableQuestion.getQuestionsOf(categories.get(position).getId()).size() + " questions");
 
-        return rowView;
+        rowView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                replaceFragments(categories.get(position).getId());
+            }
+        });
 
+        return rowView;
     }
 
+    private void replaceFragments(int categoryId) {
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        CategoryDetailFragment fragment = new CategoryDetailFragment(categoryId);
+        transaction.replace(R.id.nav_host_fragment_activity_main, fragment);
+        transaction.addToBackStack("xyz");
+        transaction.commit();
+    }
 
 }
