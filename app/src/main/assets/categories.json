@@ -2,243 +2,293 @@
   "categories": [
     {
       "id": 1,
-      "title": "accounting"
+      "title": "agile-methodologies",
+      "description": null
     },
     {
       "id": 2,
-      "title": "adobe-acrobat"
+      "title": "android",
+      "description": null
     },
     {
       "id": 3,
-      "title": "agile-methodologies"
+      "title": "angular",
+      "description": null
     },
     {
       "id": 4,
-      "title": "android"
+      "title": "aws",
+      "description": null
     },
     {
       "id": 5,
-      "title": "angular"
+      "title": "aws-lambda",
+      "description": null
     },
     {
       "id": 6,
-      "title": "aws"
+      "title": "bash",
+      "description": null
     },
     {
       "id": 7,
-      "title": "aws-lambda"
+      "title": "c",
+      "description": null
     },
     {
       "id": 8,
-      "title": "bash"
+      "title": "c#",
+      "description": null
     },
     {
       "id": 9,
-      "title": "c"
+      "title": "c++",
+      "description": null
     },
     {
       "id": 10,
-      "title": "c#"
+      "title": "css",
+      "description": null
     },
     {
       "id": 11,
-      "title": "c++"
+      "title": "cybersecurity",
+      "description": null
     },
     {
       "id": 12,
-      "title": "css"
+      "title": "django",
+      "description": null
     },
     {
       "id": 13,
-      "title": "cybersecurity"
+      "title": "dotnet-framework",
+      "description": null
     },
     {
       "id": 14,
-      "title": "django"
+      "title": "eclipse",
+      "description": null
     },
     {
       "id": 15,
-      "title": "dotnet-framework"
+      "title": "front-end-development",
+      "description": null
     },
     {
       "id": 16,
-      "title": "eclipse"
+      "title": "git",
+      "description": null
     },
     {
       "id": 17,
-      "title": "front-end-development"
+      "title": "go",
+      "description": null
     },
     {
       "id": 18,
-      "title": "git"
+      "title": "google-ads",
+      "description": null
     },
     {
       "id": 19,
-      "title": "go"
+      "title": "google-analytics",
+      "description": null
     },
     {
       "id": 20,
-      "title": "google-ads"
+      "title": "google-cloud-platform",
+      "description": null
     },
     {
       "id": 21,
-      "title": "google-analytics"
+      "title": "hadoop",
+      "description": null
     },
     {
       "id": 22,
-      "title": "google-cloud-platform"
+      "title": "html",
+      "description": null
     },
     {
       "id": 23,
-      "title": "hadoop"
+      "title": "it-operations",
+      "description": null
     },
     {
       "id": 24,
-      "title": "html"
+      "title": "java",
+      "description": null
     },
     {
       "id": 25,
-      "title": "it-operations"
+      "title": "javascript",
+      "description": null
     },
     {
       "id": 26,
-      "title": "java"
+      "title": "jquery",
+      "description": null
     },
     {
       "id": 27,
-      "title": "javascript"
+      "title": "json",
+      "description": null
     },
     {
       "id": 28,
-      "title": "jquery"
+      "title": "kotlin",
+      "description": null
     },
     {
       "id": 29,
-      "title": "json"
+      "title": "linux",
+      "description": null
     },
     {
       "id": 30,
-      "title": "kotlin"
+      "title": "machine-learning",
+      "description": null
     },
     {
       "id": 31,
-      "title": "linux"
+      "title": "matlab",
+      "description": null
     },
     {
       "id": 32,
-      "title": "machine-learning"
+      "title": "microsoft-access",
+      "description": null
     },
     {
       "id": 33,
-      "title": "matlab"
+      "title": "microsoft-azure",
+      "description": null
     },
     {
       "id": 34,
-      "title": "microsoft-access"
+      "title": "microsoft-power-bi",
+      "description": null
     },
     {
       "id": 35,
-      "title": "microsoft-azure"
+      "title": "mongodb",
+      "description": null
     },
     {
       "id": 36,
-      "title": "microsoft-power-bi"
+      "title": "mysql",
+      "description": null
     },
     {
       "id": 37,
-      "title": "mongodb"
+      "title": "node.js",
+      "description": null
     },
     {
       "id": 38,
-      "title": "mysql"
+      "title": "nosql",
+      "description": null
     },
     {
       "id": 39,
-      "title": "node.js"
+      "title": "object-oriented-programming",
+      "description": null
     },
     {
       "id": 40,
-      "title": "nosql"
+      "title": "objective-c",
+      "description": null
     },
     {
       "id": 41,
-      "title": "object-oriented-programming"
+      "title": "php",
+      "description": null
     },
     {
       "id": 42,
-      "title": "objective-c"
+      "title": "python",
+      "description": null
     },
     {
       "id": 43,
-      "title": "php"
+      "title": "quickbooks",
+      "description": null
     },
     {
       "id": 44,
-      "title": "python"
+      "title": "r",
+      "description": null
     },
     {
       "id": 45,
-      "title": "quickbooks"
+      "title": "react",
+      "description": null
     },
     {
       "id": 46,
-      "title": "r"
+      "title": "rest-api",
+      "description": null
     },
     {
       "id": 47,
-      "title": "react"
+      "title": "ruby-on-rails",
+      "description": null
     },
     {
       "id": 48,
-      "title": "rest-api"
+      "title": "rust",
+      "description": null
     },
     {
       "id": 49,
-      "title": "ruby-on-rails"
+      "title": "scala",
+      "description": null
     },
     {
       "id": 50,
-      "title": "rust"
+      "title": "search-engine-optimization",
+      "description": null
     },
     {
       "id": 51,
-      "title": "scala"
+      "title": "sharepoint",
+      "description": null
     },
     {
       "id": 52,
-      "title": "search-engine-optimization"
+      "title": "spring-framework",
+      "description": null
     },
     {
       "id": 53,
-      "title": "sharepoint"
+      "title": "swift",
+      "description": null
     },
     {
       "id": 54,
-      "title": "spring-framework"
+      "title": "t-sql",
+      "description": null
     },
     {
       "id": 55,
-      "title": "swift"
+      "title": "unity",
+      "description": null
     },
     {
       "id": 56,
-      "title": "t-sql"
+      "title": "vba",
+      "description": null
     },
     {
       "id": 57,
-      "title": "unity"
+      "title": "wordpress",
+      "description": null
     },
     {
       "id": 58,
-      "title": "vba"
-    },
-    {
-      "id": 59,
-      "title": "wordpress"
-    },
-    {
-      "id": 60,
-      "title": "xml"
+      "title": "xml",
+      "description": null
     }
   ]
 }

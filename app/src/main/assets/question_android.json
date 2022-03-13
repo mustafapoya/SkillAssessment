@@ -1,394 +1,452 @@
 {
     "questions": [
         {
-            "id": 140,
-            "category_id": 4,
+            "id": 88,
+            "category_id": 2,
             "number": 1,
-            "title": "  To add features, components, and permissions to your Android app, which file needs to be edited?"
+            "title": "To add features, components, and permissions to your Android app, which file needs to be edited?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 89,
+            "category_id": 2,
+            "number": 2,
+            "title": "Which XML attribute should be used to make an Image View accessible?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 90,
+            "category_id": 2,
+            "number": 3,
+            "title": "You launch your app, and when you navigate to a new screen it crashes, Which action will NOT help you diagnose the issue?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 91,
+            "category_id": 2,
+            "number": 4,
+            "title": "Why might push notifications stop working?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 92,
+            "category_id": 2,
+            "number": 5,
+            "title": "What is the correct set of component classes needed to implement a RecyclerView of items that displays a list of widgets vertically?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 93,
+            "category_id": 2,
+            "number": 6,
+            "title": "The Android system kills process when it needs to free up memory. The likelihood of the system killing a given process depends on the state of the process and the activity at the time. With combination of process and activity state is most likely to be killed?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 94,
+            "category_id": 2,
+            "number": 7,
+            "title": "You have created a NextActivity class that relies on a string containing some data that pass inside the intent Which code snippet allows you to launch your activity?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 95,
+            "category_id": 2,
+            "number": 8,
+            "title": "You want to include about and setting modules in your project. Which files accurately reflects their inclusion?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 96,
+            "category_id": 2,
+            "number": 9,
+            "title": "What is the benifit of using @VisibleForTesting annotation?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 97,
+            "category_id": 2,
+            "number": 10,
+            "title": "How would you specify in your build.gradle file that your app required at least API level 21 to run, but that it can be tested on API level 28?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 98,
+            "category_id": 2,
+            "number": 11,
+            "title": "When will an activity's onActivityResult()be called?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 99,
+            "category_id": 2,
+            "number": 12,
+            "title": "You need to remove an Event based on it;s id from your API, Which code snippet defines that request in Retrofit?",
+            "number_of_correct": 2
+        },
+        {
+            "id": 100,
+            "category_id": 2,
+            "number": 13,
+            "title": "When would you use a product flavour in your build setup?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 101,
+            "category_id": 2,
+            "number": 14,
+            "title": "Given the fragment below, how would you get access to a TextView with an ID of text_home contained in the layout file of a Fragment class?\n\n```\n    private lateinit var textView: TextView\n    override fun onCreateView(...): View? {\n        val root = inflator.inflator(R>layout.fragment_home, container, false)\n        textView = ??\n        return root\n    }\n```",
+            "number_of_correct": 1
+        },
+        {
+            "id": 102,
+            "category_id": 2,
+            "number": 15,
+            "title": "Why do you use the AndroidJUnitRunner when running UI tests?\n\nNotice: AndroidJUnitRunner lets us run JUnit3\/4-style tests on Android Devices",
+            "number_of_correct": 1
+        },
+        {
+            "id": 103,
+            "category_id": 2,
+            "number": 16,
+            "title": "What allows you to properly restore a user's state when an activity is restarted?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 104,
+            "category_id": 2,
+            "number": 17,
+            "title": "Given the definition below. how would you get access a TextView with an ID of text_home contained in thr layout file of a Fragment class?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 105,
+            "category_id": 2,
+            "number": 18,
+            "title": "IF the main thread is blocked for too long, the system displays the \\_ dialog?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 106,
+            "category_id": 2,
+            "number": 19,
+            "title": "How would you retrieve the value of a user's email from SharedPreferences while ensuring that the returned value is not null?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 107,
+            "category_id": 2,
+            "number": 20,
+            "title": "Why is it problematic to define sizes using pixels on Android?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 108,
+            "category_id": 2,
+            "number": 21,
+            "title": "You need to get a list of devices that are attached to your computer with USB debugging enable. Which command would execute using the Android Debug Bridge?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 109,
+            "category_id": 2,
+            "number": 22,
+            "title": "Which drawable definition allows you to achieve the shape below?\n\n![img](image\/shape.png)",
+            "number_of_correct": 1
+        },
+        {
+            "id": 110,
+            "category_id": 2,
+            "number": 23,
+            "title": "To persist a small collection of key-value data, what should you use?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 111,
+            "category_id": 2,
+            "number": 24,
+            "title": "You need to retrieve a list of photos from an API. Which code snippet defines an HTML GET request in Retrofit?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 112,
+            "category_id": 2,
+            "number": 25,
+            "title": "Given the test class below, which code snippet would be a correct assertion?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 113,
+            "category_id": 2,
+            "number": 26,
+            "title": "What tag should you use to add a reusable view component to a layout file?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 114,
+            "category_id": 2,
+            "number": 27,
+            "title": "You want to provide a different drawable for devices that are in landscape mode and whose language is set to French. which directory is named correctly?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 115,
+            "category_id": 2,
+            "number": 28,
+            "title": "Why might you need to include the following permission to your app?\n\n`android.permission.ACCESS_NETWORK_STATE`",
+            "number_of_correct": 1
+        },
+        {
+            "id": 116,
+            "category_id": 2,
+            "number": 29,
+            "title": "Which image best corresponds to the following `LinearLayout`?\n\n```\n    xml\n    <LinearLayout\n        android:layout_width=\"match_parent\"\n\tandroid:layout_height=\"match_parent\"\n\tandroid:orientation=\"horizontal\"\n\tandroid:gravity=\"center\">\n\t<Button\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:text=\"Button\" \/>\n\t<Button\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:text=\"Button\" \/>\n        <\/LinearLayout>\n```",
+            "number_of_correct": 1
+        },
+        {
+            "id": 117,
+            "category_id": 2,
+            "number": 30,
+            "title": "You want to open the default Dialer app on a device. What is wrong with this code?\n```\nval dialerIntent = Intent()\nval et = findViewById(R.id.some_edit_text)\ndialerIntent.action = Intent.ACTION_DIAL\ndialerIntent.data = Uri.parse(\"tel:\" + et.getText()?.toString())\nstartActivity(dialerIntent)\n```",
+            "number_of_correct": 1
+        },
+        {
+            "id": 118,
+            "category_id": 2,
+            "number": 31,
+            "title": "When should you store files in the `\/assets` directory?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 119,
+            "category_id": 2,
+            "number": 32,
+            "title": "You want to allow users to take pictures in your app. Which is _not_ an advantage of creating an appropriate `intent`, instead of requesting the camera permission directly?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 120,
+            "category_id": 2,
+            "number": 33,
+            "title": "When would you use the `ActivityCompat.shouldShowRequestPermissionRationale()` function?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 121,
+            "category_id": 2,
+            "number": 34,
+            "title": "You would like to enable analytics tracking only in `release` builds. How can you create a new field in the generated `BuildConfig` class to store that value?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 122,
+            "category_id": 2,
+            "number": 35,
+            "title": "To optimize your APK size, what image codec should you use?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 123,
+            "category_id": 2,
+            "number": 36,
+            "title": "You have built code to make a network call and tested that it works in your development environment. However, when you publish it to the Play console, the networking call fails to work. What will _not_ help you troubleshoot this issue?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 124,
+            "category_id": 2,
+            "number": 37,
+            "title": "Which code snippet would achieve the layout displayed below?\n\n![img](image\/04.jpeg)",
+            "number_of_correct": 1
+        },
+        {
+            "id": 125,
+            "category_id": 2,
+            "number": 38,
+            "title": "Which source set is `_not_` available to you by default when Android Studio creates a new project?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 126,
+            "category_id": 2,
+            "number": 39,
+            "title": "Which definition will prevent other apps from accessing your `Activity` class via an `intent`?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 127,
+            "category_id": 2,
+            "number": 40,
+            "title": "To preserve on-device memory, how might you determine that the user's device has limited storage capabilities?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 128,
+            "category_id": 2,
+            "number": 41,
+            "title": "What is `_not_` a good way to reuse Android code?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 129,
+            "category_id": 2,
+            "number": 42,
+            "title": "Which layout is best for large, complex hierarchies?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 130,
+            "category_id": 2,
+            "number": 43,
+            "title": "You need to upgrade to the latest version of the Android Gradle plugin. Which file should you modify?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 131,
+            "category_id": 2,
+            "number": 44,
+            "title": "Why do developers often put app initialization code in the Application class?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 132,
+            "category_id": 2,
+            "number": 45,
+            "title": "What folder should you use for your app's launcher icons?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 133,
+            "category_id": 2,
+            "number": 46,
+            "title": "Which drawable definition allows you to achieve the shape below?\n\n![img](image\/43.jpeg)",
+            "number_of_correct": 1
+        },
+        {
+            "id": 134,
+            "category_id": 2,
+            "number": 47,
+            "title": "Given the ConstraintLayout below, which statement is true?\n\n![img](image\/44.jpeg)",
+            "number_of_correct": 1
+        },
+        {
+            "id": 135,
+            "category_id": 2,
+            "number": 48,
+            "title": "Given this code snippey from a build.gradle file, which choice is not a possible build variant?\n\n    android {\n        ...\n        defaultConfig{...}\n\n        buildTypes{\n        debug{...}\n        releasae{...}\n    }\n\n      flavorDimensions \"environment\"\n      productFlavors {\n         producation {...}\n         staging {...}\n      }\n    }",
+            "number_of_correct": 1
+        },
+        {
+            "id": 136,
+            "category_id": 2,
+            "number": 49,
+            "title": "When should you use the androidTest directory to store your test classes?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 137,
+            "category_id": 2,
+            "number": 50,
+            "title": "Given an APK named app-internal-debug.apk produced from the build process, which statement is likely to be true?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 138,
+            "category_id": 2,
+            "number": 51,
+            "title": "When attempting to build your project, what might the following error indicate?\n\n`Conversion to Dalvik format filed: Unable to execute dex: method ID not in [0, 0xffff]: 65536`",
+            "number_of_correct": 1
+        },
+        {
+            "id": 139,
+            "category_id": 2,
+            "number": 52,
+            "title": "Which statement, in build.gradle file, correctly denotes that the corresponding module is an Android library module?",
+            "number_of_correct": 1
+        },
+        {
+            "id": 140,
+            "category_id": 2,
+            "number": 53,
+            "title": "Given the following dimens.xml file, how would you define an ImageView with medium spacing at the bottom?\n\n```\n<?xml version=1.0 encoding=\"utf-8\"?>\n<resources>\n    <dimen name=\"spacing_medium\">8dp<\/dimen>\n    <dimen name=\"spacing_large\">12dp<\/dimen>\n<\/resources>\n```",
+            "number_of_correct": 1
         },
         {
             "id": 141,
-            "category_id": 4,
-            "number": 2,
-            "title": "  Which XML attribute should be used to make an Image View accessible?"
+            "category_id": 2,
+            "number": 54,
+            "title": "what is not a benefit of externalizing app resources such as image and string from a code?",
+            "number_of_correct": 1
         },
         {
             "id": 142,
-            "category_id": 4,
-            "number": 3,
-            "title": "  You launch your app, and when you navigate to a new screen it crashes, Which action will NOT help you diagnose the issue?"
+            "category_id": 2,
+            "number": 55,
+            "title": "What is the chief purpose of line five in this code snippet?\n\n```\noverride fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState) setContentView(R.layout.activity_post_create)\n\n\tif (savedInstanceState != null) return\n\n\tval fragment = CreatePostFragment()\n\t\tsupportFragmentManager\n\t\t.beginTransaction()\n\t\t.add(R.id. fragment_container, fragment)\n\t\t.commit()\n\n}\n```",
+            "number_of_correct": 1
         },
         {
             "id": 143,
-            "category_id": 4,
-            "number": 4,
-            "title": "  Why might push notifications stop working?"
+            "category_id": 2,
+            "number": 56,
+            "title": "Which component is not an entry point through which the system or a user can enter your app?",
+            "number_of_correct": 1
         },
         {
             "id": 144,
-            "category_id": 4,
-            "number": 5,
-            "title": "  What is the correct set of component classes needed to implement a RecyclerView of items that displays a list of widgets vertically?"
+            "category_id": 2,
+            "number": 57,
+            "title": "What should you use to display a large, scrolling list of elements?",
+            "number_of_correct": 1
         },
         {
             "id": 145,
-            "category_id": 4,
-            "number": 6,
-            "title": "  The Android system kills process when it needs to free up memory. The likelihood of the system killing a given process depends on the state of the process and the activity at the time. With combination of process and activity state is most likely to be killed?"
+            "category_id": 2,
+            "number": 58,
+            "title": "You have created an AboutActivity class that displays details about your app. Which code snippet allows you to launch your activity?",
+            "number_of_correct": 1
         },
         {
             "id": 146,
-            "category_id": 4,
-            "number": 7,
-            "title": "  You have created a NextActivity class that relies on a string containing some data that pass inside the intent Which code snippet allows you to launch your activity?"
+            "category_id": 2,
+            "number": 59,
+            "title": "What is the use of AndroidManifest.xml file?",
+            "number_of_correct": 1
         },
         {
             "id": 147,
-            "category_id": 4,
-            "number": 8,
-            "title": "  You want to include about and setting modules in your project. Which files accurately reflects their inclusion?"
+            "category_id": 2,
+            "number": 60,
+            "title": "Which attribute of the element <uses-sdk> is used to specify the minimum API Level required for the application to run?",
+            "number_of_correct": 1
         },
         {
             "id": 148,
-            "category_id": 4,
-            "number": 9,
-            "title": "  What is the benifit of using @VisibleForTesting annotation?"
+            "category_id": 2,
+            "number": 61,
+            "title": "To shrink your code in release builds, what tool does Android Studio use?",
+            "number_of_correct": 1
         },
         {
             "id": 149,
-            "category_id": 4,
-            "number": 10,
-            "title": "  How would you specify in your build.gradle file that your app required at least API level 21 to run, but that it can be tested on API level 28?"
+            "category_id": 2,
+            "number": 62,
+            "title": "Which layout hierarchy is likely to be drawn the most quickly?",
+            "number_of_correct": 1
         },
         {
             "id": 150,
-            "category_id": 4,
-            "number": 11,
-            "title": "  When will an activity's onActivityResult()be called?"
+            "category_id": 2,
+            "number": 63,
+            "title": "What is the current recommended way to handle long-running background tasks?",
+            "number_of_correct": 1
         },
         {
             "id": 151,
-            "category_id": 4,
-            "number": 12,
-            "title": "  You need to remove an Event based on it;s id from your API, Which code snippet defines that request in Retrofit?"
-        },
-        {
-            "id": 152,
-            "category_id": 4,
-            "number": 13,
-            "title": "  When would you use a product flavour in your build setup?"
-        },
-        {
-            "id": 153,
-            "category_id": 4,
-            "number": 14,
-            "title": "  Given the fragment below, how would you get access to a TextView with an ID of text_home contained in the layout file of a Fragment class?\n\n```\n    private lateinit var textView: TextView\n    override fun onCreateView(...): View? {\n        val root = inflator.inflator(R>layout.fragment_home, container, false)\n        textView = ??\n        return root\n    }\n```"
-        },
-        {
-            "id": 154,
-            "category_id": 4,
-            "number": 15,
-            "title": "  Why do you use the AndroidJUnitRunner when running UI tests?\n\nNotice: AndroidJUnitRunner lets us run JUnit3\/4-style tests on Android Devices"
-        },
-        {
-            "id": 155,
-            "category_id": 4,
-            "number": 16,
-            "title": "  What allows you to properly restore a user's state when an activity is restarted?"
-        },
-        {
-            "id": 156,
-            "category_id": 4,
-            "number": 17,
-            "title": "  Given the definition below. how would you get access a TextView with an ID of text_home contained in thr layout file of a Fragment class?"
-        },
-        {
-            "id": 157,
-            "category_id": 4,
-            "number": 18,
-            "title": "  IF the main thread is blocked for too long, the system displays the \\_ dialog?"
-        },
-        {
-            "id": 158,
-            "category_id": 4,
-            "number": 19,
-            "title": "  How would you retrieve the value of a user's email from SharedPreferences while ensuring that the returned value is not null?"
-        },
-        {
-            "id": 159,
-            "category_id": 4,
-            "number": 20,
-            "title": "  Why is it problematic to define sizes using pixels on Android?"
-        },
-        {
-            "id": 160,
-            "category_id": 4,
-            "number": 21,
-            "title": "  You need to get a list of devices that are attached to your computer with USB debugging enable. Which command would execute using the Android Debug Bridge?"
-        },
-        {
-            "id": 161,
-            "category_id": 4,
-            "number": 22,
-            "title": "  Which drawable definition allows you to achieve the shape below?\n\n![img](image\/shape.png)"
-        },
-        {
-            "id": 162,
-            "category_id": 4,
-            "number": 23,
-            "title": "  To persist a small collection of key-value data, what should you use?"
-        },
-        {
-            "id": 163,
-            "category_id": 4,
-            "number": 24,
-            "title": "  You need to retrieve a list of photos from an API. Which code snippet defines an HTML GET request in Retrofit?"
-        },
-        {
-            "id": 164,
-            "category_id": 4,
-            "number": 25,
-            "title": "  Given the test class below, which code snippet would be a correct assertion?"
-        },
-        {
-            "id": 165,
-            "category_id": 4,
-            "number": 26,
-            "title": "  What tag should you use to add a reusable view component to a layout file?"
-        },
-        {
-            "id": 166,
-            "category_id": 4,
-            "number": 27,
-            "title": "  You want to provide a different drawable for devices that are in landscape mode and whose language is set to French. which directory is named correctly?"
-        },
-        {
-            "id": 167,
-            "category_id": 4,
-            "number": 28,
-            "title": "  Why might you need to include the following permission to your app?\n\n`android.permission.ACCESS_NETWORK_STATE`"
-        },
-        {
-            "id": 168,
-            "category_id": 4,
-            "number": 29,
-            "title": "  Which image best corresponds to the following `LinearLayout`?\n\n```\n    xml\n    <LinearLayout\n        android:layout_width=\"match_parent\"\n\tandroid:layout_height=\"match_parent\"\n\tandroid:orientation=\"horizontal\"\n\tandroid:gravity=\"center\">\n\t<Button\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:text=\"Button\" \/>\n\t<Button\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:text=\"Button\" \/>\n        <\/LinearLayout>\n```"
-        },
-        {
-            "id": 169,
-            "category_id": 4,
-            "number": 30,
-            "title": "  You want to open the default Dialer app on a device. What is wrong with this code?\n\n```\nval dialerIntent = Intent()\nval et = findViewById(R.id.some_edit_text)\ndialerIntent.action = Intent.ACTION_DIAL\ndialerIntent.data = Uri.parse(\"tel:\" + et.getText()?.toString())\nstartActivity(dialerIntent)\n```"
-        },
-        {
-            "id": 170,
-            "category_id": 4,
-            "number": 31,
-            "title": "  When should you store files in the `\/assets` directory?"
-        },
-        {
-            "id": 171,
-            "category_id": 4,
-            "number": 32,
-            "title": "  You want to allow users to take pictures in your app. Which is _not_ an advantage of creating an appropriate `intent`, instead of requesting the camera permission directly?"
-        },
-        {
-            "id": 172,
-            "category_id": 4,
-            "number": 33,
-            "title": "  When would you use the `ActivityCompat.shouldShowRequestPermissionRationale()` function?"
-        },
-        {
-            "id": 173,
-            "category_id": 4,
-            "number": 34,
-            "title": "  You would like to enable analytics tracking only in `release` builds. How can you create a new field in the generated `BuildConfig` class to store that value?"
-        },
-        {
-            "id": 174,
-            "category_id": 4,
-            "number": 35,
-            "title": "  To optimize your APK size, what image codec should you use?"
-        },
-        {
-            "id": 175,
-            "category_id": 4,
-            "number": 36,
-            "title": "  You have built code to make a network call and tested that it works in your development environment. However, when you publish it to the Play console, the networking call fails to work. What will _not_ help you troubleshoot this issue?"
-        },
-        {
-            "id": 176,
-            "category_id": 4,
-            "number": 37,
-            "title": "  Which code snippet would achieve the layout displayed below?\n\n![img](image\/04.jpeg)"
-        },
-        {
-            "id": 177,
-            "category_id": 4,
-            "number": 38,
-            "title": "  Which source set is `_not_` available to you by default when Android Studio creates a new project?"
-        },
-        {
-            "id": 178,
-            "category_id": 4,
-            "number": 39,
-            "title": "  Which definition will prevent other apps from accessing your `Activity` class via an `intent`?"
-        },
-        {
-            "id": 179,
-            "category_id": 4,
-            "number": 40,
-            "title": "  To preserve on-device memory, how might you determine that the user's device has limited storage capabilities?"
-        },
-        {
-            "id": 180,
-            "category_id": 4,
-            "number": 41,
-            "title": "  What is `_not_` a good way to reuse Android code?"
-        },
-        {
-            "id": 181,
-            "category_id": 4,
-            "number": 42,
-            "title": "  Which layout is best for large, complex hierarchies?"
-        },
-        {
-            "id": 182,
-            "category_id": 4,
-            "number": 43,
-            "title": "  You need to upgrade to the latest version of the Android Gradle plugin. Which file should you modify?"
-        },
-        {
-            "id": 183,
-            "category_id": 4,
-            "number": 44,
-            "title": "  Why do developers often put app initialization code in the Application class?"
-        },
-        {
-            "id": 184,
-            "category_id": 4,
-            "number": 45,
-            "title": "  What folder should you use for your app's launcher icons?"
-        },
-        {
-            "id": 185,
-            "category_id": 4,
-            "number": 46,
-            "title": "  Which drawable definition allows you to achieve the shape below?\n\n![img](image\/43.jpeg)"
-        },
-        {
-            "id": 186,
-            "category_id": 4,
-            "number": 47,
-            "title": "  Given the ConstraintLayout below, which statement is true?\n\n![img](image\/44.jpeg)"
-        },
-        {
-            "id": 187,
-            "category_id": 4,
-            "number": 48,
-            "title": "  Given this code snippey from a build.gradle file, which choice is not a possible build variant?\n\n    android {\n        ...\n        defaultConfig{...}\n\n        buildTypes{\n        debug{...}\n        releasae{...}\n    }\n\n      flavorDimensions \"environment\"\n      productFlavors {\n         producation {...}\n         staging {...}\n      }\n    }"
-        },
-        {
-            "id": 188,
-            "category_id": 4,
-            "number": 49,
-            "title": "  When should you use the androidTest directory to store your test classes?"
-        },
-        {
-            "id": 189,
-            "category_id": 4,
-            "number": 50,
-            "title": "  Given an APK named app-internal-debug.apk produced from the build process, which statement is likely to be true?"
-        },
-        {
-            "id": 190,
-            "category_id": 4,
-            "number": 51,
-            "title": "  When attempting to build your project, what might the following error indicate?\n\n`Conversion to Dalvik format filed: Unable to execute dex: method ID not in [0, 0xffff]: 65536`"
-        },
-        {
-            "id": 191,
-            "category_id": 4,
-            "number": 52,
-            "title": "  Which statement, in build.gradle file, correctly denotes that the corresponding module is an Android library module?"
-        },
-        {
-            "id": 192,
-            "category_id": 4,
-            "number": 53,
-            "title": "  Given the following dimens.xml file, how would you define an ImageView with medium spacing at the bottom?\n\n```\n<?xml version=1.0 encoding=\"utf-8\"?>\n<resources>\n    <dimen name=\"spacing_medium\">8dp<\/dimen>\n    <dimen name=\"spacing_large\">12dp<\/dimen>\n<\/resources>\n```"
-        },
-        {
-            "id": 193,
-            "category_id": 4,
-            "number": 54,
-            "title": "  what is not a benefit of externalizing app resources such as image and string from a code?"
-        },
-        {
-            "id": 194,
-            "category_id": 4,
-            "number": 55,
-            "title": "  What is the chief purpose of line five in this code snippet?\n\n```\noverride fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState) setContentView(R.layout.activity_post_create)\n\n\tif (savedInstanceState != null) return\n\n\tval fragment = CreatePostFragment()\n\t\tsupportFragmentManager\n\t\t.beginTransaction()\n\t\t.add(R.id. fragment_container, fragment)\n\t\t.commit()\n\n}\n```"
-        },
-        {
-            "id": 195,
-            "category_id": 4,
-            "number": 56,
-            "title": "  Which component is not an entry point through which the system or a user can enter your app?"
-        },
-        {
-            "id": 196,
-            "category_id": 4,
-            "number": 57,
-            "title": "  What should you use to display a large, scrolling list of elements?"
-        },
-        {
-            "id": 197,
-            "category_id": 4,
-            "number": 58,
-            "title": "  You have created an AboutActivity class that displays details about your app. Which code snippet allows you to launch your activity?"
-        },
-        {
-            "id": 198,
-            "category_id": 4,
-            "number": 59,
-            "title": "  What is the use of AndroidManifest.xml file?"
-        },
-        {
-            "id": 199,
-            "category_id": 4,
-            "number": 60,
-            "title": "  Which attribute of the element <uses-sdk> is used to specify the minimum API Level required for the application to run?"
-        },
-        {
-            "id": 200,
-            "category_id": 4,
-            "number": 61,
-            "title": "  To shrink your code in release builds, what tool does Android Studio use?"
-        },
-        {
-            "id": 201,
-            "category_id": 4,
-            "number": 62,
-            "title": "  Which layout hierarchy is likely to be drawn the most quickly?"
-        },
-        {
-            "id": 202,
-            "category_id": 4,
-            "number": 63,
-            "title": "  What is the current recommended way to handle long-running background tasks?"
-        },
-        {
-            "id": 203,
-            "category_id": 4,
+            "category_id": 2,
             "number": 64,
-            "title": "  You need to provide your users with certain features of your app on-demand or as instant experiences through Google Play. Which type of module should you create?"
-        },
-        {
-            "id": 204,
-            "category_id": 4,
-            "number": 65,
-            "title": "  Which approach is not recommended for providing a useful offline state in your app?"
+            "title": "You need to provide your users with certain features of your app on-demand or as instant experiences through Google Play. Which type of module should you create?",
+            "number_of_correct": 1
         }
     ]
 }
