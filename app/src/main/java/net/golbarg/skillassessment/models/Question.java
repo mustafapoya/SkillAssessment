@@ -10,15 +10,16 @@ public class Question {
     private int categoryId;
     private int number;
     private String title;
-    private Category category;
+    private int numberOfCorrectAnswer;
+
     private ArrayList<QuestionAnswer> answers;
 
-    public Question(int id, int categoryId, int number, String title) {
+    public Question(int id, int categoryId, int number, String title, int numberOfCorrectAnswer) {
         this.id = id;
         this.categoryId = categoryId;
         this.number = number;
         this.title = title;
-        this.category = category;
+        this.numberOfCorrectAnswer = numberOfCorrectAnswer;
         this.answers = new ArrayList<>();
     }
 
@@ -54,12 +55,12 @@ public class Question {
         this.title = title;
     }
 
-    public Category getCategory() {
-        return category;
+    public int getNumberOfCorrectAnswer() {
+        return numberOfCorrectAnswer;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
+    public void setNumberOfCorrectAnswer(int numberOfCorrectAnswer) {
+        this.numberOfCorrectAnswer = numberOfCorrectAnswer;
     }
 
     public ArrayList<QuestionAnswer> getAnswers() {
@@ -77,12 +78,15 @@ public class Question {
                 ", categoryId=" + categoryId +
                 ", number=" + number +
                 ", title='" + title + '\'' +
-                ", category=" + category +
+                ", numberOfCorrectAnswer=" + numberOfCorrectAnswer +
                 ", answers=" + answers +
                 '}';
     }
 
     public static Question createFromJson(JSONObject json) throws JSONException {
-        return new Question(json.getInt("id"), json.getInt("category_id"), json.getInt("number"), json.getString("title"));
+        return new Question(
+                    json.getInt("id"), json.getInt("category_id"),
+                    json.getInt("number"), json.getString("title"),
+                    json.getInt("number_of_correct"));
     }
 }

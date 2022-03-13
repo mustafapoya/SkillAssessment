@@ -16,7 +16,8 @@ public class TableQuestion implements CRUDHandler<Question> {
     public static final String KEY_CATEGORY_ID = "category_id";
     public static final String KEY_NUMBER = "number";
     public static final String KEY_TITLE = "title";
-
+    public static final String KEY_NUMBER_OF_CORRECT_ANSWER = "number_of_correct_answer";
+    public static final String [] ALL_COLUMNS = { KEY_ID, KEY_CATEGORY_ID, KEY_NUMBER, KEY_TITLE, KEY_NUMBER_OF_CORRECT_ANSWER };
     private final DatabaseHandler dbHandler;
 
     public TableQuestion(DatabaseHandler dbHandler) {
@@ -24,8 +25,8 @@ public class TableQuestion implements CRUDHandler<Question> {
     }
 
     public static String createTableQuery() {
-        return String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY, %s INTEGER, %s INTEGER, %s TEXT)",
-                    TABLE_NAME, KEY_ID, KEY_CATEGORY_ID, KEY_NUMBER, KEY_TITLE);
+        return String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY, %s INTEGER, %s INTEGER, %s TEXT, %s INTEGER)",
+                    TABLE_NAME, KEY_ID, KEY_CATEGORY_ID, KEY_NUMBER, KEY_TITLE, KEY_NUMBER_OF_CORRECT_ANSWER);
     }
 
     public static String dropTableQuery() {
@@ -53,7 +54,7 @@ public class TableQuestion implements CRUDHandler<Question> {
     public Question get(int id) {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_NAME, new String[]{KEY_ID, KEY_CATEGORY_ID, KEY_NUMBER, KEY_TITLE }, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, ALL_COLUMNS, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
 
         if(cursor != null && cursor.getCount() != 0) {
             cursor.moveToFirst();
@@ -123,7 +124,8 @@ public class TableQuestion implements CRUDHandler<Question> {
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))),
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_CATEGORY_ID))),
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_NUMBER))),
-                cursor.getString(cursor.getColumnIndex(KEY_TITLE))
+                cursor.getString(cursor.getColumnIndex(KEY_TITLE)),
+                Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_NUMBER_OF_CORRECT_ANSWER)))
         );
     }
 
@@ -136,6 +138,7 @@ public class TableQuestion implements CRUDHandler<Question> {
         values.put(KEY_CATEGORY_ID, object.getCategoryId());
         values.put(KEY_NUMBER, object.getNumber());
         values.put(KEY_TITLE, object.getTitle());
+        values.put(KEY_NUMBER_OF_CORRECT_ANSWER, object.getNumberOfCorrectAnswer());
 
         return values;
     }
