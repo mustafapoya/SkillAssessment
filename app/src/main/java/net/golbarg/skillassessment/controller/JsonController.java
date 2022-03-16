@@ -5,8 +5,10 @@ import android.content.Context;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableCategory;
 import net.golbarg.skillassessment.db.TableQuestion;
+import net.golbarg.skillassessment.db.TableQuestionAnswer;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
+import net.golbarg.skillassessment.models.QuestionAnswer;
 import net.golbarg.skillassessment.util.JsonUtil;
 
 import org.json.JSONArray;
@@ -41,6 +43,19 @@ public class JsonController {
         }
 
         return true;
+    }
 
+    public static boolean insertAnswersToDB(Context context) {
+        DatabaseHandler handler = new DatabaseHandler(context);
+        TableQuestionAnswer tableQuestionAnswer = new TableQuestionAnswer(handler);
+        JSONArray jsonArrayAnswer = JsonUtil.getJSONAnswers(context);
+        ArrayList<QuestionAnswer> questionArrayList = JsonUtil.mapAnswersFromJson(jsonArrayAnswer);
+        tableQuestionAnswer.emptyTable();
+
+        for (int i = 0; i < questionArrayList.size(); i++) {
+            tableQuestionAnswer.create(questionArrayList.get(i));
+        }
+
+        return true;
     }
 }
