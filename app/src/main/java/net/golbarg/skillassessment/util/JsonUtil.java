@@ -4,6 +4,7 @@ import android.content.Context;
 
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
+import net.golbarg.skillassessment.models.QuestionAnswer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,7 +67,7 @@ public class JsonUtil {
         JSONArray questions = null;
 
         try {
-            JSONObject obj = new JSONObject(loadJsonFileFromAsset(context, "question_android.json"));
+            JSONObject obj = new JSONObject(loadJsonFileFromAsset(context, "questions.json"));
             questions = obj.getJSONArray("questions");
         } catch (JSONException ex) {
             ex.printStackTrace();
@@ -91,5 +92,32 @@ public class JsonUtil {
     }
 
 
+    public static JSONArray getJSONAnswers(Context context) {
+        JSONArray answers = null;
+
+        try {
+            JSONObject obj = new JSONObject(loadJsonFileFromAsset(context, "answers.json"));
+            answers = obj.getJSONArray("answers");
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+        }
+
+        return answers;
+    }
+
+    public static ArrayList<QuestionAnswer> mapAnswersFromJson(JSONArray answers) {
+        ArrayList<QuestionAnswer> result = new ArrayList<>();
+
+        try {
+            for (int i = 0; i < answers.length(); i++) {
+                JSONObject jsonObject = answers.getJSONObject(i);
+                result.add(QuestionAnswer.createFromJson(jsonObject));
+            }
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+        }
+
+        return result;
+    }
 
 }
