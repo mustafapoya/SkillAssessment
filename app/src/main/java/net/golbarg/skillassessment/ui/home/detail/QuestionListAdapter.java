@@ -66,7 +66,7 @@ public class QuestionListAdapter extends ArrayAdapter<Question> {
         QuestionPart part = UtilController.convertQuestionTextToQuestionObject(questions.get(position));
         CharSequence questionText = TextUtils.concat(part.getTitle());
         for(int i = 0; i < part.getCodeList().size(); i++) {
-            SpannableString result = highlight.code(part.getCodeList().get(i).getCode(), Highlight.C);
+            SpannableString result = highlight.c(part.getCodeList().get(i).getCode());
             questionText = TextUtils.concat(questionText, result);
         }
 
