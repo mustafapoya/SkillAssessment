@@ -70,7 +70,7 @@ public class QuestionAnswer {
     }
 
     public static QuestionAnswer createFromJson(JSONObject json) throws JSONException {
-        return new QuestionAnswer(json.getInt("id"), json.getInt("question_id"),
+        return new QuestionAnswer(-1, json.getInt("assessment_question_id"),
                         json.getInt("number"), json.getString("title"),
                         json.getBoolean("is_correct"));
     }
