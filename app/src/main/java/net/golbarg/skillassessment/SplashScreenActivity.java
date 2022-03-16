@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import net.golbarg.skillassessment.controller.JsonController;
 import net.golbarg.skillassessment.db.TableCategory;
 import net.golbarg.skillassessment.db.TableQuestion;
+import net.golbarg.skillassessment.db.TableQuestionAnswer;
 import net.golbarg.skillassessment.util.UtilController;
 
 public class SplashScreenActivity extends AppCompatActivity {
@@ -93,6 +94,14 @@ public class SplashScreenActivity extends AppCompatActivity {
             txtStatus.setText("reading questions");
             JsonController.insertQuestionsToDB(getApplicationContext());
             txtStatus.setText("loading questions");
+            UtilController.insertSharedPref(pref, TableQuestion.TABLE_NAME, "added");
+        }
+
+        String answerAdded = pref.getString(TableQuestionAnswer.TABLE_NAME, null);
+        if(!"added".equals(answerAdded)) {
+            txtStatus.setText("reading Answers");
+            JsonController.insertQuestionsToDB(getApplicationContext());
+            txtStatus.setText("loading Answers");
             UtilController.insertSharedPref(pref, TableQuestion.TABLE_NAME, "added");
         }
 
