@@ -61,12 +61,12 @@ public class QuestionListAdapter extends ArrayAdapter<Question> {
         txtTitle.setText(questions.get(position).getTitle());
 
         Highlight highlight = new Highlight();
-//        txtTitle.setText(highlight.java(txtTitle.getText().toString()));
+//        highlight.setColors("#FE9003", "#FF0000", "#858585", "#cccccc", "#6A9955", "#b180d7", "#000000");
 
         QuestionPart part = UtilController.convertQuestionTextToQuestionObject(questions.get(position));
         CharSequence questionText = TextUtils.concat(part.getTitle());
         for(int i = 0; i < part.getCodeList().size(); i++) {
-            SpannableString result = highlight.c(part.getCodeList().get(i).getCode());
+            SpannableString result = highlight.c(part.getCodeList().get(i).getCode().trim().replace("    ", "  "));
             questionText = TextUtils.concat(questionText, result);
         }
 
