@@ -54,20 +54,18 @@ public class UtilController {
             int lastIndex = 0;
 
             do {
+
                 firstIndex = questionText.indexOf("```", firstIndex);
                 lastIndex = questionText.indexOf("```", firstIndex + 2);
 
                 if (firstIndex > -1 && lastIndex > -1) {
 
                     String codeSection = questionText.substring(firstIndex, lastIndex + 3);
-                    String programLang = codeSection.substring(3,
-                            codeSection.indexOf('\n') != -1 ? codeSection.indexOf('\n') : 3);
+                    String programLang = codeSection.substring(3, codeSection.indexOf('\n') != -1 ? codeSection.indexOf('\n') : 3);
+                    
                     String code = programLang.length() > 0
                             ? codeSection.substring(3 + programLang.length(), codeSection.length() - 3)
                             : codeSection.substring(3, codeSection.length() - 3);
-
-
-                    firstIndex = lastIndex + 3;
 
                     questionText = questionText.replace(codeSection, "");
 
