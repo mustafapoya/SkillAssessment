@@ -62,7 +62,7 @@ public class UtilController {
 
                     String codeSection = questionText.substring(firstIndex, lastIndex + 3);
                     String programLang = codeSection.substring(3, codeSection.indexOf('\n') != -1 ? codeSection.indexOf('\n') : 3);
-                    
+
                     String code = programLang.length() > 0
                             ? codeSection.substring(3 + programLang.length(), codeSection.length() - 3)
                             : codeSection.substring(3, codeSection.length() - 3);
