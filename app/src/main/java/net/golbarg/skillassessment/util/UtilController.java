@@ -2,6 +2,10 @@ package net.golbarg.skillassessment.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.SpannableString;
+import android.text.TextUtils;
+
+import com.nevidelia.library.highlight.Highlight;
 
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionCode;
@@ -45,9 +49,8 @@ public class UtilController {
         return editor.commit();
     }
 
-    public static QuestionPart convertQuestionTextToQuestionObject(Question question) {
+    public static QuestionPart convertQuestionTextToQuestionObject(String questionText) {
         QuestionPart part = new QuestionPart();
-        String questionText = question.getTitle();
 
         if (questionText.indexOf("```") > -1) {
             int firstIndex = 0;
@@ -79,5 +82,18 @@ public class UtilController {
         }
 
         return part;
+    }
+
+    public static CharSequence highlightQuestionText(String text) {
+        Highlight highlight = new Highlight();
+        QuestionPart part = UtilController.convertQuestionTextToQuestionObject(text);
+        CharSequence highlightedText = TextUtils.concat(part.getTitle());
+
+        for(int i = 0; i < part.getCodeList().size(); i++) {
+            SpannableString result = highlight.c(part.getCodeList().get(i).getCode().trim().replace("    ", "  "));
+            highlightedText = TextUtils.concat(highlightedText, result);
+        }
+
+        return highlightedText;
     }
 }
