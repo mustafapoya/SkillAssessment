@@ -124,7 +124,7 @@ public class TableConfig implements CRUDHandler<Config> {
     @Override
     public ContentValues putValues(Config object) {
         ContentValues values = new ContentValues();
-        if (object.getId() != -1 || object.getId() != 0) {
+        if (object.getId() != -1 && object.getId() != 0) {
             values.put(KEY_ID, object.getId());
         }
         values.put(KEY_KEY, object.getKey());

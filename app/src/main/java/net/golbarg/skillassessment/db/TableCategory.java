@@ -101,7 +101,7 @@ public class TableCategory implements CRUDHandler<Category> {
     @Override
     public ContentValues putValues(Category object) {
         ContentValues values = new ContentValues();
-        if (object.getId() != -1 || object.getId() != 0) {
+        if (object.getId() != -1 && object.getId() != 0) {
             values.put(KEY_ID, object.getId());
         }
         values.put(KEY_TITLE, object.getTitle());
