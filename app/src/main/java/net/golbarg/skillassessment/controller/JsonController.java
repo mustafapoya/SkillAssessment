@@ -38,9 +38,7 @@ public class JsonController {
         ArrayList<Question> questionArrayList = JsonUtil.mapQuestionsFromJson(jsonArrayQuestion);
         tableQuestion.emptyTable();
 
-        for (int i = 0; i < questionArrayList.size(); i++) {
-            tableQuestion.create(questionArrayList.get(i));
-        }
+        tableQuestion.create(questionArrayList);
 
         return true;
     }
@@ -49,12 +47,14 @@ public class JsonController {
         DatabaseHandler handler = new DatabaseHandler(context);
         TableQuestionAnswer tableQuestionAnswer = new TableQuestionAnswer(handler);
         JSONArray jsonArrayAnswer = JsonUtil.getJSONAnswers(context);
-        ArrayList<QuestionAnswer> questionArrayList = JsonUtil.mapAnswersFromJson(jsonArrayAnswer);
+        ArrayList<QuestionAnswer> questionAnswerArrayList = JsonUtil.mapAnswersFromJson(jsonArrayAnswer);
         tableQuestionAnswer.emptyTable();
 
-        for (int i = 0; i < questionArrayList.size(); i++) {
-            tableQuestionAnswer.create(questionArrayList.get(i));
-        }
+        tableQuestionAnswer.create(questionAnswerArrayList);
+
+//        for (int i = 0; i < questionAnswerArrayList.size(); i++) {
+//            tableQuestionAnswer.create(questionAnswerArrayList.get(i));
+//        }
 
         return true;
     }
