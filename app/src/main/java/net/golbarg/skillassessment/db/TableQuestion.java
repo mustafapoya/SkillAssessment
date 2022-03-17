@@ -41,8 +41,8 @@ public class TableQuestion implements CRUDHandler<Question> {
         db.close();
     }
 
-    public void create(ArrayList<Question> questions, SQLiteOpenHelper helper) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+    public void create(ArrayList<Question> questions) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
 
         for (int i = 0; i < questions.size(); i++) {
             db.insert(TABLE_NAME, null, putValues(questions.get(i)));
@@ -132,7 +132,7 @@ public class TableQuestion implements CRUDHandler<Question> {
     @Override
     public ContentValues putValues(Question object) {
         ContentValues values = new ContentValues();
-        if (object.getId() != -1 || object.getId() != 0) {
+        if (object.getId() != -1 && object.getId() != 0) {
             values.put(KEY_ID, object.getId());
         }
         values.put(KEY_CATEGORY_ID, object.getCategoryId());
@@ -147,5 +147,6 @@ public class TableQuestion implements CRUDHandler<Question> {
     public void emptyTable() {
         SQLiteDatabase db = dbHandler.getWritableDatabase();
         db.execSQL("DELETE FROM " + TABLE_NAME);
+
     }
 }
