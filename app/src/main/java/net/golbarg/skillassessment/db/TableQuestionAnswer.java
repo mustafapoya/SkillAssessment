@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class TableQuestionAnswer implements CRUDHandler<QuestionAnswer>{
 
     public static String createTableQuery() {
         return String.format(
-                "CREATE TABLE %s (%s INTEGER PRIMARY KEY, %s INTEGER, %s INTEGER, %s TEXT, %s TEXT)",
+                "CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, %s INTEGER, %s INTEGER, %s TEXT, %s TEXT)",
                 TABLE_NAME, KEY_ID, KEY_QUESTION_ID, KEY_NUMBER, KEY_TITLE, KEY_IS_CORRECT);
     }
 
@@ -38,6 +39,15 @@ public class TableQuestionAnswer implements CRUDHandler<QuestionAnswer>{
     public void create(QuestionAnswer object) {
         SQLiteDatabase db = dbHandler.getWritableDatabase();
         db.insert(TABLE_NAME, null, putValues(object));
+        db.close();
+    }
+
+    public void create(ArrayList<QuestionAnswer> questionAnswers) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+
+        for (int i = 0; i < questionAnswers.size(); i++) {
+            db.insert(TABLE_NAME, null, putValues(questionAnswers.get(i)));
+        }
         db.close();
     }
 
@@ -123,7 +133,9 @@ public class TableQuestionAnswer implements CRUDHandler<QuestionAnswer>{
     @Override
     public ContentValues putValues(QuestionAnswer object) {
         ContentValues values = new ContentValues();
-        values.put(KEY_ID, object.getId());
+        if (object.getId() != -1 && object.getId() != 0) {
+            values.put(KEY_ID, object.getId());
+        }
         values.put(KEY_QUESTION_ID, object.getQuestionId());
         values.put(KEY_NUMBER, object.getNumber());
         values.put(KEY_TITLE, object.getTitle());
