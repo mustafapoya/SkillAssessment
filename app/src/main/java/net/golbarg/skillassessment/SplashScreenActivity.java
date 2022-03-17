@@ -100,7 +100,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         String answerAdded = pref.getString(TableQuestionAnswer.TABLE_NAME, null);
         if(!"added".equals(answerAdded)) {
             txtStatus.setText("reading Answers");
-            JsonController.insertQuestionsToDB(getApplicationContext());
+            JsonController.insertAnswersToDB(getApplicationContext());
             txtStatus.setText("loading Answers");
             UtilController.insertSharedPref(pref, TableQuestion.TABLE_NAME, "added");
         }
