@@ -4,7 +4,10 @@
         <attr name="question_text" format="string"/>
         <attr name="question_code" format="string"/>
     </declare-styleable>
-    
+    <declare-styleable name="AnswerView">
+        <attr name="answer_text" format="string"/>
+        <attr name="answer_code" format="string"/>
+    </declare-styleable>
     <attr name="background" format="reference"/>
     <attr name="content_background" format="reference"/>
     <attr name="bgColor" format="color"/>
