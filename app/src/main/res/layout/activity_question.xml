@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -64,65 +65,62 @@
         </LinearLayout>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/txt_question_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginTop="5dp"
-        android:text="Question Title"
-        android:textColor="@color/white"
-        android:background="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
-
-
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="20dp"
-        android:orientation="vertical"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toTopOf="@+id/btn_next_question"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_question_title">
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
-        <TextView
-            android:id="@+id/txt_answer_1"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:text="Answer 1"
-            android:textColor="@color/white"
-            android:background="@color/black"
-            />
-        <TextView
-            android:id="@+id/txt_answer_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:layout_marginTop="10dp"
-            android:text="Answer 2"
-            android:textColor="@color/white"
-            android:background="@color/black"
-            />
-        <TextView
-            android:id="@+id/txt_answer_3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:layout_marginTop="10dp"
-            android:text="Answer 3"
-            android:textColor="@color/black"
-            android:background="?attr/content_background"
-            />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+            <net.golbarg.skillassessment.CustomView.QuestionView
+                android:id="@+id/question_view_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginTop="5dp"
+                android:padding="4dp"
+                app:question_text="@string/title"
+                app:question_code="@string/description"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
+            <net.golbarg.skillassessment.CustomView.AnswerView
+                android:id="@+id/answer_view_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                app:answer_text="@string/title"
+                app:answer_code="@string/description"
+                />
+            <net.golbarg.skillassessment.CustomView.AnswerView
+                android:id="@+id/answer_view_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:layout_marginTop="10dp"
+                app:answer_text="@string/title"
+                app:answer_code="@string/description"
+                />
+            <net.golbarg.skillassessment.CustomView.AnswerView
+                android:id="@+id/answer_view_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:layout_marginTop="10dp"
+                app:answer_text="@string/title"
+                app:answer_code="@string/description"
+                />
+        </LinearLayout>
+    </ScrollView>
     <Button
         android:id="@+id/btn_next_question"
         android:layout_width="0dp"

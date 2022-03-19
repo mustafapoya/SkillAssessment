@@ -1,9 +1,9 @@
 package net.golbarg.skillassessment;
 
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import net.golbarg.skillassessment.CustomView.AnswerView;
+import net.golbarg.skillassessment.CustomView.QuestionView;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.db.TableQuestionAnswer;
@@ -23,18 +25,18 @@ public class QuestionActivity extends AppCompatActivity {
     public static final String TAG = QuestionActivity.class.getName();
     public static int counter = 0;
 
-    private float x1, x2;
-    static final int MIN_DISTANCE = 150;
     ArrayList<Question> questions = new ArrayList<>();
 
     TableQuestion tableQuestion;
     TableQuestionAnswer tableQuestionAnswer;
 
     ProgressBar progressBarStep;
-    TextView txtQuestionTitle;
-    TextView txtAnswer1;
-    TextView txtAnswer2;
-    TextView txtAnswer3;
+    QuestionView questionViewTitle;
+    AnswerView answerView1;
+    AnswerView answerView2;
+    AnswerView answerView3;
+
+    ImageView imgClose;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,70 +49,41 @@ public class QuestionActivity extends AppCompatActivity {
 
         questions = tableQuestion.getQuestionsOf(2);
 
+        imgClose = findViewById(R.id.img_close);
         progressBarStep = findViewById(R.id.progress_step);
-        txtQuestionTitle = findViewById(R.id.txt_question_title);
-        txtAnswer1 = findViewById(R.id.txt_answer_1);
-        txtAnswer2 = findViewById(R.id.txt_answer_2);
-        txtAnswer3 = findViewById(R.id.txt_answer_3);
+        questionViewTitle = findViewById(R.id.question_view_title);
+        answerView1 = findViewById(R.id.answer_view_1);
+        answerView2 = findViewById(R.id.answer_view_2);
+        answerView3 = findViewById(R.id.answer_view_3);
 
         Button btnNextQuestion = findViewById(R.id.btn_next_question);
+        btnNextQuestion.setOnClickListener(v -> loadQuestion(counter++));
 
-        btnNextQuestion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadQuestion(counter++);
-            }
-        });
+        imgClose.setOnClickListener(v -> Toast.makeText(getApplicationContext(), "Closing Test", Toast.LENGTH_SHORT).show());
 
     }
 
     private void loadQuestion(int position) {
-        if (position > 0 && position < questions.size()) {
+        if (position >= 0 && position < questions.size()) {
             progressBarStep.setProgress(position);
-            txtQuestionTitle.setText(UtilController.highlightQuestionText(questions.get(counter).getTitle()));
+//            questionViewTitle.getTxtQuestionText().setText(UtilController.highlightQuestionText(questions.get(position).getTitle()));
+            UtilController.highlightQuestionText(questionViewTitle, questions.get(position).getTitle());
 
-            questions.get(counter).setAnswers(tableQuestionAnswer.getAnswersOf(questions.get(counter).getId()));
+            questions.get(position).setAnswers(tableQuestionAnswer.getAnswersOf(questions.get(position).getId()));
 
-            if (questions.get(counter).getAnswers().size() >= 1) {
-                txtAnswer1.setText(UtilController.highlightQuestionText(questions.get(counter).getAnswers().get(0).getTitle()));
+            if (questions.get(position).getAnswers().size() >= 1) {
+                UtilController.highlightAnswerText(answerView1, questions.get(position).getAnswers().get(0).getTitle());
             }
 
-            if (questions.get(counter).getAnswers().size() >= 2) {
-                txtAnswer2.setText(UtilController.highlightQuestionText(questions.get(counter).getAnswers().get(1).getTitle()));
+            if (questions.get(position).getAnswers().size() >= 2) {
+                UtilController.highlightAnswerText(answerView2, questions.get(position).getAnswers().get(1).getTitle());
             }
 
-            if (questions.get(counter).getAnswers().size() >= 3) {
-                txtAnswer3.setText(UtilController.highlightQuestionText(questions.get(counter).getAnswers().get(2).getTitle()));
+            if (questions.get(position).getAnswers().size() >= 3) {
+//                answerView3.setText(UtilController.highlightQuestionText(questions.get(position).getAnswers().get(2).getTitle()));
+                UtilController.highlightAnswerText(answerView3, questions.get(position).getAnswers().get(0).getTitle());
             }
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                x1 = event.getX();
-                break;
-            case MotionEvent.ACTION_UP:
-                x2 = event.getX();
-                float deltaX = x2 - x1;
-                if (Math.abs(deltaX) > MIN_DISTANCE) {
-                    if (x2 > x1)
-                    {
-//                        Toast.makeText(this, "Left to Right swipe [Next]", Toast.LENGTH_SHORT).show ();
-                        loadQuestion(counter--);
-                    }
-                    // Right to left swipe action
-                    else
-                    {
-//                        Toast.makeText(this, "Right to Left swipe [Previous]", Toast.LENGTH_SHORT).show ();
-                        loadQuestion(counter++);
-                    }
-                } else {
-                    // consider as something else - a screen tap for example
-                }
-                break;
-        }
-        return super.onTouchEvent(event);
-    }
 }
