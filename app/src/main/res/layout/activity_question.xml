@@ -78,14 +78,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
+            android:padding="5dp"
             >
             <net.golbarg.skillassessment.CustomView.QuestionView
                 android:id="@+id/question_view_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginTop="5dp"
                 android:padding="4dp"
                 app:question_text="@string/title"
                 app:question_code="@string/description"
