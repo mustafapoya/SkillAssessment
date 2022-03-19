@@ -4,9 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.SpannableString;
 import android.text.TextUtils;
+import android.view.View;
 
 import com.nevidelia.library.highlight.Highlight;
 
+import net.golbarg.skillassessment.CustomView.AnswerView;
+import net.golbarg.skillassessment.CustomView.QuestionView;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionCode;
 import net.golbarg.skillassessment.models.QuestionPart;
@@ -84,10 +87,44 @@ public class UtilController {
         return part;
     }
 
+    public static void highlightQuestionText(QuestionView questionView, String text) {
+        Highlight highlight = new Highlight();
+        QuestionPart part = UtilController.convertQuestionTextToQuestionObject(text);
+        questionView.getTxtQuestionText().setText(part.getTitle().trim());
+        questionView.getTxtQuestionText().setVisibility(part.getTitle().trim().length() > 0 ? View.VISIBLE : View.GONE);
+
+        CharSequence highlightedText = TextUtils.concat();
+        for(int i = 0; i < part.getCodeList().size(); i++) {
+            SpannableString result = highlight.c(part.getCodeList().get(i).getCode().trim().replace("    ", "  "));
+            highlightedText = TextUtils.concat(highlightedText, result);
+        }
+
+        questionView.getTxtQuestionCode().setText(highlightedText);
+        questionView.getTxtQuestionCode().setVisibility(part.getCodeList().size() > 0 ? View.VISIBLE : View.GONE);
+
+    }
+
+    public static void highlightAnswerText(AnswerView answerView, String text) {
+        Highlight highlight = new Highlight();
+        QuestionPart part = UtilController.convertQuestionTextToQuestionObject(text);
+        answerView.getTxtAnswerText().setText(part.getTitle().trim());
+        answerView.getTxtAnswerCode().setVisibility(part.getTitle().trim().length() > 0 ? View.VISIBLE : View.GONE);
+
+        CharSequence highlightedText = TextUtils.concat();
+        for(int i = 0; i < part.getCodeList().size(); i++) {
+            SpannableString result = highlight.c(part.getCodeList().get(i).getCode().trim().replace("    ", "  "));
+            highlightedText = TextUtils.concat(highlightedText, result);
+        }
+
+        answerView.getTxtAnswerCode().setText(highlightedText);
+        answerView.getTxtAnswerCode().setVisibility(part.getCodeList().size() > 0 ? View.VISIBLE : View.GONE);
+
+    }
+
     public static CharSequence highlightQuestionText(String text) {
         Highlight highlight = new Highlight();
         QuestionPart part = UtilController.convertQuestionTextToQuestionObject(text);
-        CharSequence highlightedText = TextUtils.concat(part.getTitle());
+        CharSequence highlightedText = TextUtils.concat(part.getTitle().trim() + "\n");
 
         for(int i = 0; i < part.getCodeList().size(); i++) {
             SpannableString result = highlight.c(part.getCodeList().get(i).getCode().trim().replace("    ", "  "));
