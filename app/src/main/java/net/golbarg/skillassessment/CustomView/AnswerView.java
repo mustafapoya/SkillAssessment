@@ -13,6 +13,7 @@ import net.golbarg.skillassessment.R;
 
 public class AnswerView extends ConstraintLayout {
     private OnClickListener listener;
+
     private TextView txtAnswerText;
     private TextView txtAnswerCode;
 
@@ -39,26 +40,22 @@ public class AnswerView extends ConstraintLayout {
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        if(ev.getAction() == MotionEvent.ACTION_UP) {
-            if(listener != null) {
-                listener.onClick(this);
-            }
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if(event.getAction() == MotionEvent.ACTION_UP) {
+            if(listener != null) listener.onClick(this);
         }
-        return super.dispatchTouchEvent(ev);
+        return super.dispatchTouchEvent(event);
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if(event.getAction() == KeyEvent.ACTION_UP && (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER || event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
-            if(listener != null) {
-                listener.onClick(this);
-            }
+            if(listener != null) listener.onClick(this);
         }
         return super.dispatchKeyEvent(event);
     }
 
-    public void setListener(OnClickListener listener) {
+    public void setOnClickListener(OnClickListener listener) {
         this.listener = listener;
     }
 }
