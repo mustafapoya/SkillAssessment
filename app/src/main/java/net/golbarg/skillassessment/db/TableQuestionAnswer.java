@@ -121,12 +121,14 @@ public class TableQuestionAnswer implements CRUDHandler<QuestionAnswer>{
 
     @Override
     public QuestionAnswer mapColumn(Cursor cursor) {
+        int is_correct = Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_IS_CORRECT)));
+
         return new QuestionAnswer(
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))),
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_QUESTION_ID))),
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_NUMBER))),
                 cursor.getString(cursor.getColumnIndex(KEY_TITLE)),
-                Boolean.parseBoolean(cursor.getString(cursor.getColumnIndex(KEY_IS_CORRECT)))
+                is_correct == 1 ? true : false
         );
     }
 
