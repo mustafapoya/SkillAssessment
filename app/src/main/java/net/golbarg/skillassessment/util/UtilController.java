@@ -108,7 +108,7 @@ public class UtilController {
         Highlight highlight = new Highlight();
         QuestionPart part = UtilController.convertQuestionTextToQuestionObject(text);
         answerView.getTxtAnswerText().setText(part.getTitle().trim());
-        answerView.getTxtAnswerCode().setVisibility(part.getTitle().trim().length() > 0 ? View.VISIBLE : View.GONE);
+        answerView.getTxtAnswerText().setVisibility(part.getTitle().trim().length() > 0 ? View.VISIBLE : View.GONE);
 
         CharSequence highlightedText = TextUtils.concat();
         for(int i = 0; i < part.getCodeList().size(); i++) {
