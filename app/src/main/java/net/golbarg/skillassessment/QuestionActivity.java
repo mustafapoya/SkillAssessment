@@ -120,7 +120,7 @@ public class QuestionActivity extends AppCompatActivity {
 
             if (questions.get(position).getAnswers().size() >= 3) {
 //                answerView3.setText(UtilController.highlightQuestionText(questions.get(position).getAnswers().get(2).getTitle()));
-                UtilController.highlightAnswerText(answerView3, questions.get(position).getAnswers().get(0).getTitle());
+                UtilController.highlightAnswerText(answerView3, questions.get(position).getAnswers().get(2).getTitle());
 
                 answerView3.setOnClickListener(v -> {
                     if(questions.get(position).getAnswers().get(2).isCorrect()) {
@@ -134,7 +134,7 @@ public class QuestionActivity extends AppCompatActivity {
             }
 
             if (questions.get(position).getAnswers().size() >= 4) {
-                UtilController.highlightAnswerText(answerView4, questions.get(position).getAnswers().get(0).getTitle());
+                UtilController.highlightAnswerText(answerView4, questions.get(position).getAnswers().get(3).getTitle());
 
                 answerView4.setOnClickListener(v -> {
                     if(questions.get(position).getAnswers().get(3).isCorrect()) {
