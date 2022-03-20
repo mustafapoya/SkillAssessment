@@ -1,7 +1,7 @@
 package net.golbarg.skillassessment;
 
 import android.os.Bundle;
-import android.view.View;
+import android.os.CountDownTimer;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -20,6 +20,7 @@ import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.util.UtilController;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class QuestionActivity extends AppCompatActivity {
     public static final String TAG = QuestionActivity.class.getName();
@@ -37,6 +38,10 @@ public class QuestionActivity extends AppCompatActivity {
     AnswerView answerView3;
 
     ImageView imgClose;
+    Button btnNextQuestion;
+    TextView txtTimer;
+
+    CountDownTimer countDownTimer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,12 +60,16 @@ public class QuestionActivity extends AppCompatActivity {
         answerView1 = findViewById(R.id.answer_view_1);
         answerView2 = findViewById(R.id.answer_view_2);
         answerView3 = findViewById(R.id.answer_view_3);
+        btnNextQuestion = findViewById(R.id.btn_next_question);
+        txtTimer = findViewById(R.id.txt_timer);
 
-        Button btnNextQuestion = findViewById(R.id.btn_next_question);
-        btnNextQuestion.setOnClickListener(v -> loadQuestion(counter++));
+        btnNextQuestion.setOnClickListener(v -> {
+            loadQuestion(counter++);
+            btnNextQuestion.setEnabled(false);
+            countDown();
+        });
 
         imgClose.setOnClickListener(v -> Toast.makeText(getApplicationContext(), "Closing Test", Toast.LENGTH_SHORT).show());
-
     }
 
     private void loadQuestion(int position) {
@@ -86,4 +95,26 @@ public class QuestionActivity extends AppCompatActivity {
         }
     }
 
+    private void countDown() {
+        if(countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+
+        countDownTimer = new CountDownTimer(91000, 500) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                millisUntilFinished = millisUntilFinished / 1000;
+                long minutes = millisUntilFinished / 60;
+                long seconds = millisUntilFinished % 60;
+                txtTimer.setText(String.format(Locale.ENGLISH,"%02d:%02d", minutes, seconds));
+            }
+
+            @Override
+            public void onFinish() {
+                btnNextQuestion.setEnabled(true);
+            }
+        };
+
+        countDownTimer.start();
+    }
 }
