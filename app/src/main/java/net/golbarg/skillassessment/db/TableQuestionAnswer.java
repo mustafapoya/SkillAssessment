@@ -109,6 +109,12 @@ public class TableQuestionAnswer implements CRUDHandler<QuestionAnswer>{
         db.delete(TABLE_NAME, KEY_ID + "= ?", new String[]{String.valueOf(object.getId())});
     }
 
+    public void deleteByCategoryId(int categoryId) {
+        String query = String.format("DELETE from %s where question_id in (select id from questions where category_id = %d)", TABLE_NAME, categoryId);
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        db.execSQL(query);
+    }
+
     @Override
     public int getCount() {
         String countQuery = "SELECT * FROM " + TABLE_NAME;
