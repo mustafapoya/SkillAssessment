@@ -8,14 +8,12 @@ import java.util.ArrayList;
 public class Category {
     private int id;
     private String title;
-    private String description;
-    private ArrayList<Question> questions;
+    private int numberOfQuestion;
 
-    public Category(int id, String title, String description) {
+    public Category(int id, String title, int numberOfQuestion) {
         this.id = id;
         this.title = title;
-        this.description = description;
-        this.questions = new ArrayList<>();
+        this.numberOfQuestion = numberOfQuestion;
     }
 
     public int getId() {
@@ -34,20 +32,12 @@ public class Category {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
+    public int getNumberOfQuestion() {
+        return numberOfQuestion;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public ArrayList<Question> getQuestions() {
-        return questions;
-    }
-
-    public void setQuestions(ArrayList<Question> questions) {
-        this.questions = questions;
+    public void setNumberOfQuestion(int numberOfQuestion) {
+        this.numberOfQuestion = numberOfQuestion;
     }
 
     @Override
@@ -55,12 +45,11 @@ public class Category {
         return "Category{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", questions=" + questions +
+                ", numberOfQuestion=" + numberOfQuestion +
                 '}';
     }
 
     public static Category createFromJson(JSONObject json) throws JSONException {
-        return new Category(json.getInt("id"), json.getString("title"), ""/*json.getString("description")*/);
+        return new Category(json.getInt("id"), json.getString("title"), json.getInt("number_of_question"));
     }
 }

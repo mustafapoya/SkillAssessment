@@ -12,7 +12,8 @@ public class TableCategory implements CRUDHandler<Category> {
     public static final String TABLE_NAME = "categories";
     public static final String KEY_ID = "id";
     public static final String KEY_TITLE = "title";
-    public static final String KEY_DESCRIPTION = "description";
+    public static final String KEY_NUMBER_OF_QUESTION = "number_of_question";
+    public static final String [] ALL_COLUMNS = { KEY_ID, KEY_TITLE, KEY_NUMBER_OF_QUESTION };
     private final DatabaseHandler dbHandler;
 
     public TableCategory(DatabaseHandler dbHandler) {
@@ -20,8 +21,8 @@ public class TableCategory implements CRUDHandler<Category> {
     }
 
     public static String createTableQuery() {
-        return String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY, %s TEXT, %s TEXT)",
-                TABLE_NAME, KEY_ID, KEY_TITLE, KEY_DESCRIPTION);
+        return String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY, %s TEXT, %s INTEGER)",
+                TABLE_NAME, KEY_ID, KEY_TITLE, KEY_NUMBER_OF_QUESTION);
     }
 
     public static String dropTableQuery() {
@@ -40,7 +41,7 @@ public class TableCategory implements CRUDHandler<Category> {
     public Category get(int id) {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_NAME, new String[]{KEY_ID, KEY_TITLE, KEY_DESCRIPTION }, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, ALL_COLUMNS, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
 
         if(cursor != null && cursor.getCount() != 0) {
             cursor.moveToFirst();
@@ -94,7 +95,7 @@ public class TableCategory implements CRUDHandler<Category> {
         return new Category(
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))),
                 cursor.getString(cursor.getColumnIndex(KEY_TITLE)),
-                cursor.getString(cursor.getColumnIndex(KEY_DESCRIPTION))
+                Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_NUMBER_OF_QUESTION)))
         );
     }
 
@@ -105,7 +106,7 @@ public class TableCategory implements CRUDHandler<Category> {
             values.put(KEY_ID, object.getId());
         }
         values.put(KEY_TITLE, object.getTitle());
-        values.put(KEY_DESCRIPTION, object.getDescription());
+        values.put(KEY_NUMBER_OF_QUESTION, object.getNumberOfQuestion());
         return values;
     }
 
