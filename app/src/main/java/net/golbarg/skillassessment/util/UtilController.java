@@ -158,4 +158,8 @@ public class UtilController {
             return false;
         }
     }
+
+    public static String appLink() {
+        return "https://play.google.com/store/apps/details?id=net.golbarg.skillassessment";
+    }
 }
