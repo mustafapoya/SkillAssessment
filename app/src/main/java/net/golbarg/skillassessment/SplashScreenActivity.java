@@ -1,5 +1,6 @@
 package net.golbarg.skillassessment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,9 +12,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import net.golbarg.skillassessment.controller.JsonController;
+import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableCategory;
+import net.golbarg.skillassessment.db.TableConfig;
 import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.db.TableQuestionAnswer;
+import net.golbarg.skillassessment.models.Config;
+import net.golbarg.skillassessment.util.CryptUtil;
 import net.golbarg.skillassessment.util.UtilController;
 
 public class SplashScreenActivity extends AppCompatActivity {
@@ -40,13 +45,15 @@ public class SplashScreenActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    String dbStatus = pref.getString(UtilController.KEY_DB_STATUS, null);
-
-                    if("success".equals(dbStatus)) {
-                        showWaiting();
-                    } else {
-                        addDataToDatabase();
-                    }
+//                    String dbStatus = pref.getString(UtilController.KEY_DB_STATUS, null);
+//
+//                    if("success".equals(dbStatus)) {
+//                        showWaiting();
+//                    } else {
+//                        addDataToDatabase();
+//                    }
+                    checkUserCredit(getApplicationContext());
+                    showWaiting();
 
                     finish();
                     startActivity(new Intent(getBaseContext(), MainActivity.class));
@@ -78,6 +85,19 @@ public class SplashScreenActivity extends AppCompatActivity {
             isActive = false;
         }
         return true;
+    }
+
+    private void checkUserCredit(Context context) {
+        TableConfig tableConfig = new TableConfig(new DatabaseHandler(context));
+
+        if(tableConfig.getByKey(UtilController.KEY_CREDIT) == null) {
+            try {
+                Config config = new Config(UtilController.KEY_CREDIT, CryptUtil.encrypt(String.valueOf(UtilController.DEFAULT_CREDIT)));
+                tableConfig.create(config);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void addDataToDatabase() {
