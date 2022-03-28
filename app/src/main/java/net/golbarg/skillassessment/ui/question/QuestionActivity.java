@@ -1,6 +1,7 @@
-package net.golbarg.skillassessment;
+package net.golbarg.skillassessment.ui.question;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
+import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.db.TableQuestionAnswer;
@@ -28,9 +30,10 @@ import java.util.Locale;
 public class QuestionActivity extends AppCompatActivity {
     public static final String TAG = QuestionActivity.class.getName();
     public static int counter = 0;
-
+    int category_id = -1;
     ArrayList<Question> questions = new ArrayList<>();
 
+    DatabaseHandler databaseHandler;
     TableQuestion tableQuestion;
     TableQuestionAnswer tableQuestionAnswer;
 
@@ -51,13 +54,15 @@ public class QuestionActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question);
-
         context = getApplicationContext();
         DatabaseHandler databaseHandler = new DatabaseHandler(getApplicationContext());
         tableQuestion = new TableQuestion(databaseHandler);
         tableQuestionAnswer = new TableQuestionAnswer(databaseHandler);
 
-        questions = tableQuestion.getQuestionsOf(2);
+        Intent intent = getIntent();
+        category_id = intent.getIntExtra("category_id", 1);
+
+        questions = tableQuestion.getQuestionsOf(category_id);
 
         imgClose = findViewById(R.id.img_close);
         progressBarStep = findViewById(R.id.progress_step);
@@ -87,7 +92,7 @@ public class QuestionActivity extends AppCompatActivity {
             UtilController.highlightQuestionText(questionViewTitle, questions.get(position).getTitle());
 
             questions.get(position).setAnswers(tableQuestionAnswer.getAnswersOf(questions.get(position).getId()));
-            
+
             if (questions.get(position).getAnswers().size() >= 1) {
                 UtilController.highlightAnswerText(answerView1, questions.get(position).getAnswers().get(0).getTitle());
                 answerView1.setOnClickListener(new View.OnClickListener() {
