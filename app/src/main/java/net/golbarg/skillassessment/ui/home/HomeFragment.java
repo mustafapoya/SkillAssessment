@@ -18,6 +18,9 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableCategory;
@@ -34,6 +37,7 @@ public class HomeFragment extends Fragment {
     public static final String TAG = HomeFragment.class.getName();
 
     Context context;
+    AdView mAdViewHomeScreenBanner;
     ProgressBar progressLoading;
     private ListView listViewCategory;
     CategoryListAdapter categoryListAdapter;
@@ -51,6 +55,10 @@ public class HomeFragment extends Fragment {
         context = root.getContext();
         dbHandler = new DatabaseHandler(context);
         tableCategory = new TableCategory(dbHandler);
+
+        mAdViewHomeScreenBanner = root.findViewById(R.id.adViewHomeScreenBanner);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdViewHomeScreenBanner.loadAd(adRequest);
 
         progressLoading = root.findViewById(R.id.progress_loading);
         progressLoading.setVisibility(View.GONE);
