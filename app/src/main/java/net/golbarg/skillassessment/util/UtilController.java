@@ -6,10 +6,12 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.nevidelia.library.highlight.Highlight;
 
 import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
+import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionCode;
 import net.golbarg.skillassessment.models.QuestionPart;
@@ -22,7 +24,8 @@ public class UtilController {
     public static final String KEY_SCORE_ON_TEST = "KEY_SCORE_ON_TEST";
     public static final int DEFAULT_SCORE_ON_TEST = 30;
     public static final String KEY_DB_STATUS = "KEY_DB_STATUS";
-
+    public static final String KEY_CREDIT = "KEY_CREDIT";
+    public static final int DEFAULT_CREDIT = 10;
 
     public static SharedPreferences getSharedPref(Context context, String name) {
         return context.getSharedPreferences(name, Context.MODE_PRIVATE);
@@ -132,5 +135,12 @@ public class UtilController {
         }
 
         return highlightedText;
+    }
+
+    public static void showSnackMessage(View view, String message) {
+        Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+        snackbar.setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE);
+        snackbar.setAnchorView(view.findViewById(R.id.nav_view));
+        snackbar.show();
     }
 }
