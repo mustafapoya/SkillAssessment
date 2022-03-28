@@ -79,6 +79,11 @@ public class TableCategory implements CRUDHandler<Category> {
         db.delete(TABLE_NAME, KEY_ID + "= ?", new String[]{String.valueOf(object.getId())});
     }
 
+    public void delete(int id) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        db.delete(TABLE_NAME, KEY_ID + "= ?", new String[]{String.valueOf(id)});
+    }
+
     @Override
     public int getCount() {
         String countQuery = String.format("SELECT * FROM %s;", TABLE_NAME);
