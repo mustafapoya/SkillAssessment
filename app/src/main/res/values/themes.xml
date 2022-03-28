@@ -9,6 +9,7 @@
         <item name="metaTextColor">@color/black_700</item>
         <item name="backgroundColor">@color/white</item>
         <item name="background">@drawable/custom_list_background</item>
+        <item name="category_background">@color/blue_200</item>
         <item name="content_background">@color/blue_600</item>
         <item name="tab_color">@drawable/tab_color</item>
 

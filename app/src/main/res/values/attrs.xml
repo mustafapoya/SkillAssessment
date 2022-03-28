@@ -9,6 +9,7 @@
         <attr name="answer_code" format="string"/>
     </declare-styleable>
     <attr name="background" format="reference"/>
+    <attr name="category_background" format="reference"/>
     <attr name="content_background" format="reference"/>
     <attr name="bgColor" format="color"/>
     <attr name="textColor" format="color"/>

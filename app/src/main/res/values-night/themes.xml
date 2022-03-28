@@ -10,6 +10,7 @@
         <item name="metaTextColor">@color/gray</item>
         <item name="backgroundColor">@color/black_500</item>
         <item name="background">@drawable/custom_list_background_night</item>
+        <item name="category_background">@color/black_500</item>
         <item name="content_background">@color/blue_200</item>
         <item name="tab_color">@drawable/tab_color</item>
 
