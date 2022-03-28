@@ -2,6 +2,7 @@ package net.golbarg.skillassessment.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.view.View;
@@ -142,5 +143,19 @@ public class UtilController {
         snackbar.setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE);
         snackbar.setAnchorView(view.findViewById(R.id.nav_view));
         snackbar.show();
+    }
+
+    public static boolean isNetworkConnected(Context context) {
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+    }
+
+    public static boolean isInternetAvailable() {
+        try {
+            String command = "ping -i 1 -c 1 google.com";
+            return Runtime.getRuntime().exec(command).waitFor() == 0;
+        } catch(Exception e) {
+            return false;
+        }
     }
 }

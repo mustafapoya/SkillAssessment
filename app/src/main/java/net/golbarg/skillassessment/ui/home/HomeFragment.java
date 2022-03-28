@@ -3,22 +3,20 @@ package net.golbarg.skillassessment.ui.home;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
@@ -26,6 +24,7 @@ import net.golbarg.skillassessment.db.TableCategory;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.ui.dialog.CreditDialog;
 import net.golbarg.skillassessment.util.JsonUtil;
+import net.golbarg.skillassessment.util.UtilController;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -39,29 +38,58 @@ public class HomeFragment extends Fragment {
     private ListView listViewCategory;
     CategoryListAdapter categoryListAdapter;
     ArrayList<Category> categoryArrayList = new ArrayList<>();
-    private ConstraintLayout layoutMainLayout;
+
+    ConstraintLayout layoutNoInternet;
+    ConstraintLayout layoutMainLayout;
+    Button btnTryAgainConnection;
     DatabaseHandler dbHandler;
+    TableCategory tableCategory;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         setHasOptionsMenu(true);
         context = root.getContext();
         dbHandler = new DatabaseHandler(context);
+        tableCategory = new TableCategory(dbHandler);
 
         progressLoading = root.findViewById(R.id.progress_loading);
+        progressLoading.setVisibility(View.GONE);
         listViewCategory = root.findViewById(R.id.list_view_category);
         layoutMainLayout = root.findViewById(R.id.layout_main_layout);
+        layoutNoInternet = root.findViewById(R.id.layout_no_internet);
+        btnTryAgainConnection = root.findViewById(R.id.btn_try_again);
 
+        categoryArrayList = tableCategory.getAll();
         categoryListAdapter = new CategoryListAdapter(getActivity(), categoryArrayList, getParentFragmentManager());
         listViewCategory.setAdapter(categoryListAdapter);
 
-        try {
+        btnTryAgainConnection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleDataLoading();
+            }
+        });
+
+        if(!UtilController.isNetworkConnected(context) && categoryArrayList.size() > 0) {
+            categoryListAdapter.notifyDataSetChanged();
+            Log.d(TAG, "read data from database" + categoryArrayList.size());
+        } else {
+            Log.d(TAG, "connect to online server" + categoryArrayList.size());
             new FetchCategoryDataTask().execute();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return root;
+    }
+
+    private void handleDataLoading() {
+        if(UtilController.isNetworkConnected(context)) {
+            layoutMainLayout.setVisibility(View.VISIBLE);
+            layoutNoInternet.setVisibility(View.GONE);
+            new FetchCategoryDataTask().execute();
+        } else {
+            layoutMainLayout.setVisibility(View.GONE);
+            layoutNoInternet.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -76,7 +104,7 @@ public class HomeFragment extends Fragment {
 
         switch (item.getItemId()) {
             case R.id.refresh:
-                new FetchCategoryDataTask().execute();
+                handleDataLoading();
                 return true;
             case R.id.credit:
                 CreditDialog creditDialog = new CreditDialog();
@@ -116,9 +144,14 @@ public class HomeFragment extends Fragment {
             super.onPostExecute(result);
             progressLoading.setVisibility(View.GONE);
 
-            categoryArrayList.clear();
-            categoryArrayList.addAll(result);
-            categoryListAdapter.notifyDataSetChanged();
+            if(!successful && categoryArrayList.size() > 0) {
+                layoutMainLayout.setVisibility(View.GONE);
+                layoutNoInternet.setVisibility(View.VISIBLE);
+            } else {
+                categoryArrayList.clear();
+                categoryArrayList.addAll(result);
+                categoryListAdapter.notifyDataSetChanged();
+            }
         }
     }
 
