@@ -1,9 +1,13 @@
 package net.golbarg.skillassessment.ui.bookmark;
 
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,34 +16,76 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+
+import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.databinding.FragmentBookmarkBinding;
+import net.golbarg.skillassessment.db.DatabaseHandler;
+import net.golbarg.skillassessment.db.TableBookmark;
+import net.golbarg.skillassessment.models.Bookmark;
+import net.golbarg.skillassessment.models.Question;
+
+import java.util.ArrayList;
 
 public class BookmarkFragment extends Fragment {
 
-    private BookmarkViewModel bookmarkViewModel;
-    private FragmentBookmarkBinding binding;
+    Context context;
+    ProgressBar progressLoading;
+    BookmarkQuestionListAdapter bookmarkQuestionListAdapter;
+    ArrayList<Bookmark> bookmarksArrayList = new ArrayList<>();
+    DatabaseHandler dbHandler;
+    TableBookmark tableBookmark;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        bookmarkViewModel =
-                new ViewModelProvider(this).get(BookmarkViewModel.class);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_bookmark, container, false);
+        context = root.getContext();
+        dbHandler = new DatabaseHandler(context);
+        tableBookmark = new TableBookmark(dbHandler);
 
-        binding = FragmentBookmarkBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
+        AdView mAdViewBookmarkScreenBanner = root.findViewById(R.id.adViewBookmarkScreenBanner);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdViewBookmarkScreenBanner.loadAd(adRequest);
 
-        final TextView textView = binding.textDashboard;
-        bookmarkViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+        progressLoading = root.findViewById(R.id.progress_loading);
+        ListView listViewContents = root.findViewById(R.id.list_view_questions);
+
+        bookmarkQuestionListAdapter = new BookmarkQuestionListAdapter(getActivity(), bookmarksArrayList);
+        listViewContents.setAdapter(bookmarkQuestionListAdapter);
+
+        new BookmarkFragment.FetchBookmarkContentDataTask().execute();
+
         return root;
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+    private class FetchBookmarkContentDataTask extends AsyncTask<String, String, ArrayList<Bookmark>> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressLoading.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected ArrayList<Bookmark> doInBackground(String... params) {
+            ArrayList<Bookmark> result = new ArrayList<>();
+
+            try {
+                result = tableBookmark.getAll();
+                return result;
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Bookmark> bookmarks) {
+            super.onPostExecute(bookmarks);
+            progressLoading.setVisibility(View.GONE);
+            bookmarksArrayList.clear();
+            bookmarksArrayList.addAll(bookmarks);
+            bookmarkQuestionListAdapter.notifyDataSetChanged();
+
+        }
     }
 }

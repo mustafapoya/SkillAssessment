@@ -24,4 +24,8 @@
     <string name="added_successfully">Added Successfully</string>
     <string name="credits">Credits</string>
     <string name="retry">Retry</string>
+    <string name="delete">delete</string>
+    <string name="share_content">share</string>
+    <string name="share_using">share using</string>
+    <string name="bookmark_deleted">bookmark deleted</string>
 </resources>
