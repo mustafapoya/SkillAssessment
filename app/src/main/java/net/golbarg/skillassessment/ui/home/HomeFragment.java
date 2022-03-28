@@ -4,6 +4,9 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -21,7 +24,10 @@ import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableCategory;
 import net.golbarg.skillassessment.models.Category;
+import net.golbarg.skillassessment.ui.dialog.CreditDialog;
 import net.golbarg.skillassessment.util.JsonUtil;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -38,6 +44,7 @@ public class HomeFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+        setHasOptionsMenu(true);
         context = root.getContext();
         dbHandler = new DatabaseHandler(context);
 
@@ -55,6 +62,28 @@ public class HomeFragment extends Fragment {
         }
 
         return root;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull @NotNull Menu menu, @NonNull @NotNull MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.refresh_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull @NotNull MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.refresh:
+                new FetchCategoryDataTask().execute();
+                return true;
+            case R.id.credit:
+                CreditDialog creditDialog = new CreditDialog();
+                creditDialog.show(getChildFragmentManager(), CreditDialog.TAG);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private class FetchCategoryDataTask extends AsyncTask<String, String, ArrayList<Category>> {

@@ -22,4 +22,6 @@
     <string name="view_ad">view ad</string>
     <string name="to_view_question_add_first">to view questions try to add first</string>
     <string name="added_successfully">Added Successfully</string>
+    <string name="credits">Credits</string>
+    <string name="retry">Retry</string>
 </resources>
