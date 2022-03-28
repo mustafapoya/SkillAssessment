@@ -18,10 +18,10 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.databinding.FragmentHomeBinding;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableCategory;
 import net.golbarg.skillassessment.models.Category;
+import net.golbarg.skillassessment.util.JsonUtil;
 
 import java.util.ArrayList;
 
@@ -58,6 +58,7 @@ public class HomeFragment extends Fragment {
     }
 
     private class FetchCategoryDataTask extends AsyncTask<String, String, ArrayList<Category>> {
+        boolean successful = false;
 
         @Override
         protected void onPreExecute() {
@@ -70,14 +71,14 @@ public class HomeFragment extends Fragment {
             ArrayList<Category> result = new ArrayList<>();
 
             try {
-
-                TableCategory tableCategory = new TableCategory(dbHandler);
-                result = tableCategory.getAll();
-
+                result = JsonUtil.mapCategoriesFromJson(JsonUtil.getJsonCategories(context));
+                successful = true;
                 return result;
             }catch(Exception e) {
+                successful = false;
                 e.printStackTrace();
             }
+            successful = false;
             return result;
         }
 
@@ -85,6 +86,7 @@ public class HomeFragment extends Fragment {
         protected void onPostExecute(ArrayList<Category> result) {
             super.onPostExecute(result);
             progressLoading.setVisibility(View.GONE);
+
             categoryArrayList.clear();
             categoryArrayList.addAll(result);
             categoryListAdapter.notifyDataSetChanged();
