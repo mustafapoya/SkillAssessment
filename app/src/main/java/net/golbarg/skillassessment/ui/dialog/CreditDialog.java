@@ -13,9 +13,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableConfig;
+import net.golbarg.skillassessment.models.Config;
 import net.golbarg.skillassessment.util.CryptUtil;
 import net.golbarg.skillassessment.util.UtilController;
 
@@ -24,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 public class CreditDialog extends DialogFragment {
     public static String TAG = CreditDialog.class.getName();
     Context context;
-//    private RewardedAd mRewardedAd;
+    private RewardedAd mRewardedAd;
     DatabaseHandler databaseHandler;
     TableConfig tableConfig;
 
@@ -51,10 +59,11 @@ public class CreditDialog extends DialogFragment {
         btnViewAd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*AdRequest adRequest = new AdRequest.Builder().build();
-                 *//* real ad Unit: ca-app-pub-3540008829614888/4907303326 *//*
-                 *//* test ad Unit: ca-app-pub-3940256099942544/5224354917 *//*
-                RewardedAd.load(context, "ca-app-pub-3540008829614888/4907303326", adRequest, new RewardedAdLoadCallback() {
+                AdRequest adRequest = new AdRequest.Builder().build();
+                // real ad Unit: ca-app-pub-3540008829614888/4907303326
+                // test ad Unit: ca-app-pub-3940256099942544/5224354917
+                //TODO: on publish add real ad unit
+                RewardedAd.load(context, "ca-app-pub-3940256099942544/5224354917", adRequest, new RewardedAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull @NotNull RewardedAd rewardedAd) {
                         super.onAdLoaded(rewardedAd);
@@ -77,15 +86,15 @@ public class CreditDialog extends DialogFragment {
                             // Handle the reward.
                             Log.d(TAG, "The user earned the reward.");
                             try {
-                                Config credit = TableConfig.getByKey(ConfigUtil.KEY_CREDIT, databaseHandler);
-                                int newCredit = ConfigUtil.DEFAULT_CREDIT;
+                                Config credit = tableConfig.getByKey(UtilController.KEY_CREDIT);
+                                int newCredit = UtilController.DEFAULT_CREDIT;
                                 if(credit != null) {
                                     newCredit = Integer.parseInt(CryptUtil.decrypt(credit.getValue()));
                                 }
-                                newCredit += 1;
+                                newCredit += 2;
                                 credit.setValue(CryptUtil.encrypt(String.valueOf(newCredit)));
                                 txtCredit.setText(CryptUtil.decrypt(credit.getValue()));
-                                TableConfig.updateByKey(credit, databaseHandler);
+                                tableConfig.updateByKey(credit);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -94,7 +103,6 @@ public class CreditDialog extends DialogFragment {
                 } else {
                     Log.d(TAG, "The rewarded ad wasn't ready yet.");
                 }
-            */
             }
         });
         return root;
