@@ -8,12 +8,14 @@
             <item>
                 <shape>
                     <solid android:color="@color/blue_600" />
+                    <corners android:radius="10dp"/>
                 </shape>
             </item>
             <!-- Background -->
             <item>
                 <shape>
                     <solid android:color="@color/blue_700" />
+                    <corners android:radius="10dp"/>
                 </shape>
             </item>
         </layer-list>
@@ -24,12 +26,14 @@
             <item>
                 <shape>
                     <solid android:color="@color/blue_600" />
+                    <corners android:radius="10dp"/>
                 </shape>
             </item>
             <!-- Background -->
             <item>
                 <shape>
-                    <solid android:color="@color/black_500" />
+                    <solid android:color="@color/blue_600" />
+                    <corners android:radius="10dp"/>
                 </shape>
             </item>
         </layer-list>
