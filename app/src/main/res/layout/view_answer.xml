@@ -47,8 +47,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         app:flow_horizontalAlign="start"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_answer_code"
-        tools:srcCompat="@tools:sample/avatars" />
+        tools:srcCompat="@drawable/image_placeholder" />
 </androidx.constraintlayout.widget.ConstraintLayout>
