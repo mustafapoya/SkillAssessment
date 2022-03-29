@@ -97,6 +97,22 @@ public class TableQuestionAnswer implements CRUDHandler<QuestionAnswer>{
         return result;
     }
 
+    public ArrayList<QuestionAnswer> getCorrectAnswersOf(int questionId) {
+        ArrayList<QuestionAnswer> result = new ArrayList<>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_NAME + " WHERE " + KEY_QUESTION_ID + " = " + questionId + " AND " + KEY_IS_CORRECT + " = 1 ";
+
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if(cursor.moveToFirst()) {
+            do {
+                result.add(mapColumn(cursor));
+            }while(cursor.moveToNext());
+        }
+        return result;
+    }
+
     @Override
     public int update(QuestionAnswer object) {
         SQLiteDatabase db = dbHandler.getWritableDatabase();
