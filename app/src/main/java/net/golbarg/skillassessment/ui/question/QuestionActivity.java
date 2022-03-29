@@ -2,6 +2,9 @@ package net.golbarg.skillassessment.ui.question;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -19,21 +22,25 @@ import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
+import net.golbarg.skillassessment.db.TableCategory;
 import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.db.TableQuestionAnswer;
+import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.util.UtilController;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class QuestionActivity extends AppCompatActivity {
     public static final String TAG = QuestionActivity.class.getName();
     public static int counter = 0;
-    int category_id = -1;
+    Category selectedCategory;
     ArrayList<Question> questions = new ArrayList<>();
 
     DatabaseHandler databaseHandler;
+    TableCategory tableCategory;
     TableQuestion tableQuestion;
     TableQuestionAnswer tableQuestionAnswer;
 
@@ -56,13 +63,15 @@ public class QuestionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_question);
         context = getApplicationContext();
         DatabaseHandler databaseHandler = new DatabaseHandler(getApplicationContext());
+        tableCategory = new TableCategory(databaseHandler);
         tableQuestion = new TableQuestion(databaseHandler);
         tableQuestionAnswer = new TableQuestionAnswer(databaseHandler);
 
         Intent intent = getIntent();
-        category_id = intent.getIntExtra("category_id", 1);
+        int category_id = intent.getIntExtra("category_id", 2);
+        selectedCategory = tableCategory.get(category_id);
 
-        questions = tableQuestion.getQuestionsOf(category_id);
+        questions = tableQuestion.getQuestionsOf(selectedCategory.getId());
 
         imgClose = findViewById(R.id.img_close);
         progressBarStep = findViewById(R.id.progress_step);
@@ -89,12 +98,12 @@ public class QuestionActivity extends AppCompatActivity {
         if (position >= 0 && position < questions.size()) {
             progressBarStep.setProgress(position);
 //            questionViewTitle.getTxtQuestionText().setText(UtilController.highlightQuestionText(questions.get(position).getTitle()));
-            UtilController.highlightQuestionText(questionViewTitle, questions.get(position).getTitle());
+            UtilController.highlightQuestionText(questionViewTitle, questions.get(position).getTitle(), selectedCategory, getApplicationContext());
 
             questions.get(position).setAnswers(tableQuestionAnswer.getAnswersOf(questions.get(position).getId()));
 
             if (questions.get(position).getAnswers().size() >= 1) {
-                UtilController.highlightAnswerText(answerView1, questions.get(position).getAnswers().get(0).getTitle());
+                UtilController.highlightAnswerText(answerView1, questions.get(position).getAnswers().get(0).getTitle(), selectedCategory, getApplicationContext());
                 answerView1.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -110,7 +119,7 @@ public class QuestionActivity extends AppCompatActivity {
             }
 
             if (questions.get(position).getAnswers().size() >= 2) {
-                UtilController.highlightAnswerText(answerView2, questions.get(position).getAnswers().get(1).getTitle());
+                UtilController.highlightAnswerText(answerView2, questions.get(position).getAnswers().get(1).getTitle(), selectedCategory, getApplicationContext());
 
                 answerView2.setOnClickListener(v -> {
                     if(questions.get(position).getAnswers().get(1).isCorrect()) {
@@ -125,7 +134,7 @@ public class QuestionActivity extends AppCompatActivity {
 
             if (questions.get(position).getAnswers().size() >= 3) {
 //                answerView3.setText(UtilController.highlightQuestionText(questions.get(position).getAnswers().get(2).getTitle()));
-                UtilController.highlightAnswerText(answerView3, questions.get(position).getAnswers().get(2).getTitle());
+                UtilController.highlightAnswerText(answerView3, questions.get(position).getAnswers().get(2).getTitle(), selectedCategory, getApplicationContext());
 
                 answerView3.setOnClickListener(v -> {
                     if(questions.get(position).getAnswers().get(2).isCorrect()) {
@@ -139,7 +148,7 @@ public class QuestionActivity extends AppCompatActivity {
             }
 
             if (questions.get(position).getAnswers().size() >= 4) {
-                UtilController.highlightAnswerText(answerView4, questions.get(position).getAnswers().get(3).getTitle());
+                UtilController.highlightAnswerText(answerView4, questions.get(position).getAnswers().get(3).getTitle(), selectedCategory, getApplicationContext());
 
                 answerView4.setOnClickListener(v -> {
                     if(questions.get(position).getAnswers().get(3).isCorrect()) {

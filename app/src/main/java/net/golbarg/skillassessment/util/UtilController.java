@@ -2,20 +2,25 @@ package net.golbarg.skillassessment.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.nevidelia.library.highlight.Highlight;
 
 import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
 import net.golbarg.skillassessment.R;
+import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionCode;
 import net.golbarg.skillassessment.models.QuestionPart;
+
+import java.io.InputStream;
 
 public class UtilController {
     public static final String KEY_HEALTH = "KEY_HEALTH";
@@ -88,10 +93,18 @@ public class UtilController {
             part = new QuestionPart(questionText);
         }
 
+        if(part.getTitle().toLowerCase().contains("![image]")) {
+            int imageFirstIndex = part.getTitle().toLowerCase().indexOf("![image]");
+            int imageLastIndex = part.getTitle().indexOf("\n", imageFirstIndex+1) > 0 ? questionText.indexOf("\n", imageFirstIndex+1) : questionText.length();
+            String imagePart = part.getTitle().substring(imageFirstIndex, imageLastIndex);
+            part.setTitle(part.getTitle().replace(imagePart, ""));
+            part.setImage(imagePart.substring(imagePart.indexOf("(")+1, imagePart.indexOf(")")));
+        }
+
         return part;
     }
 
-    public static void highlightQuestionText(QuestionView questionView, String text) {
+    public static void highlightQuestionText(QuestionView questionView, String text, Category category, Context context) {
         Highlight highlight = new Highlight();
         QuestionPart part = UtilController.convertQuestionTextToQuestionObject(text);
         questionView.getTxtQuestionText().setText(part.getTitle().trim());
@@ -106,9 +119,30 @@ public class UtilController {
         questionView.getTxtQuestionCode().setText(highlightedText);
         questionView.getTxtQuestionCode().setVisibility(part.getCodeList().size() > 0 ? View.VISIBLE : View.GONE);
 
+        if(part.hasImage()) {
+            questionView.getImgQuestionImage().setVisibility(View.VISIBLE);
+            if(part.isLocalImage()) {
+                try {
+                    InputStream istr = context.getAssets().open("question_images/" + category.getTitle() + "/" + part.getImage());
+                    Drawable d = Drawable.createFromStream(istr, null);
+                    questionView.getImgQuestionImage().setImageDrawable(d);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    Glide.with(context).load(part.getImage()).into(questionView.getImgQuestionImage());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            questionView.getImgQuestionImage().setVisibility(View.GONE);
+        }
+
     }
 
-    public static void highlightAnswerText(AnswerView answerView, String text) {
+    public static void highlightAnswerText(AnswerView answerView, String text, Category category, Context context) {
         Highlight highlight = new Highlight();
         QuestionPart part = UtilController.convertQuestionTextToQuestionObject(text);
         answerView.getTxtAnswerText().setText(part.getTitle().trim());
@@ -123,6 +157,26 @@ public class UtilController {
         answerView.getTxtAnswerCode().setText(highlightedText);
         answerView.getTxtAnswerCode().setVisibility(part.getCodeList().size() > 0 ? View.VISIBLE : View.GONE);
 
+        if(part.hasImage()) {
+            answerView.getImgAnswerImage().setVisibility(View.VISIBLE);
+            if(part.isLocalImage()) {
+                try {
+                    InputStream istr = context.getAssets().open("question_images/" + category.getTitle() + "/" + part.getImage());
+                    Drawable d = Drawable.createFromStream(istr, null);
+                    answerView.getImgAnswerImage().setImageDrawable(d);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    Glide.with(context).load(part.getImage()).into(answerView.getImgAnswerImage());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            answerView.getImgAnswerImage().setVisibility(View.GONE);
+        }
     }
 
     public static CharSequence highlightQuestionText(String text) {
