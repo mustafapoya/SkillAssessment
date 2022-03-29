@@ -6,11 +6,9 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,7 +51,7 @@ public class QuestionActivity extends AppCompatActivity {
 
     QuestionView questionViewTitle;
 
-    ArrayList<AnswerView> answerViewsList = new ArrayList<AnswerView>();
+    ArrayList<AnswerView> answerViewsList = new ArrayList<>();
     AnswerView answerView1;
     AnswerView answerView2;
     AnswerView answerView3;
@@ -113,25 +111,20 @@ public class QuestionActivity extends AppCompatActivity {
         btnNextQuestion.performClick();
         imgClose.setOnClickListener(v -> Toast.makeText(getApplicationContext(), "Closing Test", Toast.LENGTH_SHORT).show());
 
-        btnBookmark.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    Bookmark isBookmarked = tableBookmark.getByQuestionId(questions.get(counter).getId());
-                    if(isBookmarked != null) {
-                        tableBookmark.deleteByQuestionId(questions.get(counter).getId());
-                        Toast.makeText(context, R.string.bookmark_deleted, Toast.LENGTH_SHORT).show();
-                        btnBookmark.setImageDrawable(context.getDrawable(R.drawable.ic_bookmark_no));
-                    } else {
-                        Bookmark newBookmark = new Bookmark();
-                        newBookmark.setQuestionId(questions.get(counter).getId());
-                        tableBookmark.create(newBookmark);
-                        Toast.makeText(context, R.string.added_to_bookmark, Toast.LENGTH_SHORT).show();
-                        btnBookmark.setImageDrawable(context.getDrawable(R.drawable.ic_bookmark_yes));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+        btnBookmark.setOnClickListener(view -> {
+            try {
+                Bookmark isBookmarked = tableBookmark.getByQuestionId(questions.get(counter).getId());
+                if(isBookmarked != null) {
+                    tableBookmark.deleteByQuestionId(questions.get(counter).getId());
+                    Toast.makeText(context, R.string.bookmark_deleted, Toast.LENGTH_SHORT).show();
+                } else {
+                    tableBookmark.create(new Bookmark(questions.get(counter).getId()));
+                    Toast.makeText(context, R.string.added_to_bookmark, Toast.LENGTH_SHORT).show();
                 }
+
+                validateBookmarkStatus(questions.get(counter));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -139,7 +132,7 @@ public class QuestionActivity extends AppCompatActivity {
     private void loadQuestion(int position) {
         if (position >= 0 && position < questions.size()) {
             validateBookmarkStatus(questions.get(position));
-            txtQuestionTrack.setText(position + 1 + "/" + questions.size());
+            txtQuestionTrack.setText(String.format("%d/%d", position + 1, questions.size()));
             progressBarStep.setProgress(position);
 
             UtilController.highlightQuestionText(questionViewTitle, questions.get(position).getTitle(), selectedCategory, getApplicationContext());
@@ -153,16 +146,13 @@ public class QuestionActivity extends AppCompatActivity {
                     QuestionAnswer selectedAnswer = questions.get(position).getAnswers().get(i);
 
                     UtilController.highlightAnswerText(answerView, selectedAnswer.getTitle(), selectedCategory, getApplicationContext());
-                    answerView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if(selectedAnswer.isCorrect()) {
-                                Log.d(TAG, "Answer 1 Success");
-                                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Log.d(TAG, "Answer 1 Wrong");
-                                Toast.makeText(getApplicationContext(), "Wrong", Toast.LENGTH_SHORT).show();
-                            }
+                    answerView.setOnClickListener(view -> {
+                        if(selectedAnswer.isCorrect()) {
+                            Log.d(TAG, "Answer 1 Success");
+                            Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.d(TAG, "Answer 1 Wrong");
+                            Toast.makeText(getApplicationContext(), "Wrong", Toast.LENGTH_SHORT).show();
                         }
                     });
                 } else {
@@ -188,7 +178,7 @@ public class QuestionActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                btnNextQuestion.setEnabled(true);
+                btnNextQuestion.performClick();
             }
         };
 

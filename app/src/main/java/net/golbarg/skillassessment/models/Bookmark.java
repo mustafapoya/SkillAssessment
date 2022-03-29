@@ -4,8 +4,8 @@ public class Bookmark {
     private int id;
     private int questionId;
 
-    public Bookmark() {
-
+    public Bookmark(int questionId) {
+        this.questionId = questionId;
     }
 
     public Bookmark(int id, int questionId) {
