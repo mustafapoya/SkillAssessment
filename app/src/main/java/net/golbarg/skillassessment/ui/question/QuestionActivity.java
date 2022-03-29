@@ -2,15 +2,14 @@ package net.golbarg.skillassessment.ui.question;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,15 +26,15 @@ import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.db.TableQuestionAnswer;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
+import net.golbarg.skillassessment.models.QuestionAnswer;
 import net.golbarg.skillassessment.util.UtilController;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class QuestionActivity extends AppCompatActivity {
     public static final String TAG = QuestionActivity.class.getName();
-    public static int counter = 0;
+    public int counter = 0;
     Category selectedCategory;
     ArrayList<Question> questions = new ArrayList<>();
 
@@ -46,14 +45,19 @@ public class QuestionActivity extends AppCompatActivity {
 
     ProgressBar progressBarStep;
     QuestionView questionViewTitle;
+    LinearLayout linearLayoutQuestionContainer;
+    ArrayList<AnswerView> answerViewsList = new ArrayList<AnswerView>();
+
     AnswerView answerView1;
     AnswerView answerView2;
     AnswerView answerView3;
     AnswerView answerView4;
+    AnswerView answerView5;
 
     ImageView imgClose;
     Button btnNextQuestion;
     TextView txtTimer;
+    TextView txtQuestionTrack;
 
     CountDownTimer countDownTimer;
     private Context context;
@@ -75,15 +79,24 @@ public class QuestionActivity extends AppCompatActivity {
 
         imgClose = findViewById(R.id.img_close);
         progressBarStep = findViewById(R.id.progress_step);
+        linearLayoutQuestionContainer = findViewById(R.id.linear_layout_question_container);
         questionViewTitle = findViewById(R.id.question_view_title);
 
         answerView1 = findViewById(R.id.answer_view_1);
         answerView2 = findViewById(R.id.answer_view_2);
         answerView3 = findViewById(R.id.answer_view_3);
         answerView4 = findViewById(R.id.answer_view_4);
+        answerView5 = findViewById(R.id.answer_view_5);
+
+        answerViewsList.add(answerView1);
+        answerViewsList.add(answerView2);
+        answerViewsList.add(answerView3);
+        answerViewsList.add(answerView4);
+        answerViewsList.add(answerView5);
 
         btnNextQuestion = findViewById(R.id.btn_next_question);
         txtTimer = findViewById(R.id.txt_timer);
+        txtQuestionTrack = findViewById(R.id.txt_question_track);
 
         btnNextQuestion.setOnClickListener(v -> {
             loadQuestion(counter++);
@@ -91,76 +104,43 @@ public class QuestionActivity extends AppCompatActivity {
             countDown();
         });
 
+        btnNextQuestion.performClick();
+
         imgClose.setOnClickListener(v -> Toast.makeText(getApplicationContext(), "Closing Test", Toast.LENGTH_SHORT).show());
     }
 
     private void loadQuestion(int position) {
         if (position >= 0 && position < questions.size()) {
+            txtQuestionTrack.setText(position + 1 + "/" + questions.size());
             progressBarStep.setProgress(position);
-//            questionViewTitle.getTxtQuestionText().setText(UtilController.highlightQuestionText(questions.get(position).getTitle()));
+
             UtilController.highlightQuestionText(questionViewTitle, questions.get(position).getTitle(), selectedCategory, getApplicationContext());
 
             questions.get(position).setAnswers(tableQuestionAnswer.getAnswersOf(questions.get(position).getId()));
 
-            if (questions.get(position).getAnswers().size() >= 1) {
-                UtilController.highlightAnswerText(answerView1, questions.get(position).getAnswers().get(0).getTitle(), selectedCategory, getApplicationContext());
-                answerView1.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if(questions.get(position).getAnswers().get(0).isCorrect()) {
-                            Log.d(TAG, "Answer 1 Success");
-                            Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Log.d(TAG, "Answer 1 Wrong");
-                            Toast.makeText(getApplicationContext(), "Wrong", Toast.LENGTH_SHORT).show();
+            //
+            for(int i = 0; i < answerViewsList.size(); i++) {
+                if(i < questions.get(position).getAnswers().size()) {
+                    AnswerView answerView = answerViewsList.get(i);
+                    QuestionAnswer selectedAnswer = questions.get(position).getAnswers().get(i);
+
+                    UtilController.highlightAnswerText(answerView, selectedAnswer.getTitle(), selectedCategory, getApplicationContext());
+                    answerView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(selectedAnswer.isCorrect()) {
+                                Log.d(TAG, "Answer 1 Success");
+                                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.d(TAG, "Answer 1 Wrong");
+                                Toast.makeText(getApplicationContext(), "Wrong", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    answerViewsList.get(i).setVisibility(View.GONE);
+                }
             }
-
-            if (questions.get(position).getAnswers().size() >= 2) {
-                UtilController.highlightAnswerText(answerView2, questions.get(position).getAnswers().get(1).getTitle(), selectedCategory, getApplicationContext());
-
-                answerView2.setOnClickListener(v -> {
-                    if(questions.get(position).getAnswers().get(1).isCorrect()) {
-                        Log.d(TAG, "Answer 2 Success");
-                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.d(TAG, "Answer 2 Wrong");
-                        Toast.makeText(getApplicationContext(), "Wrong", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            if (questions.get(position).getAnswers().size() >= 3) {
-//                answerView3.setText(UtilController.highlightQuestionText(questions.get(position).getAnswers().get(2).getTitle()));
-                UtilController.highlightAnswerText(answerView3, questions.get(position).getAnswers().get(2).getTitle(), selectedCategory, getApplicationContext());
-
-                answerView3.setOnClickListener(v -> {
-                    if(questions.get(position).getAnswers().get(2).isCorrect()) {
-                        Log.d(TAG, "Answer 3 Success");
-                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.d(TAG, "Answer 3 Wrong");
-                        Toast.makeText(getApplicationContext(), "Wrong", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            if (questions.get(position).getAnswers().size() >= 4) {
-                UtilController.highlightAnswerText(answerView4, questions.get(position).getAnswers().get(3).getTitle(), selectedCategory, getApplicationContext());
-
-                answerView4.setOnClickListener(v -> {
-                    if(questions.get(position).getAnswers().get(3).isCorrect()) {
-                        Log.d(TAG, "Answer 4 Success");
-                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.d(TAG, "Answer 4 Wrong");
-                        Toast.makeText(getApplicationContext(), "Wrong", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
         }
     }
 
