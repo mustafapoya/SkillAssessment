@@ -11,9 +11,11 @@
         android:id="@+id/txt_credit_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/credits"
+        android:text="@string/coins"
         android:textColor="?attr/textColor"
-        android:textSize="20sp"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textAllCaps="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
