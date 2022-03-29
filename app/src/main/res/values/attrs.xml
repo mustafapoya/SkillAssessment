@@ -3,6 +3,7 @@
     <declare-styleable name="QuestionView">
         <attr name="question_text" format="string"/>
         <attr name="question_code" format="string"/>
+        <attr name="question_image" format="string"/>
     </declare-styleable>
     <declare-styleable name="AnswerView">
         <attr name="answer_text" format="string"/>
