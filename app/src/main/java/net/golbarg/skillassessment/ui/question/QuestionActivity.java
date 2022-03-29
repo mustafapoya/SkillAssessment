@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -21,9 +22,11 @@ import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
+import net.golbarg.skillassessment.db.TableBookmark;
 import net.golbarg.skillassessment.db.TableCategory;
 import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.db.TableQuestionAnswer;
+import net.golbarg.skillassessment.models.Bookmark;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
@@ -42,19 +45,21 @@ public class QuestionActivity extends AppCompatActivity {
     TableCategory tableCategory;
     TableQuestion tableQuestion;
     TableQuestionAnswer tableQuestionAnswer;
+    TableBookmark tableBookmark;
 
+    ImageView imgClose;
     ProgressBar progressBarStep;
-    QuestionView questionViewTitle;
-    LinearLayout linearLayoutQuestionContainer;
-    ArrayList<AnswerView> answerViewsList = new ArrayList<AnswerView>();
+    ImageButton btnBookmark;
 
+    QuestionView questionViewTitle;
+
+    ArrayList<AnswerView> answerViewsList = new ArrayList<AnswerView>();
     AnswerView answerView1;
     AnswerView answerView2;
     AnswerView answerView3;
     AnswerView answerView4;
     AnswerView answerView5;
 
-    ImageView imgClose;
     Button btnNextQuestion;
     TextView txtTimer;
     TextView txtQuestionTrack;
@@ -66,10 +71,11 @@ public class QuestionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question);
         context = getApplicationContext();
-        DatabaseHandler databaseHandler = new DatabaseHandler(getApplicationContext());
+        databaseHandler = new DatabaseHandler(getApplicationContext());
         tableCategory = new TableCategory(databaseHandler);
         tableQuestion = new TableQuestion(databaseHandler);
         tableQuestionAnswer = new TableQuestionAnswer(databaseHandler);
+        tableBookmark = new TableBookmark(databaseHandler);
 
         Intent intent = getIntent();
         int category_id = intent.getIntExtra("category_id", 2);
@@ -79,7 +85,9 @@ public class QuestionActivity extends AppCompatActivity {
 
         imgClose = findViewById(R.id.img_close);
         progressBarStep = findViewById(R.id.progress_step);
-        linearLayoutQuestionContainer = findViewById(R.id.linear_layout_question_container);
+        progressBarStep.setMax(questions.size());
+        btnBookmark = findViewById(R.id.btn_bookmark);
+
         questionViewTitle = findViewById(R.id.question_view_title);
 
         answerView1 = findViewById(R.id.answer_view_1);
@@ -100,17 +108,37 @@ public class QuestionActivity extends AppCompatActivity {
 
         btnNextQuestion.setOnClickListener(v -> {
             loadQuestion(counter++);
-//            btnNextQuestion.setEnabled(false);
             countDown();
         });
-
         btnNextQuestion.performClick();
-
         imgClose.setOnClickListener(v -> Toast.makeText(getApplicationContext(), "Closing Test", Toast.LENGTH_SHORT).show());
+
+        btnBookmark.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Bookmark isBookmarked = tableBookmark.getByQuestionId(questions.get(counter).getId());
+                    if(isBookmarked != null) {
+                        tableBookmark.deleteByQuestionId(questions.get(counter).getId());
+                        Toast.makeText(context, R.string.bookmark_deleted, Toast.LENGTH_SHORT).show();
+                        btnBookmark.setImageDrawable(context.getDrawable(R.drawable.ic_bookmark_no));
+                    } else {
+                        Bookmark newBookmark = new Bookmark();
+                        newBookmark.setQuestionId(questions.get(counter).getId());
+                        tableBookmark.create(newBookmark);
+                        Toast.makeText(context, R.string.added_to_bookmark, Toast.LENGTH_SHORT).show();
+                        btnBookmark.setImageDrawable(context.getDrawable(R.drawable.ic_bookmark_yes));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void loadQuestion(int position) {
         if (position >= 0 && position < questions.size()) {
+            validateBookmarkStatus(questions.get(position));
             txtQuestionTrack.setText(position + 1 + "/" + questions.size());
             progressBarStep.setProgress(position);
 
@@ -165,5 +193,14 @@ public class QuestionActivity extends AppCompatActivity {
         };
 
         countDownTimer.start();
+    }
+
+    private void validateBookmarkStatus(Question question) {
+        Bookmark isBookmarked = tableBookmark.getByQuestionId(question.getId());
+        if(isBookmarked != null) {
+            btnBookmark.setImageDrawable(context.getDrawable(R.drawable.ic_bookmark_yes));
+        } else {
+            btnBookmark.setImageDrawable(context.getDrawable(R.drawable.ic_bookmark_no));
+        }
     }
 }

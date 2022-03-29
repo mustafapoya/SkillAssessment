@@ -42,7 +42,7 @@
             android:progress="5" />
 
         <LinearLayout
-            android:layout_width="45dp"
+            android:layout_width="75dp"
             android:layout_height="30dp"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
@@ -65,9 +65,17 @@
                 android:textSize="16sp"
                 android:textColor="?attr/textColor"
                 android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btn_bookmark"
+                android:layout_width="30dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bottom_round"
+                app:tint="@color/white"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_bookmark_no"/>
         </LinearLayout>
     </LinearLayout>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"

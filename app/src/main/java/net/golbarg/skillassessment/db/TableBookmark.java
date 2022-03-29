@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import net.golbarg.skillassessment.models.Bookmark;
+import net.golbarg.skillassessment.models.Question;
 
 import java.util.ArrayList;
 
@@ -50,6 +51,20 @@ public class TableBookmark implements CRUDHandler<Bookmark>{
         }
     }
 
+    public Bookmark getByQuestionId(int question_id) {
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_NAME, ALL_COLUMNS, KEY_QUESTION_ID + "=?", new String[]{String.valueOf(question_id)}, null, null, null, null);
+
+        if(cursor != null && cursor.getCount() != 0) {
+            cursor.moveToFirst();
+            return mapColumn(cursor);
+        } else {
+            return null;
+        }
+    }
+
+
     @Override
     public ArrayList<Bookmark> getAll() {
         ArrayList<Bookmark> result = new ArrayList<>();
@@ -78,6 +93,12 @@ public class TableBookmark implements CRUDHandler<Bookmark>{
         db.delete(TABLE_NAME, KEY_ID + "= ?", new String[]{String.valueOf(object.getId())});
     }
 
+    public void deleteByQuestionId(int question_id) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        db.delete(TABLE_NAME, KEY_QUESTION_ID + "= ?", new String[]{String.valueOf(question_id)});
+    }
+
+
     @Override
     public int getCount() {
         String countQuery = "SELECT * FROM " + TABLE_NAME;
@@ -99,7 +120,9 @@ public class TableBookmark implements CRUDHandler<Bookmark>{
     @Override
     public ContentValues putValues(Bookmark object) {
         ContentValues values = new ContentValues();
-        values.put(KEY_ID, object.getId());
+        if (object.getId() != -1 && object.getId() != 0) {
+            values.put(KEY_ID, object.getId());
+        }
         values.put(KEY_QUESTION_ID, object.getQuestionId());
         return values;
     }
