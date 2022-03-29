@@ -8,6 +8,7 @@
     <declare-styleable name="AnswerView">
         <attr name="answer_text" format="string"/>
         <attr name="answer_code" format="string"/>
+        <attr name="answer_image" format="string"/>
     </declare-styleable>
     <attr name="background" format="reference"/>
     <attr name="category_background" format="reference"/>

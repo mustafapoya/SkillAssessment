@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -16,6 +17,7 @@ public class AnswerView extends ConstraintLayout {
 
     private TextView txtAnswerText;
     private TextView txtAnswerCode;
+    private ImageView imgAnswerImage;
 
     public AnswerView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
@@ -23,10 +25,12 @@ public class AnswerView extends ConstraintLayout {
 
         txtAnswerText = findViewById(R.id.txt_answer_text);
         txtAnswerCode = findViewById(R.id.txt_answer_code);
+        imgAnswerImage = findViewById(R.id.img_answer_image);
 
         TypedArray attributes = context.obtainStyledAttributes(attributeSet, R.styleable.AnswerView);
         txtAnswerText.setText(attributes.getString(R.styleable.AnswerView_answer_text));
         txtAnswerCode.setText(attributes.getString(R.styleable.AnswerView_answer_code));
+        imgAnswerImage.setImageDrawable(attributes.getDrawable(R.styleable.AnswerView_answer_image));
 
         attributes.recycle();
     }
@@ -37,6 +41,10 @@ public class AnswerView extends ConstraintLayout {
 
     public TextView getTxtAnswerCode() {
         return txtAnswerCode;
+    }
+
+    public ImageView getImgAnswerImage() {
+        return imgAnswerImage;
     }
 
     @Override
