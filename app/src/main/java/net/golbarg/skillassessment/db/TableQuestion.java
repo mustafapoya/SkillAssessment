@@ -64,6 +64,22 @@ public class TableQuestion implements CRUDHandler<Question> {
         }
     }
 
+    public Question getWithCorrectAnswer(int id) {
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_NAME, ALL_COLUMNS, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
+
+        if(cursor != null && cursor.getCount() != 0) {
+            cursor.moveToFirst();
+            Question question = mapColumn(cursor);
+            TableQuestionAnswer tableQuestionAnswer = new TableQuestionAnswer(dbHandler);
+            question.setAnswers(tableQuestionAnswer.getAnswersOf(question.getId()));
+            return question;
+        } else {
+            return null;
+        }
+    }
+
     public ArrayList<Question> getQuestionsOf(int categoryId) {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
         ArrayList<Question> result = new ArrayList<>();
