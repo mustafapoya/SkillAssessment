@@ -118,7 +118,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
 
                     if(userCredit >= 2) {
                         try {
-                            if(tableCategory.get(selectedCategory.getId()) == null) {
+                            if(tableCategory.get(selectedCategory.getId()) == null || tableQuestion.getCountOf(selectedCategory.getId()) < selectedCategory.getNumberOfQuestion()) {
                                 new FetchCategoryQuestionDataTask(rowView, progress, btnDownload, selectedCategory).execute();
                             }
                         } catch (Exception e) {
