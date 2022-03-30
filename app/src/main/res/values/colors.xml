@@ -9,6 +9,7 @@
     <color name="blue_500">#1cb0f6</color>
     <color name="blue_600">#4071AA</color>
     <color name="blue_700">#3e6189</color>
+    <color name="red_500">#CC0202</color>
 
     <!-- Colors for Button Style -->
     <color name="gradient_start_color">#4C84FF</color>

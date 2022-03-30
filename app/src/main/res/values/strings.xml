@@ -30,4 +30,8 @@
     <string name="bookmark_deleted">bookmark deleted</string>
     <string name="coins">Coins</string>
     <string name="added_to_bookmark">Added to bookmark</string>
+    <string name="next">Next</string>
+    <string name="finish">Finish</string>
+    <string name="correct">Correct</string>
+    <string name="wrong">Wrong</string>
 </resources>

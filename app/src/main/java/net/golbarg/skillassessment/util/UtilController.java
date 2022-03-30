@@ -2,6 +2,7 @@ package net.golbarg.skillassessment.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.text.SpannableString;
@@ -193,9 +194,18 @@ public class UtilController {
     }
 
     public static void showSnackMessage(View view, String message) {
-        Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+        Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
         snackbar.setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE);
         snackbar.setAnchorView(view.findViewById(R.id.nav_view));
+
+        snackbar.show();
+    }
+
+    public static void showSnackMessage(View view, String message, int color, int anchorId) {
+        Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
+        snackbar.setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE);
+        snackbar.setAnchorView(view.findViewById(anchorId));
+        snackbar.setBackgroundTint(color);
         snackbar.show();
     }
 

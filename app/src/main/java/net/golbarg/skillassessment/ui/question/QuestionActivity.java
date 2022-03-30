@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -15,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
@@ -35,7 +35,7 @@ import java.util.Locale;
 
 public class QuestionActivity extends AppCompatActivity {
     public static final String TAG = QuestionActivity.class.getName();
-    public int counter = 0;
+    public int currentPosition = -1;
     Category selectedCategory;
     ArrayList<Question> questions = new ArrayList<>();
 
@@ -45,18 +45,13 @@ public class QuestionActivity extends AppCompatActivity {
     TableQuestionAnswer tableQuestionAnswer;
     TableBookmark tableBookmark;
 
+    ConstraintLayout mainLayout;
     ImageView imgClose;
     ProgressBar progressBarStep;
     ImageButton btnBookmark;
 
     QuestionView questionViewTitle;
-
     ArrayList<AnswerView> answerViewsList = new ArrayList<>();
-    AnswerView answerView1;
-    AnswerView answerView2;
-    AnswerView answerView3;
-    AnswerView answerView4;
-    AnswerView answerView5;
 
     Button btnNextQuestion;
     TextView txtTimer;
@@ -64,105 +59,123 @@ public class QuestionActivity extends AppCompatActivity {
 
     CountDownTimer countDownTimer;
     private Context context;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question);
         context = getApplicationContext();
-        databaseHandler = new DatabaseHandler(getApplicationContext());
-        tableCategory = new TableCategory(databaseHandler);
-        tableQuestion = new TableQuestion(databaseHandler);
-        tableQuestionAnswer = new TableQuestionAnswer(databaseHandler);
-        tableBookmark = new TableBookmark(databaseHandler);
 
         Intent intent = getIntent();
         int category_id = intent.getIntExtra("category_id", 2);
-        selectedCategory = tableCategory.get(category_id);
 
+        initDB();
+        selectedCategory = tableCategory.get(category_id);
         questions = tableQuestion.getQuestionsOf(selectedCategory.getId());
 
+        mainLayout = findViewById(R.id.layout_main_layout);
         imgClose = findViewById(R.id.img_close);
         progressBarStep = findViewById(R.id.progress_step);
         progressBarStep.setMax(questions.size());
         btnBookmark = findViewById(R.id.btn_bookmark);
 
         questionViewTitle = findViewById(R.id.question_view_title);
-
-        answerView1 = findViewById(R.id.answer_view_1);
-        answerView2 = findViewById(R.id.answer_view_2);
-        answerView3 = findViewById(R.id.answer_view_3);
-        answerView4 = findViewById(R.id.answer_view_4);
-        answerView5 = findViewById(R.id.answer_view_5);
-
-        answerViewsList.add(answerView1);
-        answerViewsList.add(answerView2);
-        answerViewsList.add(answerView3);
-        answerViewsList.add(answerView4);
-        answerViewsList.add(answerView5);
+        initAnswerViews();
 
         btnNextQuestion = findViewById(R.id.btn_next_question);
         txtTimer = findViewById(R.id.txt_timer);
         txtQuestionTrack = findViewById(R.id.txt_question_track);
 
         btnNextQuestion.setOnClickListener(v -> {
-            loadQuestion(counter++);
-            countDown();
+            currentPosition++;
+            if (currentPosition >= 0 && currentPosition < questions.size()) {
+                loadQuestion(currentPosition++);
+            }
+            if(currentPosition >= 0 && currentPosition == questions.size()-1) {
+                btnNextQuestion.setText(R.string.finish);
+            }
+            countDownTime();
         });
         btnNextQuestion.performClick();
+
         imgClose.setOnClickListener(v -> Toast.makeText(getApplicationContext(), "Closing Test", Toast.LENGTH_SHORT).show());
 
         btnBookmark.setOnClickListener(view -> {
             try {
-                Bookmark isBookmarked = tableBookmark.getByQuestionId(questions.get(counter).getId());
+                Bookmark isBookmarked = tableBookmark.getByQuestionId(questions.get(currentPosition).getId());
                 if(isBookmarked != null) {
-                    tableBookmark.deleteByQuestionId(questions.get(counter).getId());
-                    Toast.makeText(context, R.string.bookmark_deleted, Toast.LENGTH_SHORT).show();
+                    tableBookmark.delete(isBookmarked);
+                    UtilController.showSnackMessage(mainLayout, context.getString(R.string.bookmark_deleted),
+                            context.getResources().getColor(R.color.red_500), R.id.layout_footer);
                 } else {
-                    tableBookmark.create(new Bookmark(questions.get(counter).getId()));
-                    Toast.makeText(context, R.string.added_to_bookmark, Toast.LENGTH_SHORT).show();
+                    tableBookmark.create(new Bookmark(questions.get(currentPosition).getId()));
+                    UtilController.showSnackMessage(mainLayout, context.getString(R.string.added_to_bookmark),
+                            context.getResources().getColor(R.color.green_500), R.id.layout_footer);
                 }
 
-                validateBookmarkStatus(questions.get(counter));
+                validateBookmarkStatus(questions.get(currentPosition));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
     }
 
+    private void initDB() {
+        databaseHandler = new DatabaseHandler(getApplicationContext());
+        tableCategory = new TableCategory(databaseHandler);
+        tableQuestion = new TableQuestion(databaseHandler);
+        tableQuestionAnswer = new TableQuestionAnswer(databaseHandler);
+        tableBookmark = new TableBookmark(databaseHandler);
+    }
+
+    private void initAnswerViews() {
+        AnswerView  answerView1 = findViewById(R.id.answer_view_1);
+        AnswerView  answerView2 = findViewById(R.id.answer_view_2);
+        AnswerView  answerView3 = findViewById(R.id.answer_view_3);
+        AnswerView  answerView4 = findViewById(R.id.answer_view_4);
+        AnswerView  answerView5 = findViewById(R.id.answer_view_5);
+
+        answerViewsList.add(answerView1);
+        answerViewsList.add(answerView2);
+        answerViewsList.add(answerView3);
+        answerViewsList.add(answerView4);
+        answerViewsList.add(answerView5);
+    }
+
     private void loadQuestion(int position) {
-        if (position >= 0 && position < questions.size()) {
-            validateBookmarkStatus(questions.get(position));
-            txtQuestionTrack.setText(String.format("%d/%d", position + 1, questions.size()));
-            progressBarStep.setProgress(position);
 
-            UtilController.highlightQuestionText(questionViewTitle, questions.get(position).getTitle(), selectedCategory, getApplicationContext());
+        validateBookmarkStatus(questions.get(position));
 
-            questions.get(position).setAnswers(tableQuestionAnswer.getAnswersOf(questions.get(position).getId()));
+        txtQuestionTrack.setText(String.format("%d/%d", position + 1, questions.size()));
+        progressBarStep.setProgress(position);
 
-            //
-            for(int i = 0; i < answerViewsList.size(); i++) {
-                if(i < questions.get(position).getAnswers().size()) {
-                    AnswerView answerView = answerViewsList.get(i);
-                    QuestionAnswer selectedAnswer = questions.get(position).getAnswers().get(i);
+        UtilController.highlightQuestionText(questionViewTitle, questions.get(position).getTitle(), selectedCategory, getApplicationContext());
 
-                    UtilController.highlightAnswerText(answerView, selectedAnswer.getTitle(), selectedCategory, getApplicationContext());
-                    answerView.setOnClickListener(view -> {
-                        if(selectedAnswer.isCorrect()) {
-                            Log.d(TAG, "Answer 1 Success");
-                            Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Log.d(TAG, "Answer 1 Wrong");
-                            Toast.makeText(getApplicationContext(), "Wrong", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    answerViewsList.get(i).setVisibility(View.GONE);
-                }
+        questions.get(position).setAnswers(tableQuestionAnswer.getAnswersOf(questions.get(position).getId()));
+
+        //
+        for(int i = 0; i < answerViewsList.size(); i++) {
+            if(i < questions.get(position).getAnswers().size()) {
+                AnswerView answerView = answerViewsList.get(i);
+                QuestionAnswer selectedAnswer = questions.get(position).getAnswers().get(i);
+
+                UtilController.highlightAnswerText(answerView, selectedAnswer.getTitle(), selectedCategory, getApplicationContext());
+                answerView.setOnClickListener(view -> {
+                    if(selectedAnswer.isCorrect()) {
+                        UtilController.showSnackMessage(mainLayout, context.getString(R.string.correct),
+                                context.getResources().getColor(R.color.green_500), R.id.layout_footer);
+                    } else {
+                        UtilController.showSnackMessage(mainLayout, context.getString(R.string.wrong),
+                                context.getResources().getColor(R.color.red_500), R.id.layout_footer);
+                    }
+                });
+            } else {
+                answerViewsList.get(i).setVisibility(View.GONE);
             }
         }
     }
 
-    private void countDown() {
+    private void countDownTime() {
         if(countDownTimer != null) {
             countDownTimer.cancel();
         }
