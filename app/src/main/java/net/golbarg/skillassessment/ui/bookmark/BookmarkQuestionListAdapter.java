@@ -64,17 +64,6 @@ public class BookmarkQuestionListAdapter extends ArrayAdapter<Bookmark> {
         }
 
         Button btnDelete = rowView.findViewById(R.id.btn_delete);
-        Button btnShare  = rowView.findViewById(R.id.btn_share);
-
-        btnShare.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, bookmarks.get(position).getQuestionId() + "\n\n" + UtilController.appLink());
-                context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_using)));
-            }
-        });
 
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
