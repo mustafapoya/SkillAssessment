@@ -16,6 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.bumptech.glide.util.Util;
+
 import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
 import net.golbarg.skillassessment.R;
@@ -89,11 +91,19 @@ public class QuestionActivity extends AppCompatActivity {
         btnNextQuestion.setOnClickListener(v -> {
             currentPosition++;
             if (currentPosition >= 0 && currentPosition < questions.size()) {
-                loadQuestion(currentPosition++);
+                loadQuestion(currentPosition);
             }
+
             if(currentPosition >= 0 && currentPosition == questions.size()-1) {
                 btnNextQuestion.setText(R.string.finish);
+                return;
             }
+
+            if(btnNextQuestion.getText().toString().equals(context.getString(R.string.finish))) {
+                UtilController.showSnackMessage(mainLayout, "Finished",
+                        context.getResources().getColor(R.color.blue_500), R.id.layout_footer);
+            }
+
             countDownTime();
         });
         btnNextQuestion.performClick();
@@ -162,11 +172,15 @@ public class QuestionActivity extends AppCompatActivity {
                 UtilController.highlightAnswerText(answerView, selectedAnswer.getTitle(), selectedCategory, getApplicationContext());
                 answerView.setOnClickListener(view -> {
                     if(selectedAnswer.isCorrect()) {
+                        btnNextQuestion.setEnabled(false);
                         UtilController.showSnackMessage(mainLayout, context.getString(R.string.correct),
                                 context.getResources().getColor(R.color.green_500), R.id.layout_footer);
+                        btnNextQuestion.setEnabled(true);
                     } else {
+                        btnNextQuestion.setEnabled(false);
                         UtilController.showSnackMessage(mainLayout, context.getString(R.string.wrong),
                                 context.getResources().getColor(R.color.red_500), R.id.layout_footer);
+                        btnNextQuestion.setEnabled(true);
                     }
                 });
             } else {
