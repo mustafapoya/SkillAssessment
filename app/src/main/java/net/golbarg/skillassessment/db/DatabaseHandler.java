@@ -20,6 +20,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(TableQuestion.createTableQuery());
         db.execSQL(TableQuestionAnswer.createTableQuery());
         db.execSQL(TableBookmark.createTableQuery());
+        db.execSQL(TableExamResult.createTableQuery());
+
     }
 
     @Override
@@ -30,6 +32,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(TableQuestion.dropTableQuery());
         db.execSQL(TableQuestionAnswer.dropTableQuery());
         db.execSQL(TableBookmark.dropTableQuery());
+        db.execSQL(TableExamResult.dropTableQuery());
         // Create tables again
         onCreate(db);
     }
