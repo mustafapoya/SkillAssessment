@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -50,17 +51,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
     TableQuestionAnswer tableQuestionAnswer;
     TableConfig tableConfig;
     FragmentManager fragmentManager;
-
-    public CategoryListAdapter(Activity context, ArrayList<Category> categories) {
-        super(context, R.layout.custom_list_category, categories);
-        this.context = context;
-        this.categories = categories;
-        this.dbHandler = new DatabaseHandler(context);
-        this.tableCategory = new TableCategory(dbHandler);
-        this.tableQuestion = new TableQuestion(dbHandler);
-        this.tableQuestionAnswer = new TableQuestionAnswer(dbHandler);
-        this.tableConfig = new TableConfig(dbHandler);
-    }
+    private boolean isDownloading = false;
 
     public CategoryListAdapter(Activity context, ArrayList<Category> categories, FragmentManager fragmentManager) {
         super(context, R.layout.custom_list_category, categories);
@@ -116,16 +107,19 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
                     Config credit = tableConfig.getByKey(UtilController.KEY_CREDIT);
                     int userCredit = Integer.valueOf(credit.getDecryptedValue());
 
-                    if(userCredit >= 2) {
+                    if(userCredit >= 2 && !isDownloading) {
                         try {
                             if(tableCategory.get(selectedCategory.getId()) == null || tableQuestion.getCountOf(selectedCategory.getId()) < selectedCategory.getNumberOfQuestion()) {
+                                isDownloading = true;
                                 new FetchCategoryQuestionDataTask(rowView, progress, btnDownload, selectedCategory).execute();
                             }
                         } catch (Exception e) {
-                            UtilController.showSnackMessage(rowView, context.getString(R.string.add_failed_try_again));
+                            UtilController.showSnackMessage(rowView, context.getString(R.string.add_failed_try_again),
+                                    context.getResources().getColor(R.color.red_500), R.id.nav_view);
                         }
                     } else {
-                        UtilController.showSnackMessage(rowView, context.getString(R.string.you_dont_have_enough_credit));
+                        UtilController.showSnackMessage(rowView, context.getString(R.string.you_dont_have_enough_credit),
+                                context.getResources().getColor(R.color.red_500), R.id.nav_view);
                         CreditDialog creditDialog = new CreditDialog();
                         creditDialog.show(fragmentManager, CreditDialog.TAG);
                     }
@@ -138,13 +132,19 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(isDownloading) {
+                    UtilController.showSnackMessage(rowView, context.getString(R.string.please_wait_for_download_to_finish),
+                            context.getResources().getColor(R.color.blue_600), R.id.nav_view);
+                    return;
+                }
                 if(tableCategory.get(selectedCategory.getId()) != null &&
                     tableQuestion.getCountOf(selectedCategory.getId()) == selectedCategory.getNumberOfQuestion()) {
                     Intent categoryQuestionIntent = new Intent(context, QuestionActivity.class);
                     categoryQuestionIntent.putExtra("category_id", categories.get(position).getId());
                     context.startActivity(categoryQuestionIntent);
                 } else {
-                    UtilController.showSnackMessage(rowView, context.getString(R.string.to_view_question_add_first));
+                    UtilController.showSnackMessage(rowView, context.getString(R.string.to_view_question_add_first),
+                            context.getResources().getColor(R.color.green_500), R.id.nav_view);
                 }
             }
         });
@@ -243,19 +243,17 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         @Override
         protected void onPostExecute(ArrayList<Question> questionArrayList) {
             super.onPostExecute(questionArrayList);
+            isDownloading = false;
             if(successful) {
                 progress.setProgress(100);
                 btnDownload.setEnabled(false);
-                Log.d(TAG, "data downloaded: " + questionArrayList.toString());
-                UtilController.showSnackMessage(rowView, context.getString(R.string.added_successfully));
-
+                UtilController.showSnackMessage(rowView, context.getString(R.string.added_successfully),
+                        context.getResources().getColor(R.color.green_500), R.id.nav_view);
                 try {
                     Config credit = tableConfig.getByKey(UtilController.KEY_CREDIT);
                     int userCredit = Integer.valueOf(credit.getDecryptedValue()) - 2;
                     credit.setValue(CryptUtil.encrypt(String.valueOf(userCredit)));
                     tableConfig.updateByKey(credit);
-                    Log.d(TAG, "updated credit: " + String.valueOf(userCredit));
-                    Log.d(TAG, "credit config: " + credit.toString());
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -264,7 +262,8 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
                 progress.setProgress(100);
                 progress.setProgressTintList(ColorStateList.valueOf(Color.RED));
                 btnDownload.setEnabled(true);
-                UtilController.showSnackMessage(rowView, context.getString(R.string.add_failed_try_again));
+                UtilController.showSnackMessage(rowView, context.getString(R.string.add_failed_try_again),
+                        context.getResources().getColor(R.color.red_500), R.id.nav_view);
             }
         }
     }
