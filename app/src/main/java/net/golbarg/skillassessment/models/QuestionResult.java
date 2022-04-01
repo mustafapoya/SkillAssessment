@@ -61,11 +61,11 @@ public class QuestionResult {
     }
 
     public void incrementCorrectAnswer() {
-        setCorrectAnswer(getCorrectAnswer() + 1);
+        this.correctAnswer++;
     }
 
     public void decrementCorrectAnswer() {
-        setCorrectAnswer(getCorrectAnswer() - 1);
+        this.correctAnswer--;
     }
 
     public int getWrongAnswer() {
@@ -82,11 +82,11 @@ public class QuestionResult {
     }
 
     public void incrementWrongAnswer() {
-        setWrongAnswer(getCorrectAnswer() + 1);
+        this.wrongAnswer++;
     }
 
     public void decrementWrongAnswer() {
-        setWrongAnswer(getCorrectAnswer() - 1);
+        this.wrongAnswer--;
     }
 
     public int getNoAnswer() {
@@ -103,11 +103,11 @@ public class QuestionResult {
     }
 
     public void incrementNoAnswer() {
-        setNoAnswer(getCorrectAnswer() + 1);
+        this.noAnswer++;
     }
 
     public void decrementNoAnswer() {
-        setNoAnswer(getCorrectAnswer() - 1);
+        this.noAnswer--;
     }
 
     @Override
