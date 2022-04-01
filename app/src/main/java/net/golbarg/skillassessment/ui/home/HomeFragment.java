@@ -68,7 +68,7 @@ public class HomeFragment extends Fragment {
         btnTryAgainConnection = root.findViewById(R.id.btn_try_again);
 
         categoryArrayList = tableCategory.getAll();
-        categoryListAdapter = new CategoryListAdapter(getActivity(), categoryArrayList, getParentFragmentManager());
+        categoryListAdapter = new CategoryListAdapter(getActivity(), categoryArrayList, getParentFragmentManager(), listViewCategory);
         listViewCategory.setAdapter(categoryListAdapter);
 
         btnTryAgainConnection.setOnClickListener(new View.OnClickListener() {

@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -52,8 +53,9 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
     TableConfig tableConfig;
     FragmentManager fragmentManager;
     private boolean isDownloading = false;
+    private ListView parentListView;
 
-    public CategoryListAdapter(Activity context, ArrayList<Category> categories, FragmentManager fragmentManager) {
+    public CategoryListAdapter(Activity context, ArrayList<Category> categories, FragmentManager fragmentManager, ListView parentListView) {
         super(context, R.layout.custom_list_category, categories);
         this.context = context;
         this.categories = categories;
@@ -63,6 +65,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         this.tableQuestionAnswer = new TableQuestionAnswer(dbHandler);
         this.tableConfig = new TableConfig(dbHandler);
         this.fragmentManager = fragmentManager;
+        this.parentListView = parentListView;
     }
 
 
@@ -111,6 +114,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
                         try {
                             if(tableCategory.get(selectedCategory.getId()) == null || tableQuestion.getCountOf(selectedCategory.getId()) < selectedCategory.getNumberOfQuestion()) {
                                 isDownloading = true;
+                                parentListView.setEnabled(false);
                                 new FetchCategoryQuestionDataTask(rowView, progress, btnDownload, selectedCategory).execute();
                             }
                         } catch (Exception e) {
@@ -244,6 +248,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         protected void onPostExecute(ArrayList<Question> questionArrayList) {
             super.onPostExecute(questionArrayList);
             isDownloading = false;
+            parentListView.setEnabled(true);
             if(successful) {
                 progress.setProgress(100);
                 btnDownload.setEnabled(false);
