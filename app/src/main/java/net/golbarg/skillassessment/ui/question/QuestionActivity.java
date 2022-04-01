@@ -1,6 +1,8 @@
 package net.golbarg.skillassessment.ui.question;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -16,7 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.bumptech.glide.util.Util;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
@@ -24,10 +27,13 @@ import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableBookmark;
 import net.golbarg.skillassessment.db.TableCategory;
+import net.golbarg.skillassessment.db.TableQuestionResult;
 import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.db.TableQuestionAnswer;
+import net.golbarg.skillassessment.models.AnswerResponseType;
 import net.golbarg.skillassessment.models.Bookmark;
 import net.golbarg.skillassessment.models.Category;
+import net.golbarg.skillassessment.models.QuestionResult;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
 import net.golbarg.skillassessment.util.UtilController;
@@ -37,22 +43,27 @@ import java.util.Locale;
 
 public class QuestionActivity extends AppCompatActivity {
     public static final String TAG = QuestionActivity.class.getName();
+    private Context context;
+    public static String[] AnswerOptions = {"A", "B", "C", "D", "E", "F", "G"};
+
     public int currentPosition = -1;
     Category selectedCategory;
     ArrayList<Question> questions = new ArrayList<>();
+    QuestionResult questionResult;
 
     DatabaseHandler databaseHandler;
     TableCategory tableCategory;
     TableQuestion tableQuestion;
     TableQuestionAnswer tableQuestionAnswer;
     TableBookmark tableBookmark;
+    TableQuestionResult tableQuestionResult;
 
     ConstraintLayout mainLayout;
     ImageView imgClose;
     ProgressBar progressBarStep;
     ImageButton btnBookmark;
 
-    QuestionView questionViewTitle;
+    QuestionView questionView;
     ArrayList<AnswerView> answerViewsList = new ArrayList<>();
 
     Button btnNextQuestion;
@@ -60,7 +71,6 @@ public class QuestionActivity extends AppCompatActivity {
     TextView txtQuestionTrack;
 
     CountDownTimer countDownTimer;
-    private Context context;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,6 +84,9 @@ public class QuestionActivity extends AppCompatActivity {
         initDB();
         selectedCategory = tableCategory.get(category_id);
         questions = tableQuestion.getQuestionsOf(selectedCategory.getId());
+        questionResult = new QuestionResult(selectedCategory.getId());
+
+        getSupportActionBar().setTitle(selectedCategory.getTitle().replace("-", " "));
 
         mainLayout = findViewById(R.id.layout_main_layout);
         imgClose = findViewById(R.id.img_close);
@@ -81,7 +94,7 @@ public class QuestionActivity extends AppCompatActivity {
         progressBarStep.setMax(questions.size());
         btnBookmark = findViewById(R.id.btn_bookmark);
 
-        questionViewTitle = findViewById(R.id.question_view_title);
+        questionView = findViewById(R.id.question_view_title);
         initAnswerViews();
 
         btnNextQuestion = findViewById(R.id.btn_next_question);
@@ -89,26 +102,26 @@ public class QuestionActivity extends AppCompatActivity {
         txtQuestionTrack = findViewById(R.id.txt_question_track);
 
         btnNextQuestion.setOnClickListener(v -> {
-            currentPosition++;
-            if (currentPosition >= 0 && currentPosition < questions.size()) {
-                loadQuestion(currentPosition);
-            }
-
-            if(currentPosition >= 0 && currentPosition == questions.size()-1) {
-                btnNextQuestion.setText(R.string.finish);
-                return;
-            }
-
-            if(btnNextQuestion.getText().toString().equals(context.getString(R.string.finish))) {
-                UtilController.showSnackMessage(mainLayout, "Finished",
-                        context.getResources().getColor(R.color.blue_500), R.id.layout_footer);
-            }
-
-            countDownTime();
+            questionResult.incrementNoAnswer();
+            handleNextQuestion();
         });
         btnNextQuestion.performClick();
 
-        imgClose.setOnClickListener(v -> Toast.makeText(getApplicationContext(), "Closing Test", Toast.LENGTH_SHORT).show());
+        imgClose.setOnClickListener(view -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("End Test?");
+            builder.setMessage("Are you Sure you want to end Test \nThe Result with not be saved?");
+            builder.setPositiveButton("END", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Toast.makeText(context, "Exam End", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            });
+            builder.setIcon(R.drawable.ic_info);
+            builder.setNegativeButton("CANCEL", null);
+            builder.show();
+        });
 
         btnBookmark.setOnClickListener(view -> {
             try {
@@ -130,12 +143,31 @@ public class QuestionActivity extends AppCompatActivity {
         });
     }
 
+    private void handleNextQuestion() {
+        currentPosition++;
+        if (currentPosition >= 0 && currentPosition < questions.size()) {
+            loadQuestion(currentPosition);
+        }
+
+        if(currentPosition >= 0 && currentPosition == questions.size()-1) {
+            btnNextQuestion.setText(R.string.finish);
+            return;
+        }
+
+        if(btnNextQuestion.getText().toString().equals(context.getString(R.string.finish))) {
+            tableQuestionResult.create(questionResult);
+
+        }
+        countDownTime();
+    }
+
     private void initDB() {
         databaseHandler = new DatabaseHandler(getApplicationContext());
         tableCategory = new TableCategory(databaseHandler);
         tableQuestion = new TableQuestion(databaseHandler);
         tableQuestionAnswer = new TableQuestionAnswer(databaseHandler);
         tableBookmark = new TableBookmark(databaseHandler);
+        tableQuestionResult = new TableQuestionResult(databaseHandler);
     }
 
     private void initAnswerViews() {
@@ -152,6 +184,13 @@ public class QuestionActivity extends AppCompatActivity {
         answerViewsList.add(answerView5);
     }
 
+    private void setAnswersClickable(boolean isEnable) {
+        for (int i = 0; i < answerViewsList.size(); i++) {
+            answerViewsList.get(i).setClickable(isEnable);
+            answerViewsList.get(i).getMainLayout().invalidate();
+        }
+    }
+
     private void loadQuestion(int position) {
 
         validateBookmarkStatus(questions.get(position));
@@ -159,33 +198,64 @@ public class QuestionActivity extends AppCompatActivity {
         txtQuestionTrack.setText(String.format("%d/%d", position + 1, questions.size()));
         progressBarStep.setProgress(position);
 
-        UtilController.highlightQuestionText(questionViewTitle, questions.get(position).getTitle(), selectedCategory, getApplicationContext());
+        UtilController.highlightQuestionText(questionView, questions.get(position).getTitle(), selectedCategory, getApplicationContext());
 
         questions.get(position).setAnswers(tableQuestionAnswer.getAnswersOf(questions.get(position).getId()));
 
         //
         for(int i = 0; i < answerViewsList.size(); i++) {
             if(i < questions.get(position).getAnswers().size()) {
-                AnswerView answerView = answerViewsList.get(i);
                 QuestionAnswer selectedAnswer = questions.get(position).getAnswers().get(i);
 
+                AnswerView answerView = answerViewsList.get(i);
+                answerView.getTxtAnswerOption().setText(AnswerOptions[i]);
                 UtilController.highlightAnswerText(answerView, selectedAnswer.getTitle(), selectedCategory, getApplicationContext());
                 answerView.setOnClickListener(view -> {
+                    setAnswersClickable(false);
                     if(selectedAnswer.isCorrect()) {
-                        btnNextQuestion.setEnabled(false);
-                        UtilController.showSnackMessage(mainLayout, context.getString(R.string.correct),
-                                context.getResources().getColor(R.color.green_500), R.id.layout_footer);
-                        btnNextQuestion.setEnabled(true);
+                        handleAnswerClick(AnswerResponseType.CORRECT);
                     } else {
-                        btnNextQuestion.setEnabled(false);
-                        UtilController.showSnackMessage(mainLayout, context.getString(R.string.wrong),
-                                context.getResources().getColor(R.color.red_500), R.id.layout_footer);
-                        btnNextQuestion.setEnabled(true);
+                        handleAnswerClick(AnswerResponseType.WRONG);
                     }
                 });
             } else {
                 answerViewsList.get(i).setVisibility(View.GONE);
             }
+        }
+    }
+
+    private void handleAnswerClick(AnswerResponseType responseType) {
+        int text = 0;
+        int color = 0;
+
+        if(responseType == AnswerResponseType.CORRECT) {
+            text = R.string.correct;
+            color = context.getResources().getColor(R.color.green_500);
+            questionResult.incrementCorrectAnswer();
+        } else if(responseType == AnswerResponseType.WRONG) {
+            text = R.string.wrong;
+            color = context.getResources().getColor(R.color.red_500);
+            questionResult.incrementWrongAnswer();
+        } else {
+            text = R.string.no_response;
+            color = context.getResources().getColor(R.color.gray);
+            questionResult.incrementNoAnswer();
+        }
+
+        Snackbar snackbar = UtilController.createSnackBar(mainLayout, context.getString(text), color, R.id.layout_footer);
+        snackbar.setDuration(1200);
+        snackbar.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
+
+        snackbar.addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+            @Override
+            public void onDismissed(Snackbar transientBottomBar, int event) {
+                super.onDismissed(transientBottomBar, event);
+                handleNextQuestion();
+                setAnswersClickable(true);
+            }
+        });
+        if(responseType != AnswerResponseType.NO_ANSWER) {
+            snackbar.show();
         }
     }
 
@@ -205,7 +275,7 @@ public class QuestionActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                btnNextQuestion.performClick();
+                handleAnswerClick(AnswerResponseType.NO_ANSWER);
             }
         };
 
