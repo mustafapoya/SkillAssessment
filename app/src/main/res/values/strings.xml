@@ -36,4 +36,7 @@
     <string name="wrong">Wrong</string>
     <string name="please_wait_for_download_to_finish">Please wait for download to be finished</string>
     <string name="choice">Choice</string>
+    <string name="no_response">No response</string>
+    <string name="test_result">Test Result</string>
+    <string name="performance">Performance</string>
 </resources>
