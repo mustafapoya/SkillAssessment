@@ -39,6 +39,13 @@ public class TableQuestionResult implements CRUDHandler<QuestionResult>{
         db.close();
     }
 
+    public long createGetId(QuestionResult object) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        long insertedId = db.insert(TABLE_NAME, null, putValues(object));
+        db.close();
+        return insertedId;
+    }
+
     @Override
     public QuestionResult get(int id) {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
