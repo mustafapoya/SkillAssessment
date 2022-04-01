@@ -4,12 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import net.golbarg.skillassessment.models.ExamResult;
+import net.golbarg.skillassessment.models.QuestionResult;
 
 import java.util.ArrayList;
 
-public class TableExamResult implements CRUDHandler<ExamResult>{
-    public static final String TABLE_NAME = "exam_results";
+public class TableQuestionResult implements CRUDHandler<QuestionResult>{
+    public static final String TABLE_NAME = "question_results";
     public static final String KEY_ID = "id";
     public static final String KEY_CATEGORY_ID = "category_id";
     public static final String KEY_CORRECT_ANSWER = "correct_answer";
@@ -18,7 +18,7 @@ public class TableExamResult implements CRUDHandler<ExamResult>{
     public static final String [] ALL_COLUMNS = { KEY_ID, KEY_CATEGORY_ID, KEY_CORRECT_ANSWER, KEY_WRONG_ANSWER, KEY_NO_ANSWER };
     private final DatabaseHandler dbHandler;
 
-    public TableExamResult(DatabaseHandler dbHandler) {
+    public TableQuestionResult(DatabaseHandler dbHandler) {
         this.dbHandler = dbHandler;
     }
 
@@ -33,14 +33,14 @@ public class TableExamResult implements CRUDHandler<ExamResult>{
 
 
     @Override
-    public void create(ExamResult object) {
+    public void create(QuestionResult object) {
         SQLiteDatabase db = dbHandler.getWritableDatabase();
         db.insert(TABLE_NAME, null, putValues(object));
         db.close();
     }
 
     @Override
-    public ExamResult get(int id) {
+    public QuestionResult get(int id) {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NAME, ALL_COLUMNS, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
@@ -54,8 +54,8 @@ public class TableExamResult implements CRUDHandler<ExamResult>{
     }
 
     @Override
-    public ArrayList<ExamResult> getAll() {
-        ArrayList<ExamResult> result = new ArrayList<>();
+    public ArrayList<QuestionResult> getAll() {
+        ArrayList<QuestionResult> result = new ArrayList<>();
         String selectQuery = "SELECT  * FROM " + TABLE_NAME;
 
         SQLiteDatabase db = dbHandler.getReadableDatabase();
@@ -70,13 +70,13 @@ public class TableExamResult implements CRUDHandler<ExamResult>{
     }
 
     @Override
-    public int update(ExamResult object) {
+    public int update(QuestionResult object) {
         SQLiteDatabase db = dbHandler.getWritableDatabase();
         return db.update(TABLE_NAME, putValues(object), KEY_ID + "=?", new String[]{String.valueOf(object.getId())});
     }
 
     @Override
-    public void delete(ExamResult object) {
+    public void delete(QuestionResult object) {
         SQLiteDatabase db = dbHandler.getWritableDatabase();
         db.delete(TABLE_NAME, KEY_ID + "= ?", new String[]{String.valueOf(object.getId())});
     }
@@ -92,8 +92,8 @@ public class TableExamResult implements CRUDHandler<ExamResult>{
     }
 
     @Override
-    public ExamResult mapColumn(Cursor cursor) {
-        return new ExamResult(
+    public QuestionResult mapColumn(Cursor cursor) {
+        return new QuestionResult(
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID))),
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_CATEGORY_ID))),
                 Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_CORRECT_ANSWER))),
@@ -103,7 +103,7 @@ public class TableExamResult implements CRUDHandler<ExamResult>{
     }
 
     @Override
-    public ContentValues putValues(ExamResult object) {
+    public ContentValues putValues(QuestionResult object) {
         ContentValues values = new ContentValues();
         if (object.getId() != -1 && object.getId() != 0) {
             values.put(KEY_ID, object.getId());

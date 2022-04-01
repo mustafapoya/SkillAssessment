@@ -1,13 +1,13 @@
 package net.golbarg.skillassessment.models;
 
-public class ExamResult {
+public class QuestionResult {
     private int id;
     private int categoryId;
     private int correctAnswer;
     private int wrongAnswer;
     private int noAnswer;
 
-    public ExamResult(int id, int categoryId, int correctAnswer, int wrongAnswer, int noAnswer) {
+    public QuestionResult(int id, int categoryId, int correctAnswer, int wrongAnswer, int noAnswer) {
         this.id = id;
         this.categoryId = categoryId;
         this.correctAnswer = correctAnswer;
@@ -15,7 +15,7 @@ public class ExamResult {
         this.noAnswer = noAnswer;
     }
 
-    public ExamResult(int categoryId, int correctAnswer, int wrongAnswer, int noAnswer) {
+    public QuestionResult(int categoryId, int correctAnswer, int wrongAnswer, int noAnswer) {
         this.id = -1;
         this.categoryId = categoryId;
         this.correctAnswer = correctAnswer;
@@ -23,7 +23,7 @@ public class ExamResult {
         this.noAnswer = noAnswer;
     }
 
-    public ExamResult(int categoryId) {
+    public QuestionResult(int categoryId) {
         this.id = -1;
         this.categoryId = categoryId;
         setCorrectAnswer(0);
