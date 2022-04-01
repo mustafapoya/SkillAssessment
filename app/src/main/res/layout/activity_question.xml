@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:id="@+id/layout_main_layout"
+<androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/layout_main_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,7 +14,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:weightSum="1"
-        android:background="?attr/category_background"
+        android:background="@drawable/progress_status_background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -25,7 +23,7 @@
             android:id="@+id/img_close"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            app:tint="?attr/textColor"
+            app:tint="@color/white"
             android:layout_gravity="center_vertical"
             app:srcCompat="@drawable/ic_close" />
 
@@ -45,7 +43,7 @@
 
         <LinearLayout
             android:layout_width="75dp"
-            android:layout_height="30dp"
+            android:layout_height="35dp"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:orientation="horizontal">
@@ -65,16 +63,17 @@
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="8dp"
                 android:textSize="16sp"
-                android:textColor="?attr/textColor"
+                android:textColor="@color/white"
                 android:textStyle="bold" />
 
             <ImageButton
                 android:id="@+id/btn_bookmark"
                 android:layout_width="30dp"
-                android:layout_height="36dp"
+                android:layout_height="32dp"
+
                 android:background="@drawable/bottom_round"
                 app:tint="@color/white"
-                android:layout_gravity="center"
+                android:layout_gravity="center|top"
                 android:src="@drawable/ic_bookmark_no"/>
         </LinearLayout>
     </LinearLayout>
