@@ -112,6 +112,7 @@
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
                 app:answer_code="@string/description"
+                app:answer_option="A"
                 />
             <net.golbarg.skillassessment.CustomView.AnswerView
                 android:id="@+id/answer_view_2"
@@ -121,6 +122,7 @@
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
                 app:answer_code="@string/description"
+                app:answer_option="B"
                 />
             <net.golbarg.skillassessment.CustomView.AnswerView
                 android:id="@+id/answer_view_3"
@@ -130,6 +132,7 @@
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
                 app:answer_code="@string/description"
+                app:answer_option="C"
                 />
             <net.golbarg.skillassessment.CustomView.AnswerView
                 android:id="@+id/answer_view_4"
@@ -139,6 +142,7 @@
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
                 app:answer_code="@string/description"
+                app:answer_option="D"
                 />
 
             <net.golbarg.skillassessment.CustomView.AnswerView
@@ -149,6 +153,7 @@
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
                 app:answer_code="@string/description"
+                app:answer_option="E"
                 />
         </LinearLayout>
     </ScrollView>
@@ -158,7 +163,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="2dp"
-        android:weightSum="5"
+        android:weightSum="4"
         android:background="?attr/category_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -167,7 +172,7 @@
         <LinearLayout
             android:id="@+id/layout_footer"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="45dp"
             android:layout_gravity="center"
             android:layout_weight="4">
             <TextView
@@ -177,8 +182,8 @@
                 android:textColor="?attr/textColor"
                 android:layout_gravity="center"
                 android:paddingLeft="10dp"
-                android:layout_weight="2"
-                android:textSize="16sp"
+                android:layout_weight="1"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:text="0/0" />
             <TextView
@@ -188,7 +193,9 @@
                 android:textColor="?attr/textColor"
                 android:layout_gravity="center"
                 android:paddingLeft="10dp"
-                android:textSize="16sp"
+                android:drawableLeft="@drawable/ic_timer"
+                android:drawableTint="@color/black"
+                android:textSize="20sp"
                 android:layout_weight="2"
                 android:textStyle="bold"
                 android:text="00:00" />
@@ -197,6 +204,7 @@
         <Button
             android:id="@+id/btn_next_question"
             android:layout_width="70dp"
+            android:visibility="gone"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="14sp"
