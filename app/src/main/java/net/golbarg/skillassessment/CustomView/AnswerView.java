@@ -17,22 +17,29 @@ public class AnswerView extends ConstraintLayout {
 
     private TextView txtAnswerText;
     private TextView txtAnswerCode;
+    private TextView txtAnswerOption;
     private ImageView imgAnswerImage;
 
     public AnswerView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
         inflate(context, R.layout.view_answer, this);
 
+        txtAnswerOption = findViewById(R.id.txt_answer_option);
         txtAnswerText = findViewById(R.id.txt_answer_text);
         txtAnswerCode = findViewById(R.id.txt_answer_code);
         imgAnswerImage = findViewById(R.id.img_answer_image);
 
         TypedArray attributes = context.obtainStyledAttributes(attributeSet, R.styleable.AnswerView);
+        txtAnswerOption.setText(attributes.getString(R.styleable.AnswerView_answer_option));
         txtAnswerText.setText(attributes.getString(R.styleable.AnswerView_answer_text));
         txtAnswerCode.setText(attributes.getString(R.styleable.AnswerView_answer_code));
         imgAnswerImage.setImageDrawable(attributes.getDrawable(R.styleable.AnswerView_answer_image));
 
         attributes.recycle();
+    }
+
+    public TextView getTxtAnswerOption() {
+        return txtAnswerOption;
     }
 
     public TextView getTxtAnswerText() {

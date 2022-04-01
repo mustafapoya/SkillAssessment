@@ -6,6 +6,7 @@
         <attr name="question_image" format="string"/>
     </declare-styleable>
     <declare-styleable name="AnswerView">
+        <attr name="answer_option" format="string"/>
         <attr name="answer_text" format="string"/>
         <attr name="answer_code" format="string"/>
         <attr name="answer_image" format="string"/>
