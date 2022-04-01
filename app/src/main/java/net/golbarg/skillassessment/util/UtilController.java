@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.text.SpannableString;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.bumptech.glide.Glide;
@@ -128,6 +129,7 @@ public class UtilController {
                     Drawable d = Drawable.createFromStream(istr, null);
                     questionView.getImgQuestionImage().setImageDrawable(d);
                 } catch (Exception e) {
+                    Log.d("highlightQuestionText", "error loading question image: " + part.getImage());
                     e.printStackTrace();
                 }
             } else {
