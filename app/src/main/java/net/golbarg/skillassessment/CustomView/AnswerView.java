@@ -14,7 +14,7 @@ import net.golbarg.skillassessment.R;
 
 public class AnswerView extends ConstraintLayout {
     private OnClickListener listener;
-
+    private ConstraintLayout mainLayout;
     private TextView txtAnswerText;
     private TextView txtAnswerCode;
     private TextView txtAnswerOption;
@@ -24,18 +24,31 @@ public class AnswerView extends ConstraintLayout {
         super(context, attributeSet);
         inflate(context, R.layout.view_answer, this);
 
+        mainLayout = findViewById(R.id.main_layout);
         txtAnswerOption = findViewById(R.id.txt_answer_option);
         txtAnswerText = findViewById(R.id.txt_answer_text);
         txtAnswerCode = findViewById(R.id.txt_answer_code);
         imgAnswerImage = findViewById(R.id.img_answer_image);
 
         TypedArray attributes = context.obtainStyledAttributes(attributeSet, R.styleable.AnswerView);
+        mainLayout.setClickable(attributes.getBoolean(R.styleable.AnswerView_answer_enabled, true));
+        mainLayout.setFocusable(attributes.getBoolean(R.styleable.AnswerView_answer_enabled, true));
         txtAnswerOption.setText(attributes.getString(R.styleable.AnswerView_answer_option));
         txtAnswerText.setText(attributes.getString(R.styleable.AnswerView_answer_text));
         txtAnswerCode.setText(attributes.getString(R.styleable.AnswerView_answer_code));
         imgAnswerImage.setImageDrawable(attributes.getDrawable(R.styleable.AnswerView_answer_image));
 
         attributes.recycle();
+    }
+
+    public void setClickable(boolean isEnabled) {
+        mainLayout.setClickable(isEnabled);
+        mainLayout.setFocusable(isEnabled);
+        mainLayout.setEnabled(isEnabled);
+    }
+
+    public ConstraintLayout getMainLayout() {
+        return mainLayout;
     }
 
     public TextView getTxtAnswerOption() {
