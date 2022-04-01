@@ -209,6 +209,14 @@ public class UtilController {
         snackbar.show();
     }
 
+    public static Snackbar createSnackBar(View view, String message, int color, int anchorId) {
+        Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
+        snackbar.setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE);
+        snackbar.setAnchorView(view.findViewById(anchorId));
+        snackbar.setBackgroundTint(color);
+        return snackbar;
+    }
+
     public static boolean isNetworkConnected(Context context) {
         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
