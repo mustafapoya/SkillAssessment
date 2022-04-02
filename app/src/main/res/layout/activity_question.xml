@@ -181,11 +181,23 @@
                 android:layout_height="wrap_content"
                 android:textColor="?attr/textColor"
                 android:layout_gravity="center"
+                android:textAlignment="center"
                 android:paddingLeft="10dp"
                 android:layout_weight="1"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:text="0/0" />
+            <Button
+                android:id="@+id/btn_handle_question"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:drawableTint="@color/white"
+                android:text="@string/skip"
+               />
             <TextView
                 android:id="@+id/txt_timer"
                 android:layout_width="match_parent"
@@ -196,23 +208,11 @@
                 android:drawableLeft="@drawable/ic_timer"
                 android:drawableTint="@color/black"
                 android:textSize="20sp"
-                android:layout_weight="2"
+                android:layout_weight="1"
                 android:textStyle="bold"
                 android:text="00:00" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_next_question"
-            android:layout_width="70dp"
-            android:visibility="gone"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:layout_marginEnd="5dp"
-            android:drawableTint="@color/white"
-            android:text="@string/next"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

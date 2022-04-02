@@ -2,13 +2,12 @@ package net.golbarg.skillassessment.ui.question;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -37,6 +36,8 @@ import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
 import net.golbarg.skillassessment.models.QuestionResult;
+import net.golbarg.skillassessment.ui.dialog.CreditDialog;
+import net.golbarg.skillassessment.ui.dialog.LifeDialog;
 import net.golbarg.skillassessment.util.UtilController;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class QuestionActivity extends AppCompatActivity {
     private Context context;
     private int currentQuestionIndex = 0;
     private Category selectedCategory;
-    private ArrayList<Question> questions = new ArrayList<Question>();
+    private ArrayList<Question> questions = new ArrayList<>();
     private QuestionResult questionResult;
 
     private DatabaseHandler databaseHandler;
@@ -61,13 +62,18 @@ public class QuestionActivity extends AppCompatActivity {
     private ConstraintLayout mainLayout;
     private ImageView imgClose;
     private ProgressBar progressBarStep;
+    private TextView txtLife;
     private ImageButton btnBookmark;
     private QuestionView questionView;
     private ArrayList<AnswerView> answerViewsList = new ArrayList<>();
     private TextView txtTimer;
     private TextView txtQuestionTrack;
+    private Button btnHandleQuestion;
 
     private CountDownTimer countDownTimer;
+    private int numberOfLife = 5;
+    private int selectedAnswerIndex = -1;
+    private int correctAnswerIndex = -1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -88,6 +94,7 @@ public class QuestionActivity extends AppCompatActivity {
         imgClose = findViewById(R.id.img_close);
         progressBarStep = findViewById(R.id.progress_step);
         progressBarStep.setMax(questions.size());
+        txtLife = findViewById(R.id.txt_life);
         btnBookmark = findViewById(R.id.btn_bookmark);
 
         questionView = findViewById(R.id.question_view_title);
@@ -95,13 +102,27 @@ public class QuestionActivity extends AppCompatActivity {
 
         txtTimer = findViewById(R.id.txt_timer);
         txtQuestionTrack = findViewById(R.id.txt_question_track);
+        btnHandleQuestion = findViewById(R.id.btn_handle_question);
 
-        imgClose.setOnClickListener(view -> {
-            showConfirmDialog();
+        imgClose.setOnClickListener(view -> showConfirmDialog());
+
+        txtLife.setOnClickListener(view -> {
+            LifeDialog lifeDialog = new LifeDialog();
+            lifeDialog.show(getSupportFragmentManager(), CreditDialog.TAG);
         });
 
-        btnBookmark.setOnClickListener(view -> {
-            handleQuestionBookmark();
+        btnBookmark.setOnClickListener(view -> handleQuestionBookmark());
+
+        btnHandleQuestion.setOnClickListener(view -> {
+            if(btnHandleQuestion.getText().equals(context.getResources().getString(R.string.check))) {
+                if(selectedAnswerIndex == correctAnswerIndex) {
+                    handleAnswerClick(AnswerResponseType.CORRECT);
+                } else {
+                    handleAnswerClick(AnswerResponseType.WRONG);
+                }
+            } else {
+                handleAnswerClick(AnswerResponseType.NO_ANSWER);
+            }
         });
 
         loadQuestion();
@@ -137,14 +158,15 @@ public class QuestionActivity extends AppCompatActivity {
                 answerView.getTxtAnswerOption().setText(AnswerOptions[i]);
                 UtilController.highlightAnswerText(answerView, selectedAnswer.getTitle(), selectedCategory, getApplicationContext());
 
+                if(selectedAnswer.isCorrect()) {
+                    correctAnswerIndex = i;
+                }
+                int finalI = i;
                 answerView.setOnClickListener(view -> {
-                    setAnswersClickable(false);
-                    Log.d(TAG, "question_result: " + questionResult.toString());
-                    if(selectedAnswer.isCorrect()) {
-                        handleAnswerClick(AnswerResponseType.CORRECT);
-                    } else {
-                        handleAnswerClick(AnswerResponseType.WRONG);
-                    }
+                    selectedAnswerIndex = finalI;
+                    // TODO: Firstly Handle Selection of Question Answer, Then Check the Answer, Go to Next Question
+                    setSelectedAnswer(selectedAnswerIndex);
+                    btnHandleQuestion.setText(context.getResources().getString(R.string.check));
                 });
             } else {
                 answerViewsList.get(i).setVisibility(View.GONE);
@@ -153,8 +175,8 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     private void handleAnswerClick(AnswerResponseType responseType) {
-        int text = 0;
-        int color = 0;
+        int text;
+        int color;
 
         if(responseType == AnswerResponseType.CORRECT) {
             text = R.string.correct;
@@ -164,10 +186,12 @@ public class QuestionActivity extends AppCompatActivity {
             text = R.string.wrong;
             color = context.getResources().getColor(R.color.red_500);
             questionResult.incrementWrongAnswer();
+            updateLife(--numberOfLife);
         } else {
             text = R.string.no_response;
             color = context.getResources().getColor(R.color.gray);
             questionResult.incrementNoAnswer();
+            updateLife(--numberOfLife);
         }
 
         Snackbar snackbar = UtilController.createSnackBar(mainLayout, context.getString(text), color, R.id.layout_footer);
@@ -178,14 +202,24 @@ public class QuestionActivity extends AppCompatActivity {
             @Override
             public void onDismissed(Snackbar transientBottomBar, int event) {
                 super.onDismissed(transientBottomBar, event);
-                currentQuestionIndex++;
-                loadQuestion();
-                setAnswersClickable(true);
+                processQuestionAnswer();
             }
         });
+
         if(responseType != AnswerResponseType.NO_ANSWER) {
             snackbar.show();
+        } else {
+            processQuestionAnswer();
         }
+    }
+
+    private void processQuestionAnswer() {
+        currentQuestionIndex++;
+        loadQuestion();
+        correctAnswerIndex = -1;
+        selectedAnswerIndex = -1;
+        setSelectedAnswer(selectedAnswerIndex);
+        btnHandleQuestion.setText(context.getResources().getString(R.string.skip));
     }
 
     private void startCountDownTimer() {
@@ -247,22 +281,18 @@ public class QuestionActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("End Test?");
         builder.setMessage("Are you Sure you want to end Test \nThe Result with not be saved?");
-        builder.setPositiveButton("END", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(context, "Exam End", Toast.LENGTH_SHORT).show();
-                finish();
-            }
+        builder.setPositiveButton("END", (dialog, which) -> {
+            Toast.makeText(context, "Exam End", Toast.LENGTH_SHORT).show();
+            finish();
         });
         builder.setIcon(R.drawable.ic_info);
         builder.setNegativeButton("CANCEL", null);
         builder.show();
     }
 
-    private void setAnswersClickable(boolean isEnable) {
-        for (int i = 0; i < answerViewsList.size(); i++) {
-            answerViewsList.get(i).setClickable(isEnable);
-            answerViewsList.get(i).getMainLayout().invalidate();
+    private void setSelectedAnswer(int index) {
+        for(int i = 0; i < answerViewsList.size(); i++) {
+            answerViewsList.get(i).setSelected(i == index);
         }
     }
 
@@ -287,5 +317,10 @@ public class QuestionActivity extends AppCompatActivity {
         tableQuestionAnswer = new TableQuestionAnswer(databaseHandler);
         tableBookmark = new TableBookmark(databaseHandler);
         tableQuestionResult = new TableQuestionResult(databaseHandler);
+    }
+
+    private void updateLife(int life) {
+        txtLife.setText(String.valueOf(life));
+        txtLife.invalidate();
     }
 }

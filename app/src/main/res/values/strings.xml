@@ -39,4 +39,6 @@
     <string name="no_response">No response</string>
     <string name="test_result">Test Result</string>
     <string name="performance">Performance</string>
+    <string name="skip">Skip</string>
+    <string name="check">Check</string>
 </resources>
