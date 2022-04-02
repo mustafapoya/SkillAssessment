@@ -28,6 +28,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- TODO: on publish add real ad unit -->
         <!-- real_id="ca-app-pub-3540008829614888/9732061078" -->
         <!-- test_id="ca-app-pub-3940256099942544/6300978111" -->
         <com.google.android.gms.ads.AdView

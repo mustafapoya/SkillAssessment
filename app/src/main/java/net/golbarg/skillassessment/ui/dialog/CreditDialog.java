@@ -60,6 +60,7 @@ public class CreditDialog extends DialogFragment {
             @Override
             public void onClick(View v) {
                 AdRequest adRequest = new AdRequest.Builder().build();
+                // TODO: on publish add real ad unit
                 // real ad Unit: ca-app-pub-3540008829614888/4907303326
                 // test ad Unit: ca-app-pub-3940256099942544/5224354917
                 //TODO: on publish add real ad unit
