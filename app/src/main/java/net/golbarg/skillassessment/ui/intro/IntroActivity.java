@@ -63,10 +63,10 @@ public class IntroActivity extends AppCompatActivity {
 
         // fill list screen
         List<ScreenItem> mList = new ArrayList<>();
-        mList.add(new ScreenItem("جایزه", "هر روز و هر ساعت برنامه و چک کن جایزه ببر", R.drawable.ic_java_original));
-        mList.add(new ScreenItem("مسابقه", "د مسابفات اشتراک کو و امتیازهایت چند برابر کو", R.drawable.ic_java_original));
-        mList.add(new ScreenItem("قرعه کشی", "داخل قرعه کشی ها شرکت کن و چانس ات امتحان کو و ببر", R.drawable.ic_java_original));
-        mList.add(new ScreenItem("پول نقد", "پول هایت که جمع کردی و پس انداز شد نقدشان کو", R.drawable.ic_java_original));
+        mList.add(new ScreenItem("Skill Assessment", "this Application will help you practice Programming Skills", R.drawable.golbarg_logo_blue));
+        mList.add(new ScreenItem("Categories", "Different categories to choose and practice", R.drawable.ic_java_original));
+        mList.add(new ScreenItem("Questions", "select the correct Answer and enjoy learning by practicing", R.drawable.ic_check));
+        mList.add(new ScreenItem("Performance", "watch your performance", R.drawable.ic_bar_chart));
 
         // setup viewpager
         screenPager = findViewById(R.id.screen_view_pager);
