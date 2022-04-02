@@ -24,6 +24,8 @@ import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableConfig;
 import net.golbarg.skillassessment.models.Config;
+import net.golbarg.skillassessment.models.Question;
+import net.golbarg.skillassessment.ui.question.QuestionActivity;
 import net.golbarg.skillassessment.util.CryptUtil;
 import net.golbarg.skillassessment.util.UtilController;
 
@@ -40,6 +42,11 @@ public class LifeDialog extends DialogFragment {
     Button btnViewAd;
     Button btnEndTest;
 
+    QuestionActivity questionActivity;
+    public LifeDialog(QuestionActivity questionActivity) {
+        this.questionActivity = questionActivity;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -49,8 +56,13 @@ public class LifeDialog extends DialogFragment {
         tableConfig = new TableConfig(databaseHandler);
 
         txtLifeCount = root.findViewById(R.id.txt_life_count);
+        txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getCurrentLife());
         btnViewAd = root.findViewById(R.id.btn_view_ad);
+
         btnEndTest = root.findViewById(R.id.btn_end_test);
+        btnEndTest.setOnClickListener(v -> {
+            questionActivity.gotoFinishActivity();
+        });
 
         btnViewAd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,7 +71,6 @@ public class LifeDialog extends DialogFragment {
                 // TODO: on publish add real ad unit
                 // real ad Unit: ca-app-pub-3540008829614888/4907303326
                 // test ad Unit: ca-app-pub-3940256099942544/5224354917
-                //TODO: on publish add real ad unit
                 RewardedAd.load(context, "ca-app-pub-3940256099942544/5224354917", adRequest, new RewardedAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull @NotNull RewardedAd rewardedAd) {
@@ -83,15 +94,8 @@ public class LifeDialog extends DialogFragment {
                             // Handle the reward.
                             Log.d(TAG, "The user earned the reward.");
                             try {
-                                Config credit = tableConfig.getByKey(UtilController.KEY_CREDIT);
-                                int newCredit = UtilController.DEFAULT_CREDIT;
-                                if(credit != null) {
-                                    newCredit = Integer.parseInt(CryptUtil.decrypt(credit.getValue()));
-                                }
-                                newCredit += 2;
-                                credit.setValue(CryptUtil.encrypt(String.valueOf(newCredit)));
-                                txtLifeCount.setText(CryptUtil.decrypt(credit.getValue()));
-                                tableConfig.updateByKey(credit);
+                                questionActivity.setNumberOfLife(questionActivity.getCurrentLife() + 1);
+                                txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getCurrentLife());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -106,4 +110,9 @@ public class LifeDialog extends DialogFragment {
         return root;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("QuestionActivity", "the dialog closed");
+    }
 }
