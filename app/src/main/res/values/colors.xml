@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--White Theme Color-->
+    <color name="green_50">#E2FFCD</color>
     <color name="green_100">#AAE87E</color>
     <color name="green_200">#80ee31</color>
     <color name="green_500">#57cc02</color>
