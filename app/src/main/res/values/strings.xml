@@ -41,4 +41,7 @@
     <string name="performance">Performance</string>
     <string name="skip">Skip</string>
     <string name="check">Check</string>
+    <string name="keep_practicing">Keep Practicing!</string>
+    <string name="number_of_life">Available life: 0</string>
+    <string name="end_test">End Test</string>
 </resources>
