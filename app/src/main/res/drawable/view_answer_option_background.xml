@@ -2,6 +2,16 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
     android:enterFadeDuration="@android:integer/config_shortAnimTime"
     android:exitFadeDuration="@android:integer/config_shortAnimTime">
+    <item android:state_selected="true">
+        <layer-list>
+            <!-- Background -->
+            <item>
+                <shape>
+                    <solid android:color="@color/blue_500" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
     <item android:state_pressed="true">
         <layer-list>
             <!-- Background -->
