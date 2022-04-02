@@ -36,7 +36,6 @@ import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
 import net.golbarg.skillassessment.models.QuestionResult;
-import net.golbarg.skillassessment.ui.dialog.CreditDialog;
 import net.golbarg.skillassessment.ui.dialog.LifeDialog;
 import net.golbarg.skillassessment.util.UtilController;
 
@@ -62,6 +61,7 @@ public class QuestionActivity extends AppCompatActivity {
     private ConstraintLayout mainLayout;
     private ImageView imgClose;
     private ProgressBar progressBarStep;
+    private ImageView imgLife;
     private TextView txtLife;
     private ImageButton btnBookmark;
     private QuestionView questionView;
@@ -75,6 +75,7 @@ public class QuestionActivity extends AppCompatActivity {
     private int selectedAnswerIndex = -1;
     private int correctAnswerIndex = -1;
 
+    LifeDialog lifeDialog;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +95,7 @@ public class QuestionActivity extends AppCompatActivity {
         imgClose = findViewById(R.id.img_close);
         progressBarStep = findViewById(R.id.progress_step);
         progressBarStep.setMax(questions.size());
+        imgLife = findViewById(R.id.img_life);
         txtLife = findViewById(R.id.txt_life);
         btnBookmark = findViewById(R.id.btn_bookmark);
 
@@ -107,8 +109,11 @@ public class QuestionActivity extends AppCompatActivity {
         imgClose.setOnClickListener(view -> showConfirmDialog());
 
         txtLife.setOnClickListener(view -> {
-            LifeDialog lifeDialog = new LifeDialog();
-            lifeDialog.show(getSupportFragmentManager(), CreditDialog.TAG);
+            handleLifeDialog();
+        });
+
+        imgLife.setOnClickListener(view -> {
+            handleLifeDialog();
         });
 
         btnBookmark.setOnClickListener(view -> handleQuestionBookmark());
@@ -128,18 +133,35 @@ public class QuestionActivity extends AppCompatActivity {
         loadQuestion();
     }
 
+    private void handleLifeDialog() {
+        lifeDialog = new LifeDialog(QuestionActivity.this);
+        lifeDialog.show(getSupportFragmentManager(), LifeDialog.TAG);
+    }
+
     private void loadQuestion() {
         if(currentQuestionIndex < questions.size()) {
             loadQuestionDetails(currentQuestionIndex);
             startCountDownTimer();
         } else {
-            long question_result_id =  tableQuestionResult.createGetId(questionResult);
-            Intent questionResultIntent = new Intent(getBaseContext(), QuestionResultActivity.class);
-            questionResultIntent.putExtra("question_result_id", question_result_id);
-            Log.d("QuestionResult", String.valueOf(question_result_id));
-            startActivity(questionResultIntent);
-            finish();
+            gotoFinishActivity();
         }
+    }
+
+    public void gotoFinishActivity() {
+        for(int i = currentQuestionIndex; i < questions.size(); i++) {
+            questionResult.incrementNoAnswer();
+        }
+        long question_result_id =  tableQuestionResult.createGetId(questionResult);
+        Intent questionResultIntent = new Intent(getBaseContext(), QuestionResultActivity.class);
+        questionResultIntent.putExtra("question_result_id", question_result_id);
+        if(countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        if(lifeDialog != null) {
+            lifeDialog.dismiss();
+        }
+        startActivity(questionResultIntent);
+        finish();
     }
 
     private void loadQuestionDetails(int selectedPosition) {
@@ -186,12 +208,12 @@ public class QuestionActivity extends AppCompatActivity {
             text = R.string.wrong;
             color = context.getResources().getColor(R.color.red_500);
             questionResult.incrementWrongAnswer();
-            updateLife(--numberOfLife);
+            setNumberOfLife(--numberOfLife);
         } else {
             text = R.string.no_response;
             color = context.getResources().getColor(R.color.gray);
             questionResult.incrementNoAnswer();
-            updateLife(--numberOfLife);
+            setNumberOfLife(--numberOfLife);
         }
 
         Snackbar snackbar = UtilController.createSnackBar(mainLayout, context.getString(text), color, R.id.layout_footer);
@@ -225,9 +247,10 @@ public class QuestionActivity extends AppCompatActivity {
     private void startCountDownTimer() {
         if(countDownTimer != null) {
             countDownTimer.cancel();
+            countDownTimer = null;
         }
-
-        countDownTimer = new CountDownTimer(91000, 500) {
+        //91000
+        countDownTimer = new CountDownTimer(20000, 500) {
             @Override
             public void onTick(long millisUntilFinished) {
                 millisUntilFinished = millisUntilFinished / 1000;
@@ -323,4 +346,20 @@ public class QuestionActivity extends AppCompatActivity {
         txtLife.setText(String.valueOf(life));
         txtLife.invalidate();
     }
+
+    public int getCurrentLife() {
+        return this.numberOfLife;
+    }
+
+    public void setNumberOfLife(int newLife) {
+        if(newLife > 0) {
+            this.numberOfLife = newLife;
+            updateLife(this.numberOfLife);
+        } else {
+            this.numberOfLife = 0;
+            updateLife(this.numberOfLife);
+            handleLifeDialog();
+        }
+    }
+
 }
