@@ -14,10 +14,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -77,6 +83,9 @@ public class QuestionActivity extends AppCompatActivity {
     private int correctAnswerIndex = -1;
 
     LifeDialog lifeDialog;
+
+    private InterstitialAd mInterstitialAd;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,8 +145,10 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     private void handleLifeDialog() {
-        countDownTimer.pause();
-        lifeDialog.show(getSupportFragmentManager(), LifeDialog.TAG);
+        if(lifeDialog != null && !lifeDialog.isVisible()) {
+            countDownTimer.pause();
+            lifeDialog.show(getSupportFragmentManager(), LifeDialog.TAG);
+        }
     }
 
     private void loadQuestion() {
@@ -162,8 +173,46 @@ public class QuestionActivity extends AppCompatActivity {
         if(lifeDialog != null) {
             lifeDialog.dismiss();
         }
-        startActivity(questionResultIntent);
-        finish();
+
+        loadInterstitialAd();
+
+        if(mInterstitialAd != null) {
+            mInterstitialAd.show(this);
+            mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    super.onAdDismissedFullScreenContent();
+                    startActivity(questionResultIntent);
+                    finish();
+                }
+            });
+        } else {
+            startActivity(questionResultIntent);
+            finish();
+        }
+
+    }
+
+    private void loadInterstitialAd() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        /* real ad Unit: ca-app-pub-1361000594268534/6220605444 */
+        /* test ad Unit: ca-app-pub-3940256099942544/1033173712 */
+        InterstitialAd.load(context,"ca-app-pub-3940256099942544/1033173712", adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        mInterstitialAd = interstitialAd;
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        mInterstitialAd = null;
+                    }
+                });
+
     }
 
     private void loadQuestionDetails(int selectedPosition) {
