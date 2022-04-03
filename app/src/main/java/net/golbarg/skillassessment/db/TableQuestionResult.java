@@ -60,6 +60,26 @@ public class TableQuestionResult implements CRUDHandler<QuestionResult>{
         }
     }
 
+    public QuestionResult getTotalResult() {
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        String selectQuery = "select sum(correct_answer) as total_correct_answer, sum(wrong_answer) as total_wrong_answer,  sum(no_answer) as total_no_answer from question_results; ";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if(cursor != null && cursor.getCount() != 0) {
+            cursor.moveToFirst();
+            return new QuestionResult(
+                    -1,
+                    -1,
+                    Integer.parseInt(cursor.getString(cursor.getColumnIndex("total_correct_answer"))),
+                    Integer.parseInt(cursor.getString(cursor.getColumnIndex("total_wrong_answer"))),
+                    Integer.parseInt(cursor.getString(cursor.getColumnIndex("total_no_answer")))
+            );
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public ArrayList<QuestionResult> getAll() {
         ArrayList<QuestionResult> result = new ArrayList<>();
