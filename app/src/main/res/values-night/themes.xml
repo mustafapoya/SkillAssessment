@@ -2,15 +2,15 @@
     <!-- Base application theme. -->
     <style name="Theme.SkillAssessment" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/green_200</item>
-        <item name="colorPrimaryVariant">@color/green_500</item>
-        <item name="colorOnPrimary">@color/green_700</item>
+        <item name="colorPrimary">@color/blue_600</item>
+        <item name="colorPrimaryVariant">@color/blue_700</item>
+        <item name="colorOnPrimary">@color/white</item>
 
         <item name="textColor">@color/white</item>
         <item name="metaTextColor">@color/gray</item>
         <item name="backgroundColor">@color/blue_600</item>
         <item name="content_background">@color/blue_200</item>
-        <item name="category_background">@color/blue_600</item>
+        <item name="category_background">@color/black_500</item>
         <item name="tab_color">@drawable/tab_color</item>
 
         <!-- Secondary brand color. -->
