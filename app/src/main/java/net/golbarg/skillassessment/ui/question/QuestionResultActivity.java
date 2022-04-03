@@ -6,7 +6,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +19,7 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 
+import net.golbarg.skillassessment.MainActivity;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableCategory;
@@ -47,6 +50,8 @@ public class QuestionResultActivity extends AppCompatActivity {
     TextView txtProgressStatus;
     PieChart pieChartProgress;
 
+    Button btnGoHome;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +69,7 @@ public class QuestionResultActivity extends AppCompatActivity {
         txtQuestionNoAnswer = findViewById(R.id.txt_question_no_answer);
         txtProgressStatus = findViewById(R.id.txt_progress_status);
         pieChartProgress = findViewById(R.id.pie_chart_progress);
+        btnGoHome = findViewById(R.id.btn_go_home);
 
         Intent intent = getIntent();
         long question_result_id = intent.getLongExtra("question_result_id", 1);
@@ -114,6 +120,15 @@ public class QuestionResultActivity extends AppCompatActivity {
             pieChartProgress.setCenterTextSize(18);
             pieChartProgress.invalidate();
 
+
+            btnGoHome.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent homeIntentActivity = new Intent(getBaseContext(), MainActivity.class);
+                    startActivity(homeIntentActivity);
+                    finish();
+                }
+            });
         }
 
     }
