@@ -45,7 +45,7 @@ import java.util.Locale;
 
 public class QuestionActivity extends AppCompatActivity {
     public static final String TAG = QuestionActivity.class.getName();
-    public static String[] AnswerOptions = {"A", "B", "C", "D", "E", "F", "G"};
+    public static String[] AnswerOptions = {"A", "B", "C", "D", "E", "F", "G", "H", "J"};
     private Context context;
     private int currentQuestionIndex = 0;
     private Category selectedCategory;
