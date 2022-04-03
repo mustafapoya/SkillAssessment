@@ -120,12 +120,12 @@ public class IntroActivity extends AppCompatActivity {
             mDots[i] = new TextView(this);
             mDots[i].setText(Html.fromHtml("&#8226"));
             mDots[i].setTextSize(35);
-            mDots[i].setTextColor(getResources().getColor(R.color.black));
+            mDots[i].setTextColor(getResources().getColor(R.color.gray));
             mDotLayout.addView(mDots[i]);
         }
 
         if (mDots.length > 0) {
-            mDots[position].setTextColor(getResources().getColor(R.color.design_default_color_error));
+            mDots[position].setTextColor(getResources().getColor(R.color.green_500));
         }
 
     }

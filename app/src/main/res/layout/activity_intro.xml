@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fff">
+    android:background="@drawable/custom_list_category_background"
+    >
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/screen_view_pager"
@@ -24,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="5dp"
         android:text="Next"
+        android:drawableTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
