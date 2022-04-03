@@ -206,7 +206,7 @@
                 android:layout_gravity="center"
                 android:paddingLeft="10dp"
                 android:drawableLeft="@drawable/ic_timer"
-                android:drawableTint="@color/black"
+                android:drawableTint="?attr/textColor"
                 android:textSize="20sp"
                 android:layout_weight="1"
                 android:textStyle="bold"
