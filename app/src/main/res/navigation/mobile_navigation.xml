@@ -22,4 +22,10 @@
         android:name="net.golbarg.skillassessment.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
         tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/navigation_about"
+        android:name="net.golbarg.skillassessment.ui.about.AboutFragment"
+        android:label="@string/title_about"
+        tools:layout="@layout/fragment_about" />
 </navigation>
