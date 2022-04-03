@@ -20,6 +20,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableCategory;
@@ -54,6 +60,8 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
     FragmentManager fragmentManager;
     private boolean isDownloading = false;
     private ListView parentListView;
+
+    private InterstitialAd mInterstitialAd;
 
     public CategoryListAdapter(Activity context, ArrayList<Category> categories, FragmentManager fragmentManager, ListView parentListView) {
         super(context, R.layout.custom_list_category, categories);
@@ -145,7 +153,21 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
                     tableQuestion.getCountOf(selectedCategory.getId()) == selectedCategory.getNumberOfQuestion()) {
                     Intent categoryQuestionIntent = new Intent(context, QuestionActivity.class);
                     categoryQuestionIntent.putExtra("category_id", categories.get(position).getId());
-                    context.startActivity(categoryQuestionIntent);
+
+                    loadInterstitialAd();
+
+                    if(mInterstitialAd != null) {
+                        mInterstitialAd.show(context);
+                        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                super.onAdDismissedFullScreenContent();
+                                context.startActivity(categoryQuestionIntent);
+                            }
+                        });
+                    } else {
+                        context.startActivity(categoryQuestionIntent);
+                    }
                 } else {
                     UtilController.showSnackMessage(rowView, context.getString(R.string.to_view_question_add_first),
                             context.getResources().getColor(R.color.green_500), R.id.nav_view);
@@ -154,6 +176,28 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         });
 
         return rowView;
+    }
+
+    private void loadInterstitialAd() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        /* real ad Unit: ca-app-pub-1361000594268534/6283312483 */
+        /* test ad Unit: ca-app-pub-3940256099942544/1033173712 */
+        InterstitialAd.load(context,"ca-app-pub-3940256099942544/1033173712", adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        mInterstitialAd = interstitialAd;
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        mInterstitialAd = null;
+                    }
+                });
+
     }
 
     private class FetchCategoryQuestionDataTask extends AsyncTask<String, String, ArrayList<Question>> {
