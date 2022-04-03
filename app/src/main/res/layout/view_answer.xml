@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/white"
         android:fontFamily="monospace"
-        android:text="@string/description"
+        android:text="@string/code"
         android:textSize="12sp"
         android:background="@color/blue_700"
         android:padding="8dp"

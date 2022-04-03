@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:padding="4dp"
                 app:question_text="@string/title"
-                app:question_code="@string/description"
+                app:question_code="@string/code"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
@@ -111,7 +111,7 @@
                 android:padding="4dp"
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
-                app:answer_code="@string/description"
+                app:answer_code="@string/code"
                 app:answer_option="A"
                 />
             <net.golbarg.skillassessment.CustomView.AnswerView
@@ -121,7 +121,7 @@
                 android:padding="4dp"
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
-                app:answer_code="@string/description"
+                app:answer_code="@string/code"
                 app:answer_option="B"
                 />
             <net.golbarg.skillassessment.CustomView.AnswerView
@@ -131,7 +131,7 @@
                 android:padding="4dp"
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
-                app:answer_code="@string/description"
+                app:answer_code="@string/code"
                 app:answer_option="C"
                 />
             <net.golbarg.skillassessment.CustomView.AnswerView
@@ -141,7 +141,7 @@
                 android:padding="4dp"
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
-                app:answer_code="@string/description"
+                app:answer_code="@string/code"
                 app:answer_option="D"
                 />
 
@@ -152,7 +152,7 @@
                 android:padding="4dp"
                 android:layout_marginTop="5dp"
                 app:answer_text="@string/title"
-                app:answer_code="@string/description"
+                app:answer_code="@string/code"
                 app:answer_option="E"
                 />
         </LinearLayout>
