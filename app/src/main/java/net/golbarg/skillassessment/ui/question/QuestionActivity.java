@@ -37,6 +37,7 @@ import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
 import net.golbarg.skillassessment.models.QuestionResult;
 import net.golbarg.skillassessment.ui.dialog.LifeDialog;
+import net.golbarg.skillassessment.util.CountDownTimerWithPause;
 import net.golbarg.skillassessment.util.UtilController;
 
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class QuestionActivity extends AppCompatActivity {
     private TextView txtQuestionTrack;
     private Button btnHandleQuestion;
 
-    private CountDownTimer countDownTimer;
+    private CountDownTimerWithPause countDownTimer;
     private int numberOfLife = 5;
     private int selectedAnswerIndex = -1;
     private int correctAnswerIndex = -1;
@@ -135,6 +136,7 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     private void handleLifeDialog() {
+        countDownTimer.pause();
         lifeDialog.show(getSupportFragmentManager(), LifeDialog.TAG);
     }
 
@@ -250,7 +252,7 @@ public class QuestionActivity extends AppCompatActivity {
             countDownTimer = null;
         }
         //91000
-        countDownTimer = new CountDownTimer(20000, 500) {
+        countDownTimer = new CountDownTimerWithPause(20000, 500, true) {
             @Override
             public void onTick(long millisUntilFinished) {
                 millisUntilFinished = millisUntilFinished / 1000;
@@ -261,12 +263,20 @@ public class QuestionActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                handleAnswerClick(AnswerResponseType.NO_ANSWER);
+
+                if(getCurrentLife() > 0) {
+                    handleAnswerClick(AnswerResponseType.NO_ANSWER);
+                } else {
+                    if(!lifeDialog.isVisible()) {
+                        handleLifeDialog();
+                    }
+                }
+
             }
 
         };
 
-        countDownTimer.start();
+        countDownTimer.create();
     }
 
 
@@ -362,4 +372,7 @@ public class QuestionActivity extends AppCompatActivity {
         }
     }
 
+    public CountDownTimerWithPause getCountDownTimer() {
+        return countDownTimer;
+    }
 }

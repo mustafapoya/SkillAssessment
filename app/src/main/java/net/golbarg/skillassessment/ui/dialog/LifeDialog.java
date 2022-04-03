@@ -64,6 +64,10 @@ public class LifeDialog extends DialogFragment {
             questionActivity.gotoFinishActivity();
         });
 
+        if(this.questionActivity.getCurrentLife() <=0) {
+            this.setCancelable(false);
+        }
+
         btnViewAd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,6 +100,7 @@ public class LifeDialog extends DialogFragment {
                             try {
                                 questionActivity.setNumberOfLife(questionActivity.getCurrentLife() + 1);
                                 txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getCurrentLife());
+                                setCancelable(true);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -113,6 +118,11 @@ public class LifeDialog extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if(this.questionActivity.getCountDownTimer() != null) {
+            if(this.questionActivity.getCountDownTimer().isPaused()) {
+                this.questionActivity.getCountDownTimer().resume();
+            }
+        }
         Log.d("QuestionActivity", "the dialog closed");
     }
 }
