@@ -131,10 +131,10 @@ public class QuestionActivity extends AppCompatActivity {
         });
 
         loadQuestion();
+        lifeDialog = new LifeDialog(QuestionActivity.this);
     }
 
     private void handleLifeDialog() {
-        lifeDialog = new LifeDialog(QuestionActivity.this);
         lifeDialog.show(getSupportFragmentManager(), LifeDialog.TAG);
     }
 
