@@ -8,23 +8,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.databinding.FragmentBookmarkBinding;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableBookmark;
 import net.golbarg.skillassessment.models.Bookmark;
-import net.golbarg.skillassessment.models.Question;
 
 import java.util.ArrayList;
 
