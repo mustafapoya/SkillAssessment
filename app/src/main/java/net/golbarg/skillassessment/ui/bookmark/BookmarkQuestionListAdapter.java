@@ -1,7 +1,6 @@
 package net.golbarg.skillassessment.ui.bookmark;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import androidx.annotation.Nullable;
 
 import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
-import net.golbarg.skillassessment.MainActivity;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableBookmark;
@@ -63,7 +61,7 @@ public class BookmarkQuestionListAdapter extends ArrayAdapter<Bookmark> {
         UtilController.highlightQuestionText(questionView, currentQuestion.getTitle(), category, context);
 
         txtCategoryTitle.setText(category.getTitle());
-        
+
         if(currentQuestion.getAnswers().size() > 0) {
             answerView.setVisibility(View.VISIBLE);
             UtilController.highlightAnswerText(answerView, currentQuestion.getAnswers().get(0).getTitle(), tableCategory.get(currentQuestion.getCategoryId()), context);
@@ -72,17 +70,14 @@ public class BookmarkQuestionListAdapter extends ArrayAdapter<Bookmark> {
             answerView.setVisibility(View.GONE);
         }
 
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    tableBookmark.delete((bookmarks.get(position)));
-                    bookmarks.remove(position);
-                    notifyDataSetChanged();
-                    UtilController.showSnackMessage(rowView, context.getString(R.string.bookmark_deleted));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        btnDelete.setOnClickListener(view -> {
+            try {
+                tableBookmark.delete((bookmarks.get(position)));
+                bookmarks.remove(position);
+                notifyDataSetChanged();
+                UtilController.showSnackMessage(rowView, context.getString(R.string.bookmark_deleted));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
 
