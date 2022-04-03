@@ -16,6 +16,7 @@ import androidx.fragment.app.DialogFragment;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
@@ -39,6 +40,8 @@ public class CreditDialog extends DialogFragment {
     TextView txtCredit;
     Button btnViewAd;
 
+    private InterstitialAd mInterstitialAd;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -61,9 +64,8 @@ public class CreditDialog extends DialogFragment {
             public void onClick(View v) {
                 AdRequest adRequest = new AdRequest.Builder().build();
                 // TODO: on publish add real ad unit
-                // real ad Unit: ca-app-pub-3540008829614888/4907303326
+                // real ad Unit: ca-app-pub-1361000594268534/6248525603
                 // test ad Unit: ca-app-pub-3940256099942544/5224354917
-                //TODO: on publish add real ad unit
                 RewardedAd.load(context, "ca-app-pub-3940256099942544/5224354917", adRequest, new RewardedAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull @NotNull RewardedAd rewardedAd) {

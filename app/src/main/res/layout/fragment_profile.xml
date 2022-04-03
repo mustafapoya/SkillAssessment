@@ -22,7 +22,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- TODO: on publish add real ad unit -->
-    <!-- real_id="ca-app-pub-3540008829614888/5345808092" -->
+    <!-- real_id="ca-app-pub-1361000594268534/6126565661" -->
     <!-- test_id="ca-app-pub-3940256099942544/6300978111" -->
     <com.google.android.gms.ads.AdView
         android:id="@+id/adViewScreenBanner"
