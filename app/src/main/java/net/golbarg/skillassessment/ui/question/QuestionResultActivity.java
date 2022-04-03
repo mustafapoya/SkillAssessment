@@ -2,19 +2,19 @@ package net.golbarg.skillassessment.ui.question;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -102,14 +102,20 @@ public class QuestionResultActivity extends AppCompatActivity {
 
             PieDataSet dataSet = new PieDataSet(entries, "");
             dataSet.setValueTextSize(12);
-            dataSet.setValueTextColor(context.getResources().getColor(R.color.white));
-            dataSet.setColor(context.getResources().getColor(R.color.black));
+
+            if(isNightMode(context)) {
+                dataSet.setColor(context.getResources().getColor(R.color.white));
+            } else {
+                dataSet.setColor(context.getResources().getColor(R.color.black));
+            }
 
             dataSet.resetColors();
             for (PieChartData data: pieChartData) {
                 dataSet.addColor(data.getColor());
             }
             PieData pieData = new PieData(dataSet);
+            pieData.setValueTextColor(context.getResources().getColor(R.color.white));
+
             pieChartProgress.setData(pieData);
             Description d = new Description();
             d.setText("");
@@ -118,18 +124,25 @@ public class QuestionResultActivity extends AppCompatActivity {
             pieChartProgress.setCenterTextColor(context.getResources().getColor(R.color.blue_700));
             pieChartProgress.setCenterText("Result");
             pieChartProgress.setCenterTextSize(18);
+            pieChartProgress.getLegend().setTextColor(context.getResources().getColor(isNightMode(context) ? R.color.white : R.color.black));
+            pieChartProgress.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+            pieChartProgress.setEntryLabelColor(context.getResources().getColor(isNightMode(context) ? R.color.white : R.color.black));
+
             pieChartProgress.invalidate();
-
-
-            btnGoHome.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent homeIntentActivity = new Intent(getBaseContext(), MainActivity.class);
-                    startActivity(homeIntentActivity);
-                    finish();
-                }
-            });
         }
 
+        btnGoHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent homeIntentActivity = new Intent(getBaseContext(), MainActivity.class);
+                startActivity(homeIntentActivity);
+                finish();
+            }
+        });
+    }
+
+    public boolean isNightMode(Context context) {
+        int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
     }
 }
