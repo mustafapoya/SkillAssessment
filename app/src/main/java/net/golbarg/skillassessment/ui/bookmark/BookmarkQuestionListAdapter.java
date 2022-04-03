@@ -14,13 +14,16 @@ import androidx.annotation.Nullable;
 
 import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
+import net.golbarg.skillassessment.MainActivity;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableBookmark;
 import net.golbarg.skillassessment.db.TableCategory;
 import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.models.Bookmark;
+import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
+import net.golbarg.skillassessment.ui.question.QuestionActivity;
 import net.golbarg.skillassessment.util.UtilController;
 
 import java.util.ArrayList;
@@ -50,20 +53,24 @@ public class BookmarkQuestionListAdapter extends ArrayAdapter<Bookmark> {
         LayoutInflater inflater = context.getLayoutInflater();
         View rowView = inflater.inflate(R.layout.custom_list_bookmark_question, null,true);
 
-        Question currentQuestion = tableQuestion.getWithCorrectAnswer(bookmarks.get(position).getQuestionId());
-
+        TextView txtCategoryTitle = rowView.findViewById(R.id.txt_category_title);
         QuestionView questionView = rowView.findViewById(R.id.question_view);
-        UtilController.highlightQuestionText(questionView, currentQuestion.getTitle(), tableCategory.get(currentQuestion.getCategoryId()), context);
-
         AnswerView answerView = rowView.findViewById(R.id.question_answer_view);
+        Button btnDelete = rowView.findViewById(R.id.btn_delete);
+
+        Question currentQuestion = tableQuestion.getWithCorrectAnswer(bookmarks.get(position).getQuestionId());
+        Category category = tableCategory.get(currentQuestion.getCategoryId());
+        UtilController.highlightQuestionText(questionView, currentQuestion.getTitle(), category, context);
+
+        txtCategoryTitle.setText(category.getTitle());
+        
         if(currentQuestion.getAnswers().size() > 0) {
             answerView.setVisibility(View.VISIBLE);
             UtilController.highlightAnswerText(answerView, currentQuestion.getAnswers().get(0).getTitle(), tableCategory.get(currentQuestion.getCategoryId()), context);
+            answerView.getTxtAnswerOption().setText(QuestionActivity.AnswerOptions[currentQuestion.getAnswers().get(0).getNumber()-1]);
         } else {
             answerView.setVisibility(View.GONE);
         }
-
-        Button btnDelete = rowView.findViewById(R.id.btn_delete);
 
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -7,6 +7,20 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <TextView
+        android:id="@+id/txt_category_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/category_title"
+        android:textSize="14sp"
+        android:layout_marginTop="5dp"
+        android:textColor="?attr/textColor"
+        android:padding="4dp"
+        android:background="@drawable/view_question_background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <net.golbarg.skillassessment.CustomView.QuestionView
         android:id="@+id/question_view"
         android:paddingRight="5dp"
@@ -19,7 +33,7 @@
         android:textIsSelectable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/txt_category_title" />
 
     <net.golbarg.skillassessment.CustomView.AnswerView
         android:id="@+id/question_answer_view"
@@ -48,4 +62,5 @@
         android:drawableTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/question_answer_view" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
