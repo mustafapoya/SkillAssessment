@@ -27,6 +27,7 @@ import net.golbarg.skillassessment.db.TableQuestionResult;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.PieChartData;
 import net.golbarg.skillassessment.models.QuestionResult;
+import net.golbarg.skillassessment.util.UtilController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,7 +104,7 @@ public class QuestionResultActivity extends AppCompatActivity {
             PieDataSet dataSet = new PieDataSet(entries, "");
             dataSet.setValueTextSize(12);
 
-            if(isNightMode(context)) {
+            if(UtilController.isNightMode(context)) {
                 dataSet.setColor(context.getResources().getColor(R.color.white));
             } else {
                 dataSet.setColor(context.getResources().getColor(R.color.black));
@@ -124,9 +125,11 @@ public class QuestionResultActivity extends AppCompatActivity {
             pieChartProgress.setCenterTextColor(context.getResources().getColor(R.color.blue_700));
             pieChartProgress.setCenterText("Result");
             pieChartProgress.setCenterTextSize(18);
-            pieChartProgress.getLegend().setTextColor(context.getResources().getColor(isNightMode(context) ? R.color.white : R.color.black));
+            pieChartProgress.getLegend().setTextColor(context.getResources().getColor(UtilController.isNightMode(context) ? R.color.white : R.color.black));
             pieChartProgress.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-            pieChartProgress.setEntryLabelColor(context.getResources().getColor(isNightMode(context) ? R.color.white : R.color.black));
+            pieChartProgress.getLegend().setOrientation(Legend.LegendOrientation.VERTICAL);
+            pieChartProgress.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
+            pieChartProgress.setEntryLabelColor(context.getResources().getColor(UtilController.isNightMode(context) ? R.color.white : R.color.black));
 
             pieChartProgress.invalidate();
         }
@@ -139,10 +142,5 @@ public class QuestionResultActivity extends AppCompatActivity {
                 finish();
             }
         });
-    }
-
-    public boolean isNightMode(Context context) {
-        int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
     }
 }

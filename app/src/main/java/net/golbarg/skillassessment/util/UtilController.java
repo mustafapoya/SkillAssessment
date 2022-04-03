@@ -2,6 +2,7 @@ package net.golbarg.skillassessment.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -235,5 +236,10 @@ public class UtilController {
 
     public static String appLink() {
         return "https://play.google.com/store/apps/details?id=net.golbarg.skillassessment";
+    }
+
+    public static boolean isNightMode(Context context) {
+        int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
     }
 }
