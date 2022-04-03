@@ -73,7 +73,7 @@ public class TableQuestion implements CRUDHandler<Question> {
             cursor.moveToFirst();
             Question question = mapColumn(cursor);
             TableQuestionAnswer tableQuestionAnswer = new TableQuestionAnswer(dbHandler);
-            question.setAnswers(tableQuestionAnswer.getAnswersOf(question.getId()));
+            question.setAnswers(tableQuestionAnswer.getCorrectAnswersOf(question.getId()));
             return question;
         } else {
             return null;
