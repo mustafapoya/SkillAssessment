@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -29,10 +30,21 @@ public class AboutFragment extends Fragment {
 
         linearLayoutAbout = root.findViewById(R.id.linear_layout_about);
 
+        Element elementDonate = new Element("Donate", R.drawable.ic_heart);
+        elementDonate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "Donate", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
         View aboutPage = new AboutPage(context)
                 .isRTL(false)
-                .setDescription("")
+                .setDescription("This is the about description of app")
                 .addItem(new Element().setTitle(context.getString(R.string.version)).setIconDrawable(R.drawable.ic_info))
+                .addGroup("Help us to improve")
+                .addItem(elementDonate)
                 .addGroup(context.getString(R.string.connect_with_us))
                 .addEmail("contact@golbarg.net")
                 .addFacebook("golbargnet")
