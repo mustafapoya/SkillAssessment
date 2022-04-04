@@ -47,7 +47,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="5dp"
-            android:text="@string/donation_title"
+            android:paddingBottom="5dp"
+            android:text="@string/app_desc"
             android:textAlignment="viewStart"
             android:textColor="@color/white"
             android:textSize="14sp"
@@ -57,6 +58,7 @@
 
         <Button
             android:id="@+id/button"
+            android:visibility="gone"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="5dp"

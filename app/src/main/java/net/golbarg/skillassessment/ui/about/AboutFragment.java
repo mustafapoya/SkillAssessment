@@ -30,21 +30,10 @@ public class AboutFragment extends Fragment {
 
         linearLayoutAbout = root.findViewById(R.id.linear_layout_about);
 
-        Element elementDonate = new Element("Donate", R.drawable.ic_heart);
-        elementDonate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(context, "Donate", Toast.LENGTH_SHORT).show();
-            }
-        });
-
 
         View aboutPage = new AboutPage(context)
                 .isRTL(false)
-                .setDescription("This is the about description of app")
-                .addItem(new Element().setTitle(context.getString(R.string.version)).setIconDrawable(R.drawable.ic_info))
-                .addGroup("Help us to improve")
-                .addItem(elementDonate)
+                .setDescription("you can feel free to contact us and help us to improve with your suggestions")
                 .addGroup(context.getString(R.string.connect_with_us))
                 .addEmail("contact@golbarg.net")
                 .addFacebook("golbargnet")
@@ -52,6 +41,7 @@ public class AboutFragment extends Fragment {
                 .addPlayStore("net.golbarg.skillassessment")
                 .addWebsite("golbarg.net")
                 .addItem(getCopyRightsElement())
+                .addItem(new Element().setTitle(context.getString(R.string.version)).setIconDrawable(R.drawable.ic_info))
                 .create();
 
         linearLayoutAbout.addView(aboutPage);
