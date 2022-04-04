@@ -127,8 +127,6 @@ public class QuestionResultActivity extends AppCompatActivity {
             pieChartProgress.setCenterTextSize(18);
             pieChartProgress.getLegend().setTextColor(context.getResources().getColor(UtilController.isNightMode(context) ? R.color.white : R.color.black));
             pieChartProgress.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-            pieChartProgress.getLegend().setOrientation(Legend.LegendOrientation.VERTICAL);
-            pieChartProgress.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
             pieChartProgress.setEntryLabelColor(context.getResources().getColor(UtilController.isNightMode(context) ? R.color.white : R.color.black));
 
             pieChartProgress.invalidate();
