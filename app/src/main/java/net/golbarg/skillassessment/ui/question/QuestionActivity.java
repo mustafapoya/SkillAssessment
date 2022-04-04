@@ -78,7 +78,7 @@ public class QuestionActivity extends AppCompatActivity {
     private Button btnHandleQuestion;
 
     private CountDownTimerWithPause countDownTimer;
-    private int numberOfLife = 9;
+    private int numberOfLife = UtilController.DEFAULT_HEALTH;
     private int selectedAnswerIndex = -1;
     private int correctAnswerIndex = -1;
 
