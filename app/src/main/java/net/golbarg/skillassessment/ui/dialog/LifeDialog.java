@@ -76,7 +76,7 @@ public class LifeDialog extends DialogFragment {
                 // TODO: on publish add real ad unit
                 // real ad Unit: ca-app-pub-1361000594268534/8491545563
                 // test ad Unit: ca-app-pub-3940256099942544/5224354917
-                RewardedAd.load(context, "ca-app-pub-3940256099942544/5224354917", adRequest, new RewardedAdLoadCallback() {
+                RewardedAd.load(context, "ca-app-pub-1361000594268534/8491545563", adRequest, new RewardedAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull @NotNull RewardedAd rewardedAd) {
                         super.onAdLoaded(rewardedAd);

@@ -180,9 +180,10 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
 
     private void loadInterstitialAd() {
         AdRequest adRequest = new AdRequest.Builder().build();
+        // TODO: on publish add real ad unit
         /* real ad Unit: ca-app-pub-1361000594268534/6283312483 */
         /* test ad Unit: ca-app-pub-3940256099942544/1033173712 */
-        InterstitialAd.load(context,"ca-app-pub-3940256099942544/1033173712", adRequest,
+        InterstitialAd.load(context,"ca-app-pub-1361000594268534/6283312483", adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
