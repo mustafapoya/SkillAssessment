@@ -310,7 +310,7 @@ public class QuestionActivity extends AppCompatActivity {
             countDownTimer = null;
         }
         //91000
-        countDownTimer = new CountDownTimerWithPause(20000, 500, true) {
+        countDownTimer = new CountDownTimerWithPause(61000, 500, true) {
             @Override
             public void onTick(long millisUntilFinished) {
                 millisUntilFinished = millisUntilFinished / 1000;
