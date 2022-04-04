@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import net.golbarg.skillassessment.db.TableConfig;
 import net.golbarg.skillassessment.db.TableQuestion;
 import net.golbarg.skillassessment.db.TableQuestionAnswer;
 import net.golbarg.skillassessment.models.Config;
+import net.golbarg.skillassessment.ui.intro.IntroActivity;
 import net.golbarg.skillassessment.util.CryptUtil;
 import net.golbarg.skillassessment.util.UtilController;
 
@@ -45,18 +47,17 @@ public class SplashScreenActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-//                    String dbStatus = pref.getString(UtilController.KEY_DB_STATUS, null);
-//
-//                    if("success".equals(dbStatus)) {
-//                        showWaiting();
-//                    } else {
-//                        addDataToDatabase();
-//                    }
+                    boolean isIntroLoaded = IntroActivity.restorePrefData(getApplicationContext());
                     checkUserCredit(getApplicationContext());
                     showWaiting();
 
                     finish();
-                    startActivity(new Intent(getBaseContext(), MainActivity.class));
+                    if(isIntroLoaded) {
+                        startActivity(new Intent(getBaseContext(), MainActivity.class));
+                    } else {
+                        startActivity(new Intent(getBaseContext(), IntroActivity.class));
+                    }
+
                 } catch (Exception e) {
                     finish();
                     e.printStackTrace();

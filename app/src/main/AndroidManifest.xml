@@ -13,9 +13,11 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:largeHeap="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.SkillAssessment">
 
-        <!-- Real AdMob app ID: ca-app-pub-3540008829614888~6527468767 -->
+        <!-- Real AdMob app ID: ca-app-pub-1361000594268534~1108605916 -->
         <!-- Test AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -29,15 +31,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity android:name=".ui.intro.IntroActivity"
+            android:label="@string/app_name">
+        </activity>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+        </activity>
+        <activity
+            android:name=".ui.question.QuestionActivity"
+            android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name=".ui.question.QuestionResultActivity"
+            android:label="@string/app_name">
         </activity>
     </application>
 

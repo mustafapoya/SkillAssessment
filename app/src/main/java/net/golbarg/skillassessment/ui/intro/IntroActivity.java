@@ -1,5 +1,6 @@
 package net.golbarg.skillassessment.ui.intro;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import androidx.viewpager.widget.ViewPager;
 import net.golbarg.skillassessment.MainActivity;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.models.ScreenItem;
+import net.golbarg.skillassessment.util.UtilController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,14 +165,12 @@ public class IntroActivity extends AppCompatActivity {
     }
 
     private void savePrefsData() {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("my_prefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putBoolean("is_intro_opened", true);
-        editor.commit();
+        SharedPreferences pref = UtilController.getSharedPref(getApplicationContext(), "intro_pref");
+        UtilController.insertSharedPref(pref, "is_intro_opened", true);
     }
 
-    private boolean restorePrefData() {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("my_prefs", MODE_PRIVATE);
+    public static boolean restorePrefData(Context context) {
+        SharedPreferences pref = UtilController.getSharedPref(context, "intro_pref");
         Boolean isIntroActivityOpenedBefore = pref.getBoolean("is_intro_opened", false);
         return isIntroActivityOpenedBefore.booleanValue();
     }
