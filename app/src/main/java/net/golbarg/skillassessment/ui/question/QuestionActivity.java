@@ -78,7 +78,7 @@ public class QuestionActivity extends AppCompatActivity {
     private Button btnHandleQuestion;
 
     private CountDownTimerWithPause countDownTimer;
-    private int numberOfLife = 5000;
+    private int numberOfLife = 9;
     private int selectedAnswerIndex = -1;
     private int correctAnswerIndex = -1;
 
@@ -107,6 +107,7 @@ public class QuestionActivity extends AppCompatActivity {
         progressBarStep.setMax(questions.size());
         imgLife = findViewById(R.id.img_life);
         txtLife = findViewById(R.id.txt_life);
+        updateLifeText(numberOfLife);
         btnBookmark = findViewById(R.id.btn_bookmark);
 
         questionView = findViewById(R.id.question_view_title);
