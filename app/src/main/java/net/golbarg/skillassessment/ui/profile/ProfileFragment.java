@@ -1,11 +1,15 @@
 package net.golbarg.skillassessment.ui.profile;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -41,9 +45,11 @@ public class ProfileFragment extends Fragment {
     Context context;
     AdView mAdViewScreenBanner;
     ProgressBar progressLoading;
+    EditText editTextUsername;
     private ListView listViewQuestionResult;
     QuestionResultListAdapter questionResultListAdapter;
     ArrayList<QuestionResult> questionResultArrayList = new ArrayList<>();
+
 
     DatabaseHandler dbHandler;
     TableQuestionResult tableQuestionResult;
@@ -62,6 +68,28 @@ public class ProfileFragment extends Fragment {
 
         progressLoading = root.findViewById(R.id.progress_loading);
         progressLoading.setVisibility(View.GONE);
+
+        SharedPreferences sharedPref = UtilController.getSharedPref(getActivity(), "intro_pref");
+        String username = sharedPref.getString("user_name", "");
+
+        editTextUsername = root.findViewById(R.id.edit_text_name);
+        editTextUsername.setText(username);
+        editTextUsername.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                UtilController.insertSharedPref(sharedPref, "user_name", s.toString());
+            }
+        });
 
         TextView txtTotalTest = root.findViewById(R.id.txt_total_test);
         txtTotalTest.setText(tableQuestionResult.getCount() + " Tests tried!");
