@@ -48,4 +48,6 @@
     <string name="connect_with_us">Connect with us</string>
     <string name="version">version: 1.0</string>
     <string name="title_about">About</string>
+    <string name="donation_title">This project needs you! If you would like to support this project\'s further development, the creator of this project or the continuous maintenance of this project, feel free to donate. Thank you!</string>
+    <string name="donate">Donate</string>
 </resources>
