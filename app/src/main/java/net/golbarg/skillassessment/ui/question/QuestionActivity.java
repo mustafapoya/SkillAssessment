@@ -2,9 +2,9 @@ package net.golbarg.skillassessment.ui.question;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -78,7 +78,7 @@ public class QuestionActivity extends AppCompatActivity {
     private Button btnHandleQuestion;
 
     private CountDownTimerWithPause countDownTimer;
-    private int numberOfLife = 5;
+    private int numberOfLife = 5000;
     private int selectedAnswerIndex = -1;
     private int correctAnswerIndex = -1;
 
@@ -146,6 +146,7 @@ public class QuestionActivity extends AppCompatActivity {
 
     private void handleLifeDialog() {
         if(lifeDialog != null && !lifeDialog.isVisible()) {
+            Log.d(TAG, "handleLifeDialog: View the Life Dialog");
             countDownTimer.pause();
             lifeDialog.show(getSupportFragmentManager(), LifeDialog.TAG);
         }
@@ -169,9 +170,11 @@ public class QuestionActivity extends AppCompatActivity {
         questionResultIntent.putExtra("question_result_id", question_result_id);
         if(countDownTimer != null) {
             countDownTimer.cancel();
+            countDownTimer = null;
         }
         if(lifeDialog != null) {
             lifeDialog.dismiss();
+            lifeDialog = null;
         }
 
         loadInterstitialAd();
@@ -267,6 +270,11 @@ public class QuestionActivity extends AppCompatActivity {
             setNumberOfLife(--numberOfLife);
         }
 
+        if(getNumberOfLife() <= 0) {
+            handleLifeDialog();
+            return;
+        }
+
         Snackbar snackbar = UtilController.createSnackBar(mainLayout, context.getString(text), color, R.id.layout_footer);
         snackbar.setDuration(1200);
         snackbar.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
@@ -313,7 +321,7 @@ public class QuestionActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
 
-                if(getCurrentLife() > 0) {
+                if(getNumberOfLife() > 0) {
                     handleAnswerClick(AnswerResponseType.NO_ANSWER);
                 } else {
                     if(!lifeDialog.isVisible()) {
@@ -365,11 +373,28 @@ public class QuestionActivity extends AppCompatActivity {
         builder.setMessage("Are you Sure you want to end Test \nThe Result with not be saved?");
         builder.setPositiveButton("END", (dialog, which) -> {
             Toast.makeText(context, "Exam End", Toast.LENGTH_SHORT).show();
+            if(countDownTimer != null) {
+                countDownTimer.cancel();
+                countDownTimer = null;
+            }
             finish();
         });
         builder.setIcon(R.drawable.ic_info);
-        builder.setNegativeButton("CANCEL", null);
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(countDownTimer != null) {
+                    countDownTimer.resume();
+                }
+            }
+        });
+        builder.setCancelable(false);
         builder.show();
+
+        if(countDownTimer != null) {
+            countDownTimer.pause();
+        }
+
     }
 
     private void setSelectedAnswer(int index) {
@@ -401,24 +426,22 @@ public class QuestionActivity extends AppCompatActivity {
         tableQuestionResult = new TableQuestionResult(databaseHandler);
     }
 
-    private void updateLife(int life) {
+    private void updateLifeText(int life) {
         txtLife.setText(String.valueOf(life));
         txtLife.invalidate();
     }
 
-    public int getCurrentLife() {
+    public int getNumberOfLife() {
         return this.numberOfLife;
     }
 
     public void setNumberOfLife(int newLife) {
         if(newLife > 0) {
             this.numberOfLife = newLife;
-            updateLife(this.numberOfLife);
         } else {
             this.numberOfLife = 0;
-            updateLife(this.numberOfLife);
-            handleLifeDialog();
         }
+        updateLifeText(this.numberOfLife);
     }
 
     public CountDownTimerWithPause getCountDownTimer() {

@@ -1,6 +1,7 @@
 package net.golbarg.skillassessment.ui.dialog;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -56,7 +57,7 @@ public class LifeDialog extends DialogFragment {
         tableConfig = new TableConfig(databaseHandler);
 
         txtLifeCount = root.findViewById(R.id.txt_life_count);
-        txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getCurrentLife());
+        txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getNumberOfLife());
         btnViewAd = root.findViewById(R.id.btn_view_ad);
 
         btnEndTest = root.findViewById(R.id.btn_end_test);
@@ -64,7 +65,7 @@ public class LifeDialog extends DialogFragment {
             questionActivity.gotoFinishActivity();
         });
 
-        if(this.questionActivity.getCurrentLife() <=0) {
+        if(this.questionActivity.getNumberOfLife() <= 0) {
             this.setCancelable(false);
         }
 
@@ -98,8 +99,8 @@ public class LifeDialog extends DialogFragment {
                             // Handle the reward.
                             Log.d(TAG, "The user earned the reward.");
                             try {
-                                questionActivity.setNumberOfLife(questionActivity.getCurrentLife() + 1);
-                                txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getCurrentLife());
+                                questionActivity.setNumberOfLife(questionActivity.getNumberOfLife() + 1);
+                                txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getNumberOfLife());
                                 setCancelable(true);
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -113,6 +114,11 @@ public class LifeDialog extends DialogFragment {
         });
 
         return root;
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
     }
 
     @Override
