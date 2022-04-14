@@ -1,13 +1,11 @@
 package net.golbarg.skillassessment.ui.home;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -37,7 +35,7 @@ import net.golbarg.skillassessment.models.Config;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
 import net.golbarg.skillassessment.ui.dialog.CreditDialog;
-import net.golbarg.skillassessment.ui.question.QuestionActivity;
+import net.golbarg.skillassessment.ui.dialog.QuestionStartDialog;
 import net.golbarg.skillassessment.util.CryptUtil;
 import net.golbarg.skillassessment.util.JsonUtil;
 import net.golbarg.skillassessment.util.UtilController;
@@ -81,7 +79,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         LayoutInflater inflater = context.getLayoutInflater();
-        View rowView = inflater.inflate(R.layout.custom_list_category, null,true);
+        View rowView = inflater.inflate(R.layout.custom_list_category, null, true);
 
         Category selectedCategory = categories.get(position);
 
@@ -99,7 +97,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
 
         Category categoryInDB = tableCategory.get(selectedCategory.getId());
 
-        if(categoryInDB != null && tableQuestion.getCountOf(selectedCategory.getId()) == selectedCategory.getNumberOfQuestion()) {
+        if (categoryInDB != null && tableQuestion.getCountOf(selectedCategory.getId()) == selectedCategory.getNumberOfQuestion()) {
             btnDownload.setText(context.getResources().getString(R.string.added));
             btnDownload.setEnabled(false);
             progress.setVisibility(View.VISIBLE);
@@ -118,9 +116,11 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
                     Config credit = tableConfig.getByKey(UtilController.KEY_CREDIT);
                     int userCredit = Integer.valueOf(credit.getDecryptedValue());
 
-                    if(userCredit >= 2 && !isDownloading) {
+                    if (userCredit > 0 && !isDownloading) {
                         try {
-                            if(tableCategory.get(selectedCategory.getId()) == null || tableQuestion.getCountOf(selectedCategory.getId()) < selectedCategory.getNumberOfQuestion()) {
+                            if (tableCategory.get(selectedCategory.getId()) == null ||
+                                    tableQuestion.getCountOf(selectedCategory.getId()) < selectedCategory.getNumberOfQuestion()) {
+
                                 isDownloading = true;
                                 parentListView.setEnabled(false);
                                 new FetchCategoryQuestionDataTask(rowView, progress, btnDownload, selectedCategory).execute();
@@ -135,7 +135,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
                         CreditDialog creditDialog = new CreditDialog();
                         creditDialog.show(fragmentManager, CreditDialog.TAG);
                     }
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -144,29 +144,26 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isDownloading) {
+                if (isDownloading) {
                     UtilController.showSnackMessage(rowView, context.getString(R.string.please_wait_for_download_to_finish),
                             context.getResources().getColor(R.color.blue_600), R.id.nav_view);
                     return;
                 }
-                if(tableCategory.get(selectedCategory.getId()) != null &&
-                    tableQuestion.getCountOf(selectedCategory.getId()) == selectedCategory.getNumberOfQuestion()) {
-                    Intent categoryQuestionIntent = new Intent(context, QuestionActivity.class);
-                    categoryQuestionIntent.putExtra("category_id", categories.get(position).getId());
-
+                if (tableCategory.get(selectedCategory.getId()) != null &&
+                        tableQuestion.getCountOf(selectedCategory.getId()) == selectedCategory.getNumberOfQuestion()) {
                     loadInterstitialAd();
 
-                    if(mInterstitialAd != null) {
+                    if (mInterstitialAd != null) {
                         mInterstitialAd.show(context);
                         mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                             @Override
                             public void onAdDismissedFullScreenContent() {
                                 super.onAdDismissedFullScreenContent();
-                                context.startActivity(categoryQuestionIntent);
+                                showQuestionStartDialog(selectedCategory.getId());
                             }
                         });
                     } else {
-                        context.startActivity(categoryQuestionIntent);
+                        showQuestionStartDialog(selectedCategory.getId());
                     }
                 } else {
                     UtilController.showSnackMessage(rowView, context.getString(R.string.to_view_question_add_first),
@@ -183,7 +180,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         // TODO: on publish add real ad unit
         /* real ad Unit: ca-app-pub-1361000594268534/6283312483 */
         /* test ad Unit: ca-app-pub-3940256099942544/1033173712 */
-        InterstitialAd.load(context,"ca-app-pub-1361000594268534/6283312483", adRequest,
+        InterstitialAd.load(context, "ca-app-pub-1361000594268534/6283312483", adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
@@ -229,10 +226,10 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
 
             try {
                 publishProgress(String.valueOf(5));
-                JSONArray categories =  JsonUtil.getJSONQuestion(context);
+                JSONArray categories = JsonUtil.getJSONQuestion(context);
                 publishProgress(String.valueOf(10));
 
-                for(int categoryIndex = 0; categoryIndex < categories.length(); categoryIndex++) {
+                for (int categoryIndex = 0; categoryIndex < categories.length(); categoryIndex++) {
 
                     try {
                         JSONObject jCategoryObject = categories.getJSONObject(categoryIndex);
@@ -259,7 +256,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
 
                                 // query question answers and add to db
                                 JSONArray jAnswersArr = jQuestionObj.getJSONArray("answers");
-                                for(int answerIndex = 0; answerIndex < jAnswersArr.length(); answerIndex++) {
+                                for (int answerIndex = 0; answerIndex < jAnswersArr.length(); answerIndex++) {
                                     JSONObject jAnswerObj = jAnswersArr.getJSONObject(answerIndex);
                                     QuestionAnswer answer = QuestionAnswer.createFromJson(jAnswerObj);
                                     tableQuestionAnswer.create(answer);
@@ -294,7 +291,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
             super.onPostExecute(questionArrayList);
             isDownloading = false;
             parentListView.setEnabled(true);
-            if(successful) {
+            if (successful) {
                 progress.setProgress(100);
                 btnDownload.setEnabled(false);
                 UtilController.showSnackMessage(rowView, context.getString(R.string.added_successfully),
@@ -318,4 +315,9 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         }
     }
 
+    private void showQuestionStartDialog(int categoryId) {
+        QuestionStartDialog questionStartDialog = new QuestionStartDialog();
+        questionStartDialog.setCategoryId(categoryId);
+        questionStartDialog.show(fragmentManager, CategoryListAdapter.TAG);
+    }
 }
