@@ -18,6 +18,8 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import net.golbarg.skillassessment.MainActivity;
 import net.golbarg.skillassessment.R;
@@ -35,6 +37,7 @@ import java.util.List;
 public class QuestionResultActivity extends AppCompatActivity {
     public static final String TAG = QuestionResultActivity.class.getName();
     public Context context;
+    AdView mAdViewScreenBanner;
 
     DatabaseHandler databaseHandler;
     TableCategory tableCategory;
@@ -58,6 +61,10 @@ public class QuestionResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question_result);
         context = getApplicationContext();
+
+        mAdViewScreenBanner = findViewById(R.id.adViewScreenBanner);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdViewScreenBanner.loadAd(adRequest);
 
         databaseHandler = new DatabaseHandler(getApplicationContext());
         tableQuestionResult = new TableQuestionResult(databaseHandler);
