@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -20,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
@@ -42,7 +42,6 @@ import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
 import net.golbarg.skillassessment.models.QuestionResult;
-import net.golbarg.skillassessment.ui.dialog.LifeDialog;
 import net.golbarg.skillassessment.util.CountDownTimerWithPause;
 import net.golbarg.skillassessment.util.UtilController;
 
@@ -53,6 +52,8 @@ public class QuestionActivity extends AppCompatActivity {
     public static final String TAG = QuestionActivity.class.getName();
     public static String[] AnswerOptions = {"A", "B", "C", "D", "E", "F", "G", "H", "J"};
     private Context context;
+    AdView mAdViewScreenBanner;
+
     private int currentQuestionIndex = 0;
     private Category selectedCategory;
     private ArrayList<Question> questions = new ArrayList<>();
@@ -68,8 +69,6 @@ public class QuestionActivity extends AppCompatActivity {
     private ConstraintLayout mainLayout;
     private ImageView imgClose;
     private ProgressBar progressBarStep;
-    private ImageView imgLife;
-    private TextView txtLife;
     private ImageButton btnBookmark;
     private QuestionView questionView;
     private ArrayList<AnswerView> answerViewsList = new ArrayList<>();
@@ -78,11 +77,9 @@ public class QuestionActivity extends AppCompatActivity {
     private Button btnHandleQuestion;
 
     private CountDownTimerWithPause countDownTimer;
-    private int numberOfLife = UtilController.DEFAULT_HEALTH;
+
     private int selectedAnswerIndex = -1;
     private int correctAnswerIndex = -1;
-
-    LifeDialog lifeDialog;
 
     private InterstitialAd mInterstitialAd;
 
@@ -91,6 +88,9 @@ public class QuestionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question);
         context = getApplicationContext();
+
+        mAdViewScreenBanner = findViewById(R.id.adViewScreenBanner);
+        requestToLoadAd();
 
         Intent intent = getIntent();
         int category_id = intent.getIntExtra("category_id", 14);
@@ -105,9 +105,7 @@ public class QuestionActivity extends AppCompatActivity {
         imgClose = findViewById(R.id.img_close);
         progressBarStep = findViewById(R.id.progress_step);
         progressBarStep.setMax(questions.size());
-        imgLife = findViewById(R.id.img_life);
-        txtLife = findViewById(R.id.txt_life);
-        updateLifeText(numberOfLife);
+
         btnBookmark = findViewById(R.id.btn_bookmark);
 
         questionView = findViewById(R.id.question_view_title);
@@ -119,19 +117,11 @@ public class QuestionActivity extends AppCompatActivity {
 
         imgClose.setOnClickListener(view -> showConfirmDialog());
 
-        txtLife.setOnClickListener(view -> {
-            handleLifeDialog();
-        });
-
-        imgLife.setOnClickListener(view -> {
-            handleLifeDialog();
-        });
-
         btnBookmark.setOnClickListener(view -> handleQuestionBookmark());
 
         btnHandleQuestion.setOnClickListener(view -> {
-            if(btnHandleQuestion.getText().equals(context.getResources().getString(R.string.check))) {
-                if(selectedAnswerIndex == correctAnswerIndex) {
+            if (btnHandleQuestion.getText().equals(context.getResources().getString(R.string.check))) {
+                if (selectedAnswerIndex == correctAnswerIndex) {
                     handleAnswerClick(AnswerResponseType.CORRECT);
                 } else {
                     handleAnswerClick(AnswerResponseType.WRONG);
@@ -142,19 +132,16 @@ public class QuestionActivity extends AppCompatActivity {
         });
 
         loadQuestion();
-        lifeDialog = new LifeDialog(QuestionActivity.this);
     }
 
-    private void handleLifeDialog() {
-        if(lifeDialog != null && !lifeDialog.isVisible()) {
-            Log.d(TAG, "handleLifeDialog: View the Life Dialog");
-            countDownTimer.pause();
-            lifeDialog.show(getSupportFragmentManager(), LifeDialog.TAG);
-        }
+    private void requestToLoadAd() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdViewScreenBanner.loadAd(adRequest);
     }
 
     private void loadQuestion() {
-        if(currentQuestionIndex < questions.size()) {
+        requestToLoadAd();
+        if (currentQuestionIndex < questions.size()) {
             loadQuestionDetails(currentQuestionIndex);
             startCountDownTimer();
         } else {
@@ -163,24 +150,20 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     public void gotoFinishActivity() {
-        for(int i = currentQuestionIndex; i < questions.size(); i++) {
+        for (int i = currentQuestionIndex; i < questions.size(); i++) {
             questionResult.incrementNoAnswer();
         }
-        long question_result_id =  tableQuestionResult.createGetId(questionResult);
+        long question_result_id = tableQuestionResult.createGetId(questionResult);
         Intent questionResultIntent = new Intent(getBaseContext(), QuestionResultActivity.class);
         questionResultIntent.putExtra("question_result_id", question_result_id);
-        if(countDownTimer != null) {
+        if (countDownTimer != null) {
             countDownTimer.cancel();
             countDownTimer = null;
-        }
-        if(lifeDialog != null) {
-            lifeDialog.dismiss();
-            lifeDialog = null;
         }
 
         loadInterstitialAd();
 
-        if(mInterstitialAd != null) {
+        if (mInterstitialAd != null) {
             mInterstitialAd.show(this);
             mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                 @Override
@@ -202,7 +185,7 @@ public class QuestionActivity extends AppCompatActivity {
         // TODO: on publish add real ad unit
         /* real ad Unit: ca-app-pub-1361000594268534/6220605444 */
         /* test ad Unit: ca-app-pub-3940256099942544/1033173712 */
-        InterstitialAd.load(context,"ca-app-pub-1361000594268534/6220605444", adRequest,
+        InterstitialAd.load(context, "ca-app-pub-1361000594268534/6220605444", adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
@@ -229,14 +212,14 @@ public class QuestionActivity extends AppCompatActivity {
         UtilController.highlightQuestionText(questionView, questions.get(selectedPosition).getTitle(), selectedCategory, context);
         questions.get(selectedPosition).setAnswers(tableQuestionAnswer.getAnswersOf(questions.get(selectedPosition).getId()));
 
-        for(int i = 0; i < answerViewsList.size(); i++) {
+        for (int i = 0; i < answerViewsList.size(); i++) {
             if (i < questions.get(selectedPosition).getAnswers().size()) {
                 QuestionAnswer selectedAnswer = questions.get(selectedPosition).getAnswers().get(i);
                 AnswerView answerView = answerViewsList.get(i);
                 answerView.getTxtAnswerOption().setText(AnswerOptions[i]);
                 UtilController.highlightAnswerText(answerView, selectedAnswer.getTitle(), selectedCategory, getApplicationContext());
 
-                if(selectedAnswer.isCorrect()) {
+                if (selectedAnswer.isCorrect()) {
                     correctAnswerIndex = i;
                 }
                 int finalI = i;
@@ -256,25 +239,18 @@ public class QuestionActivity extends AppCompatActivity {
         int text;
         int color;
 
-        if(responseType == AnswerResponseType.CORRECT) {
+        if (responseType == AnswerResponseType.CORRECT) {
             text = R.string.correct;
             color = context.getResources().getColor(R.color.green_500);
             questionResult.incrementCorrectAnswer();
-        } else if(responseType == AnswerResponseType.WRONG) {
+        } else if (responseType == AnswerResponseType.WRONG) {
             text = R.string.wrong;
             color = context.getResources().getColor(R.color.red_500);
             questionResult.incrementWrongAnswer();
-            setNumberOfLife(--numberOfLife);
         } else {
             text = R.string.no_response;
             color = context.getResources().getColor(R.color.gray);
             questionResult.incrementNoAnswer();
-            setNumberOfLife(--numberOfLife);
-        }
-
-        if(getNumberOfLife() <= 0) {
-            handleLifeDialog();
-            return;
         }
 
         Snackbar snackbar = UtilController.createSnackBar(mainLayout, context.getString(text), color, R.id.layout_footer);
@@ -289,7 +265,7 @@ public class QuestionActivity extends AppCompatActivity {
             }
         });
 
-        if(responseType != AnswerResponseType.NO_ANSWER) {
+        if (responseType != AnswerResponseType.NO_ANSWER) {
             snackbar.show();
         } else {
             processQuestionAnswer();
@@ -306,7 +282,7 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     private void startCountDownTimer() {
-        if(countDownTimer != null) {
+        if (countDownTimer != null) {
             countDownTimer.cancel();
             countDownTimer = null;
         }
@@ -317,20 +293,12 @@ public class QuestionActivity extends AppCompatActivity {
                 millisUntilFinished = millisUntilFinished / 1000;
                 long minutes = millisUntilFinished / 60;
                 long seconds = millisUntilFinished % 60;
-                txtTimer.setText(String.format(Locale.ENGLISH,"%02d:%02d", minutes, seconds));
+                txtTimer.setText(String.format(Locale.ENGLISH, "%02d:%02d", minutes, seconds));
             }
 
             @Override
             public void onFinish() {
-
-                if(getNumberOfLife() > 0) {
-                    handleAnswerClick(AnswerResponseType.NO_ANSWER);
-                } else {
-                    if(!lifeDialog.isVisible()) {
-                        handleLifeDialog();
-                    }
-                }
-
+                handleAnswerClick(AnswerResponseType.NO_ANSWER);
             }
 
         };
@@ -341,9 +309,9 @@ public class QuestionActivity extends AppCompatActivity {
 
     private void handleQuestionBookmark() {
         try {
-            if(currentQuestionIndex < questions.size()) {
+            if (currentQuestionIndex < questions.size()) {
                 Bookmark isBookmarked = tableBookmark.getByQuestionId(questions.get(currentQuestionIndex).getId());
-                if(isBookmarked != null) {
+                if (isBookmarked != null) {
                     tableBookmark.delete(isBookmarked);
                     int color = context.getResources().getColor(R.color.red_500);
                     UtilController.showSnackMessage(mainLayout, context.getString(R.string.bookmark_deleted), color, R.id.layout_footer);
@@ -362,7 +330,7 @@ public class QuestionActivity extends AppCompatActivity {
 
     private void validateBookmarkStatus(Question question) {
         Bookmark isBookmarked = tableBookmark.getByQuestionId(question.getId());
-        if(isBookmarked != null) {
+        if (isBookmarked != null) {
             btnBookmark.setImageDrawable(context.getDrawable(R.drawable.ic_bookmark_yes));
         } else {
             btnBookmark.setImageDrawable(context.getDrawable(R.drawable.ic_bookmark_no));
@@ -375,7 +343,7 @@ public class QuestionActivity extends AppCompatActivity {
         builder.setMessage("Are you Sure you want to end Test \nThe Result with not be saved?");
         builder.setPositiveButton("END", (dialog, which) -> {
             Toast.makeText(context, "Exam End", Toast.LENGTH_SHORT).show();
-            if(countDownTimer != null) {
+            if (countDownTimer != null) {
                 countDownTimer.cancel();
                 countDownTimer = null;
             }
@@ -385,7 +353,7 @@ public class QuestionActivity extends AppCompatActivity {
         builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(countDownTimer != null) {
+                if (countDownTimer != null) {
                     countDownTimer.resume();
                 }
             }
@@ -393,14 +361,14 @@ public class QuestionActivity extends AppCompatActivity {
         builder.setCancelable(false);
         builder.show();
 
-        if(countDownTimer != null) {
+        if (countDownTimer != null) {
             countDownTimer.pause();
         }
 
     }
 
     private void setSelectedAnswer(int index) {
-        for(int i = 0; i < answerViewsList.size(); i++) {
+        for (int i = 0; i < answerViewsList.size(); i++) {
             answerViewsList.get(i).setSelected(i == index);
         }
     }
@@ -426,24 +394,6 @@ public class QuestionActivity extends AppCompatActivity {
         tableQuestionAnswer = new TableQuestionAnswer(databaseHandler);
         tableBookmark = new TableBookmark(databaseHandler);
         tableQuestionResult = new TableQuestionResult(databaseHandler);
-    }
-
-    private void updateLifeText(int life) {
-        txtLife.setText(String.valueOf(life));
-        txtLife.invalidate();
-    }
-
-    public int getNumberOfLife() {
-        return this.numberOfLife;
-    }
-
-    public void setNumberOfLife(int newLife) {
-        if(newLife > 0) {
-            this.numberOfLife = newLife;
-        } else {
-            this.numberOfLife = 0;
-        }
-        updateLifeText(this.numberOfLife);
     }
 
     public CountDownTimerWithPause getCountDownTimer() {
