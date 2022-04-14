@@ -26,15 +26,10 @@ import net.golbarg.skillassessment.models.QuestionPart;
 import java.io.InputStream;
 
 public class UtilController {
-    public static final String KEY_HEALTH = "KEY_HEALTH";
-    public static final int DEFAULT_HEALTH = 9;
-    public static final String KEY_SCORE = "KEY_SCORE";
-    public static final int DEFAULT_SCORE = 500;
-    public static final String KEY_SCORE_ON_TEST = "KEY_SCORE_ON_TEST";
-    public static final int DEFAULT_SCORE_ON_TEST = 30;
     public static final String KEY_DB_STATUS = "KEY_DB_STATUS";
     public static final String KEY_CREDIT = "KEY_CREDIT";
-    public static final int DEFAULT_CREDIT = 6;
+    public static final int DEFAULT_CREDIT = 5;
+    public static final int CREDIT_INCREASE = 1;
 
     public static SharedPreferences getSharedPref(Context context, String name) {
         return context.getSharedPreferences(name, Context.MODE_PRIVATE);
