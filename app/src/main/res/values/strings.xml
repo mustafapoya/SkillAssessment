@@ -51,4 +51,7 @@
     <string name="title_about">About</string>
     <string name="donation_title"></string>
     <string name="donate">Donate</string>
+    <string name="add_more_coin">Add More Coin</string>
+    <string name="get_more_coin">get more coin</string>
+    <string name="coin_dialog_title">add more coins</string>
 </resources>
