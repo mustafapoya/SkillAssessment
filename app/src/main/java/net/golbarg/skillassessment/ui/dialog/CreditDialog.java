@@ -94,10 +94,12 @@ public class CreditDialog extends DialogFragment {
                                 if(credit != null) {
                                     newCredit = Integer.parseInt(CryptUtil.decrypt(credit.getValue()));
                                 }
-                                newCredit += 2;
-                                credit.setValue(CryptUtil.encrypt(String.valueOf(newCredit)));
-                                txtCredit.setText(CryptUtil.decrypt(credit.getValue()));
-                                tableConfig.updateByKey(credit);
+                                newCredit += UtilController.CREDIT_INCREASE;
+                                if(newCredit < UtilController.DEFAULT_CREDIT) {
+                                    credit.setValue(CryptUtil.encrypt(String.valueOf(newCredit)));
+                                    txtCredit.setText(CryptUtil.decrypt(credit.getValue()));
+                                    tableConfig.updateByKey(credit);
+                                }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
