@@ -24,11 +24,7 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableConfig;
-import net.golbarg.skillassessment.models.Config;
-import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.ui.question.QuestionActivity;
-import net.golbarg.skillassessment.util.CryptUtil;
-import net.golbarg.skillassessment.util.UtilController;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -57,7 +53,7 @@ public class LifeDialog extends DialogFragment {
         tableConfig = new TableConfig(databaseHandler);
 
         txtLifeCount = root.findViewById(R.id.txt_life_count);
-        txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getNumberOfLife());
+//        txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getNumberOfLife());
         btnViewAd = root.findViewById(R.id.btn_view_ad);
 
         btnEndTest = root.findViewById(R.id.btn_end_test);
@@ -65,9 +61,9 @@ public class LifeDialog extends DialogFragment {
             questionActivity.gotoFinishActivity();
         });
 
-        if(this.questionActivity.getNumberOfLife() <= 0) {
-            this.setCancelable(false);
-        }
+//        if(this.questionActivity.getNumberOfLife() <= 0) {
+//            this.setCancelable(false);
+//        }
 
         btnViewAd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,8 +95,8 @@ public class LifeDialog extends DialogFragment {
                             // Handle the reward.
                             Log.d(TAG, "The user earned the reward.");
                             try {
-                                questionActivity.setNumberOfLife(questionActivity.getNumberOfLife() + 1);
-                                txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getNumberOfLife());
+//                                questionActivity.setNumberOfLife(questionActivity.getNumberOfLife() + 1);
+//                                txtLifeCount.setText(context.getResources().getString(R.string.number_of_life) + questionActivity.getNumberOfLife());
                                 setCancelable(true);
                             } catch (Exception e) {
                                 e.printStackTrace();
