@@ -20,7 +20,7 @@ The profile section will show your performance
 
 If you are looking for more Android app, checkout out [MustafaPoya](https://github.com/mustafapoya).
 
-# Phones
+# ScreenShots
 
 <p float="left">
   <img src="https://play-lh.googleusercontent.com/AwHjmTZ0YMmNRsF3gRq2FMwU5XslHEvUYeBQx7Lcc8wUYVa52_LsDuCpZPbBrFf-Zkk=w2560-h1440-rw" width="170" />
