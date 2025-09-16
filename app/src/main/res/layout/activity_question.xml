@@ -80,7 +80,7 @@
     </LinearLayout>
 
     <!-- TODO: on publish add real ad unit -->
-    <!-- real_id="ca-app-pub-1361000594268534/9186416225" -->
+    <!-- real_id="ca-app-pub-8976959600358837/9485430471" -->
     <!-- test_id="ca-app-pub-3940256099942544/6300978111" -->
     <com.google.android.gms.ads.AdView
         android:id="@+id/adViewScreenBanner"
@@ -89,7 +89,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-1361000594268534/9186416225"
+        ads:adUnitId="ca-app-pub-8976959600358837/9485430471"
         ads:layout_constraintEnd_toEndOf="parent"
         ads:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
