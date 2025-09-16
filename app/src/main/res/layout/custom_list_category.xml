@@ -60,7 +60,7 @@
         android:id="@+id/btn_download"
         android:layout_width="55dp"
         android:layout_height="55dp"
-        android:drawableEnd="@drawable/ic_download"
+        android:drawableEnd="@drawable/ic_lock"
         android:textColor="@color/white"
         android:drawableTint="@color/white"
         android:text="@string/add"

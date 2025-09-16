@@ -100,14 +100,18 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
         if (categoryInDB != null && tableQuestion.getCountOf(selectedCategory.getId()) == selectedCategory.getNumberOfQuestion()) {
             btnDownload.setText(context.getResources().getString(R.string.added));
             btnDownload.setEnabled(false);
+            btnDownload.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_lock_open, 0);
             progress.setVisibility(View.VISIBLE);
             progress.setProgress(100);
         } else {
             btnDownload.setText(context.getResources().getString(R.string.add));
             btnDownload.setEnabled(true);
+            btnDownload.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_lock, 0);
             progress.setVisibility(View.INVISIBLE);
             progress.setProgress(0);
         }
+
+        View rootView = context.findViewById(android.R.id.content);
 
         btnDownload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,14 +127,14 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
 
                                 isDownloading = true;
                                 parentListView.setEnabled(false);
-                                new FetchCategoryQuestionDataTask(rowView, progress, btnDownload, selectedCategory).execute();
+                                new FetchCategoryQuestionDataTask(rootView, progress, btnDownload, selectedCategory).execute();
                             }
                         } catch (Exception e) {
-                            UtilController.showSnackMessage(rowView, context.getString(R.string.add_failed_try_again),
+                            UtilController.showSnackMessage(rootView, context.getString(R.string.add_failed_try_again),
                                     context.getResources().getColor(R.color.red_500), R.id.nav_view);
                         }
                     } else {
-                        UtilController.showSnackMessage(rowView, context.getString(R.string.you_dont_have_enough_credit),
+                        UtilController.showSnackMessage(rootView, context.getString(R.string.you_dont_have_enough_credit),
                                 context.getResources().getColor(R.color.red_500), R.id.nav_view);
                         CreditDialog creditDialog = new CreditDialog();
                         creditDialog.show(fragmentManager, CreditDialog.TAG);
@@ -145,7 +149,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
             @Override
             public void onClick(View v) {
                 if (isDownloading) {
-                    UtilController.showSnackMessage(rowView, context.getString(R.string.please_wait_for_download_to_finish),
+                    UtilController.showSnackMessage(rootView, context.getString(R.string.please_wait_for_download_to_finish),
                             context.getResources().getColor(R.color.blue_600), R.id.nav_view);
                     return;
                 }
@@ -166,7 +170,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
                         showQuestionStartDialog(selectedCategory.getId());
                     }
                 } else {
-                    UtilController.showSnackMessage(rowView, context.getString(R.string.to_view_question_add_first),
+                    UtilController.showSnackMessage(rootView, context.getString(R.string.to_view_question_add_first),
                             context.getResources().getColor(R.color.green_500), R.id.nav_view);
                 }
             }
@@ -199,14 +203,14 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
     }
 
     private class FetchCategoryQuestionDataTask extends AsyncTask<String, String, ArrayList<Question>> {
-        View rowView;
+        View rootView;
         ProgressBar progress;
         Button btnDownload;
         Category selectedCategory;
         boolean successful = false;
 
-        FetchCategoryQuestionDataTask(View rowView, ProgressBar progress, Button btnDownload, Category selectedCategory) {
-            this.rowView = rowView;
+        FetchCategoryQuestionDataTask(View rootView, ProgressBar progress, Button btnDownload, Category selectedCategory) {
+            this.rootView = rootView;
             this.progress = progress;
             this.btnDownload = btnDownload;
             this.selectedCategory = selectedCategory;
@@ -294,7 +298,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
             if (successful) {
                 progress.setProgress(100);
                 btnDownload.setEnabled(false);
-                UtilController.showSnackMessage(rowView, context.getString(R.string.added_successfully),
+                UtilController.showSnackMessage(rootView, context.getString(R.string.added_successfully),
                         context.getResources().getColor(R.color.green_500), R.id.nav_view);
                 try {
                     Config credit = tableConfig.getByKey(UtilController.KEY_CREDIT);
@@ -309,7 +313,7 @@ public class CategoryListAdapter extends ArrayAdapter<Category> {
                 progress.setProgress(100);
                 progress.setProgressTintList(ColorStateList.valueOf(Color.RED));
                 btnDownload.setEnabled(true);
-                UtilController.showSnackMessage(rowView, context.getString(R.string.add_failed_try_again),
+                UtilController.showSnackMessage(rootView, context.getString(R.string.add_failed_try_again),
                         context.getResources().getColor(R.color.red_500), R.id.nav_view);
             }
         }
