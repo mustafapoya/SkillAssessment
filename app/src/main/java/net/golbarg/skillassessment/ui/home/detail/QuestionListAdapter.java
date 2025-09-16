@@ -1,8 +1,6 @@
 package net.golbarg.skillassessment.ui.home.detail;
 
 import android.app.Activity;
-import android.text.SpannableString;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 
-import com.nevidelia.library.highlight.Highlight;
-
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.models.Question;
-import net.golbarg.skillassessment.models.QuestionPart;
 import net.golbarg.skillassessment.util.UtilController;
 
 import java.util.ArrayList;

@@ -5,25 +5,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentManager;
 
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
 import net.golbarg.skillassessment.db.TableCategory;
-import net.golbarg.skillassessment.db.TableConfig;
-import net.golbarg.skillassessment.db.TableQuestion;
-import net.golbarg.skillassessment.db.TableQuestionAnswer;
 import net.golbarg.skillassessment.db.TableQuestionResult;
-import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.QuestionResult;
 import net.golbarg.skillassessment.ui.home.CategoryListAdapter;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 

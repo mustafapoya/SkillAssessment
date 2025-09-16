@@ -3,8 +3,6 @@ package net.golbarg.skillassessment.models;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 public class Category {
     private int id;
     private String title;

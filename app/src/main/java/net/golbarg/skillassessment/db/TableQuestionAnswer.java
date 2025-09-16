@@ -1,10 +1,10 @@
 package net.golbarg.skillassessment.db;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
 
 import java.util.ArrayList;
@@ -141,6 +141,7 @@ public class TableQuestionAnswer implements CRUDHandler<QuestionAnswer>{
         return count;
     }
 
+    @SuppressLint("Range")
     @Override
     public QuestionAnswer mapColumn(Cursor cursor) {
         int is_correct = Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_IS_CORRECT)));

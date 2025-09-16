@@ -47,7 +47,7 @@ public class BookmarkFragment extends Fragment {
         bookmarkQuestionListAdapter = new BookmarkQuestionListAdapter(getActivity(), bookmarksArrayList);
         listViewContents.setAdapter(bookmarkQuestionListAdapter);
 
-        new BookmarkFragment.FetchBookmarkContentDataTask().execute();
+        new FetchBookmarkContentDataTask().execute();
 
         return root;
     }

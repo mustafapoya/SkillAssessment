@@ -28,14 +28,9 @@ import com.google.android.gms.ads.AdView;
 
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.db.DatabaseHandler;
-import net.golbarg.skillassessment.db.TableCategory;
 import net.golbarg.skillassessment.db.TableQuestionResult;
-import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.PieChartData;
-import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionResult;
-import net.golbarg.skillassessment.ui.home.CategoryListAdapter;
-import net.golbarg.skillassessment.util.JsonUtil;
 import net.golbarg.skillassessment.util.UtilController;
 
 import java.util.ArrayList;

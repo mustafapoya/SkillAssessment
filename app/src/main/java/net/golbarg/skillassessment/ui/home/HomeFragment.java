@@ -109,16 +109,17 @@ public class HomeFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull @NotNull MenuItem item) {
+        int id = item.getItemId();
 
-        switch (item.getItemId()) {
-            case R.id.refresh:
-                handleDataLoading();
-                return true;
-            case R.id.credit:
-                CreditDialog creditDialog = new CreditDialog();
-                creditDialog.show(getChildFragmentManager(), CreditDialog.TAG);
-                return true;
+        if (id == R.id.refresh) {
+            handleDataLoading();
+            return true;
+        } else if (id == R.id.credit) {
+            CreditDialog creditDialog = new CreditDialog();
+            creditDialog.show(getChildFragmentManager(), CreditDialog.TAG);
+            return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 

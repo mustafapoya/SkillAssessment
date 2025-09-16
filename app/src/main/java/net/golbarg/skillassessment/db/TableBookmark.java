@@ -1,11 +1,11 @@
 package net.golbarg.skillassessment.db;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import net.golbarg.skillassessment.models.Bookmark;
-import net.golbarg.skillassessment.models.Question;
 
 import java.util.ArrayList;
 
@@ -109,6 +109,7 @@ public class TableBookmark implements CRUDHandler<Bookmark>{
         return count;
     }
 
+    @SuppressLint("Range")
     @Override
     public Bookmark mapColumn(Cursor cursor) {
         return new Bookmark(

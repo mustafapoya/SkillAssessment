@@ -1,9 +1,5 @@
 package net.golbarg.skillassessment.models;
 
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
-
 import net.golbarg.skillassessment.util.CryptUtil;
 
 import org.json.JSONException;
@@ -12,7 +8,6 @@ import org.json.JSONObject;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;

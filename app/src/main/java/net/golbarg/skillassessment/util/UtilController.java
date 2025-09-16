@@ -3,7 +3,6 @@ package net.golbarg.skillassessment.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.text.SpannableString;
@@ -19,7 +18,6 @@ import net.golbarg.skillassessment.CustomView.AnswerView;
 import net.golbarg.skillassessment.CustomView.QuestionView;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.models.Category;
-import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionCode;
 import net.golbarg.skillassessment.models.QuestionPart;
 

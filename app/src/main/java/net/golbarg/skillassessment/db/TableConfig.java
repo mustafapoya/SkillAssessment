@@ -1,5 +1,6 @@
 package net.golbarg.skillassessment.db;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -111,6 +112,7 @@ public class TableConfig implements CRUDHandler<Config> {
         return count;
     }
 
+    @SuppressLint("Range")
     @Override
     public Config mapColumn(Cursor cursor) {
         return new Config(

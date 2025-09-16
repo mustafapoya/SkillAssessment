@@ -1,5 +1,6 @@
 package net.golbarg.skillassessment.db;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -60,23 +61,27 @@ public class TableQuestionResult implements CRUDHandler<QuestionResult>{
         }
     }
 
+    @SuppressLint("Range")
     public QuestionResult getTotalResult() {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
-        String selectQuery = "select sum(correct_answer) as total_correct_answer, sum(wrong_answer) as total_wrong_answer,  sum(no_answer) as total_no_answer from question_results; ";
+        String selectQuery = "select " +
+                "COALESCE(sum(correct_answer), 0) as total_correct_answer, " +
+                "COALESCE(sum(wrong_answer), 0) as total_wrong_answer, " +
+                "COALESCE(sum(no_answer), 0) as total_no_answer " +
+                "from question_results;";
 
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        if(cursor != null && cursor.getCount() != 0) {
-            cursor.moveToFirst();
+        if(cursor != null && cursor.moveToFirst()) {
             return new QuestionResult(
                     -1,
                     -1,
-                    Integer.parseInt(cursor.getString(cursor.getColumnIndex("total_correct_answer"))),
-                    Integer.parseInt(cursor.getString(cursor.getColumnIndex("total_wrong_answer"))),
-                    Integer.parseInt(cursor.getString(cursor.getColumnIndex("total_no_answer")))
+                    cursor.getInt(cursor.getColumnIndex("total_correct_answer")),
+                    cursor.getInt(cursor.getColumnIndex("total_wrong_answer")),
+                    cursor.getInt(cursor.getColumnIndex("total_no_answer"))
             );
         } else {
-            return null;
+            return new QuestionResult(-1, -1, 0, 0, 0);
         }
     }
 
@@ -118,6 +123,7 @@ public class TableQuestionResult implements CRUDHandler<QuestionResult>{
         return count;
     }
 
+    @SuppressLint("Range")
     @Override
     public QuestionResult mapColumn(Cursor cursor) {
         return new QuestionResult(
