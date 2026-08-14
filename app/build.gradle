@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'net.golbarg.skillassessment'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "net.golbarg.skillassessment"
         minSdk 28
-        targetSdk 35
+        targetSdk 36
         versionCode 4
         versionName "1.4"
 
