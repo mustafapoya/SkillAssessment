@@ -10,8 +10,8 @@ android {
         applicationId "net.golbarg.skillassessment"
         minSdk 28
         targetSdk 36
-        versionCode 5
-        versionName "1.5"
+        versionCode 6
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", "program-question-$versionName")
@@ -19,7 +19,8 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -29,6 +30,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 
@@ -37,15 +39,16 @@ dependencies {
     implementation libs.appcompat
     implementation libs.material
     implementation libs.constraintlayout
+    implementation libs.recyclerview
+    implementation libs.viewpager2
+    implementation libs.core.splashscreen
     implementation libs.lifecycle.livedata.ktx
     implementation libs.lifecycle.viewmodel.ktx
     implementation libs.navigation.fragment
     implementation libs.navigation.ui
-    implementation libs.android.about.page
-    implementation libs.mpandroidchart
-    implementation libs.highlight
     implementation libs.glide
     implementation libs.play.services.ads
+    implementation libs.billing
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

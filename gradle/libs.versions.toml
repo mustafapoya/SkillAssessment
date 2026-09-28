@@ -6,15 +6,16 @@ espressoCore = "3.7.0"
 appcompat = "1.7.1"
 material = "1.13.0"
 constraintlayout = "2.2.1"
+recyclerview = "1.4.0"
+viewpager2 = "1.1.0"
+coreSplashscreen = "1.0.1"
 lifecycleLivedataKtx = "2.9.3"
 lifecycleViewmodelKtx = "2.9.3"
 navigationFragment = "2.9.4"
 navigationUi = "2.9.4"
-androidAboutPage = "2.0.0"
-mpandroidchart = "v3.1.0"
-highlight = "1.0.2"
 playServicesAds = "24.6.0"
 glide = "5.0.5"
+billing = "9.1.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -23,16 +24,17 @@ espresso-core = { group = "androidx.test.espresso", name = "espresso-core", vers
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
+core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
-android-about-page = { group = "io.github.medyo", name = "android-about-page", version.ref = "androidAboutPage" }
-mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
-highlight = { group = "com.github.nevidelia", name = "Highlight", version.ref = "highlight" }
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 
+billing = { group = "com.android.billingclient", name = "billing", version.ref = "billing" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-

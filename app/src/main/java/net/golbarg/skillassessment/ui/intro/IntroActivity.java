@@ -1,178 +1,138 @@
 package net.golbarg.skillassessment.ui.intro;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Html;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.view.ViewGroup;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager.widget.ViewPager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import net.golbarg.skillassessment.MainActivity;
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.models.ScreenItem;
-import net.golbarg.skillassessment.util.UtilController;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.golbarg.skillassessment.databinding.ActivityIntroBinding;
+import net.golbarg.skillassessment.databinding.ItemIntroPageBinding;
+import net.golbarg.skillassessment.util.Prefs;
+import net.golbarg.skillassessment.util.UiUtils;
 
 public class IntroActivity extends AppCompatActivity {
 
-    private ViewPager screenPager;
-    IntroViewPagerAdapter introViewPagerAdapter;
-    private LinearLayout mDotLayout;
-    private TextView[] mDots;
+    private static final class Page {
+        @StringRes final int title;
+        @StringRes final int description;
+        @DrawableRes final int icon;
 
-    Button btnNext;
-    int position = 0;
-    Button btnGetStarted;
-    Animation btnAnimation;
+        Page(int title, int description, int icon) {
+            this.title = title;
+            this.description = description;
+            this.icon = icon;
+        }
+    }
+
+    private static final Page[] PAGES = {
+            new Page(R.string.intro_1_title, R.string.intro_1_desc, 0),
+            new Page(R.string.intro_2_title, R.string.intro_2_desc, R.drawable.ic_bolt),
+            new Page(R.string.intro_3_title, R.string.intro_3_desc, R.drawable.ic_check_circle),
+            new Page(R.string.intro_4_title, R.string.intro_4_desc, R.drawable.ic_insights),
+    };
+
+    private ActivityIntroBinding binding;
+    private String enteredName = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        UiUtils.enableEdgeToEdge(this);
         super.onCreate(savedInstanceState);
+        binding = ActivityIntroBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        UiUtils.applySystemBarPadding(binding.root, true, true);
 
-        //make the activity on full screen
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        binding.pager.setAdapter(new PageAdapter());
+        new TabLayoutMediator(binding.dots, binding.pager, (tab, position) -> {
+            tab.view.setClickable(false);
+            tab.setContentDescription((position + 1) + " / " + PAGES.length);
+        }).attach();
 
-        // when this activity is about to be launch we need to check if its opened before or not
-        /*if(restorePrefData()) {
-            Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(mainActivity);
-            finish();
-        }*/
-
-
-        setContentView(R.layout.activity_intro);
-
-        //hide the action bar
-//        getSupportActionBar().hide();
-
-        btnNext = findViewById(R.id.btn_next);
-        btnGetStarted = findViewById(R.id.btn_get_started);
-        btnAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.button_animation);
-
-        // fill list screen
-        List<ScreenItem> mList = new ArrayList<>();
-        mList.add(new ScreenItem("Skill Assessment", "this Application will help you practice Programming Skills", R.drawable.golbarg_logo_blue));
-        mList.add(new ScreenItem("Categories", "Different categories to choose and practice", R.drawable.ic_java_original));
-        mList.add(new ScreenItem("Questions", "select the correct Answer and enjoy learning by practicing", R.drawable.ic_check));
-        mList.add(new ScreenItem("Performance", "watch your performance", R.drawable.ic_bar_chart));
-
-        // setup viewpager
-        screenPager = findViewById(R.id.screen_view_pager);
-        introViewPagerAdapter = new IntroViewPagerAdapter(this, mList);
-        screenPager.setAdapter(introViewPagerAdapter);
-
-        // setup dot with viewpager
-        mDotLayout = findViewById(R.id.dotsLayout);
-        addDotsIndicator(0);
-        screenPager.addOnPageChangeListener(viewListener);
-
-        btnNext.setOnClickListener(new View.OnClickListener() {
+        binding.pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onClick(View v) {
-                position = screenPager.getCurrentItem();
-
-                if (position < mList.size()) {
-                    position++;
-                    screenPager.setCurrentItem(position);
-                }
-
-                if (position == mList.size() - 1) {
-                    // TODO : show the get stated button and hide the indicator and the next button
-                    loadLastScreen();
-                }
-
+            public void onPageSelected(int position) {
+                boolean last = position == PAGES.length - 1;
+                binding.btnNext.setText(last ? R.string.get_started : R.string.next);
+                binding.btnSkip.setVisibility(last ? View.INVISIBLE : View.VISIBLE);
             }
         });
 
-        // get started button click listener
-        btnGetStarted.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(mainActivity);
-                //also we need to save a boolean value to storage so next time when the user run the app
-                // we could know that he is already check the intro screen activity
-                // I'm going to use shared preferences to that process
-                savePrefsData();
-                finish();
-            }
+        binding.btnSkip.setOnClickListener(v -> binding.pager.setCurrentItem(PAGES.length - 1));
+        binding.btnNext.setOnClickListener(v -> {
+            int current = binding.pager.getCurrentItem();
+            if (current < PAGES.length - 1) binding.pager.setCurrentItem(current + 1);
+            else finishIntro();
         });
-
     }
 
-    public void addDotsIndicator(int position) {
-        mDots = new TextView[4];
-        mDotLayout.removeAllViews();
-
-        for (int i = 0; i < mDots.length; i++) {
-            mDots[i] = new TextView(this);
-            mDots[i].setText(Html.fromHtml("&#8226"));
-            mDots[i].setTextSize(35);
-            mDots[i].setTextColor(getResources().getColor(R.color.gray));
-            mDotLayout.addView(mDots[i]);
-        }
-
-        if (mDots.length > 0) {
-            mDots[position].setTextColor(getResources().getColor(R.color.green_500));
-        }
-
+    private void finishIntro() {
+        if (!enteredName.trim().isEmpty()) Prefs.setUserName(this, enteredName);
+        Prefs.setIntroSeen(this);
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
-    ViewPager.OnPageChangeListener viewListener = new ViewPager.OnPageChangeListener() {
+    private class PageAdapter extends RecyclerView.Adapter<PageHolder> {
+        @NonNull
         @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+        public PageHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new PageHolder(ItemIntroPageBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         }
 
         @Override
-        public void onPageSelected(int position) {
-            addDotsIndicator(position);
-
-            if (position == mDots.length - 1) {
-                // TODO : show the get stated button and hide the indicator and the next button
-                loadLastScreen();
+        public void onBindViewHolder(@NonNull PageHolder holder, int position) {
+            Page page = PAGES[position];
+            ItemIntroPageBinding b = holder.binding;
+            b.txtTitle.setText(page.title);
+            b.txtDescription.setText(page.description);
+            if (page.icon == 0) {
+                b.imgIcon.setVisibility(View.GONE);
+                b.imgLogo.setVisibility(View.VISIBLE);
+                b.imgLogo.setImageResource(R.mipmap.ic_launcher_round);
+            } else {
+                b.imgLogo.setVisibility(View.GONE);
+                b.imgIcon.setVisibility(View.VISIBLE);
+                b.imgIcon.setImageResource(page.icon);
+            }
+            boolean last = position == PAGES.length - 1;
+            b.layoutName.setVisibility(last ? View.VISIBLE : View.GONE);
+            if (last) {
+                b.editName.setText(enteredName);
+                b.editName.addTextChangedListener(new TextWatcher() {
+                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+                    @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+                    @Override public void afterTextChanged(Editable s) { enteredName = s.toString(); }
+                });
             }
         }
 
         @Override
-        public void onPageScrollStateChanged(int state) {
-
+        public int getItemCount() {
+            return PAGES.length;
         }
-    };
-
-    /* show the get stated button and hide the indicator and the next button */
-    private void loadLastScreen() {
-        btnNext.setVisibility(View.INVISIBLE);
-        btnGetStarted.setVisibility(View.VISIBLE);
-        mDotLayout.setVisibility(View.INVISIBLE);
-        // TODO: add animation to get started button
-        btnGetStarted.setAnimation(btnAnimation);
-
     }
 
-    private void savePrefsData() {
-        SharedPreferences pref = UtilController.getSharedPref(getApplicationContext(), "intro_pref");
-        UtilController.insertSharedPref(pref, "is_intro_opened", true);
-    }
+    private static class PageHolder extends RecyclerView.ViewHolder {
+        final ItemIntroPageBinding binding;
 
-    public static boolean restorePrefData(Context context) {
-        SharedPreferences pref = UtilController.getSharedPref(context, "intro_pref");
-        Boolean isIntroActivityOpenedBefore = pref.getBoolean("is_intro_opened", false);
-        return isIntroActivityOpenedBefore.booleanValue();
+        PageHolder(ItemIntroPageBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
     }
-
 }

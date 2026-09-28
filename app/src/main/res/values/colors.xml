@@ -1,26 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--White Theme Color-->
-    <color name="green_50">#E2FFCD</color>
-    <color name="green_100">#AAE87E</color>
-    <color name="green_200">#80ee31</color>
-    <color name="green_500">#57cc02</color>
-    <color name="green_700">#55be08</color>
-    <color name="blue_200">#ddf3fe</color>
-    <color name="blue_500">#1cb0f6</color>
-    <color name="blue_600">#4071AA</color>
-    <color name="blue_700">#3e6189</color>
-    <color name="red_500">#CC0202</color>
+    <!-- Brand -->
+    <color name="brand_lime">#7ED321</color>
+    <color name="brand_lime_dark">#57CC02</color>
 
-    <!-- Colors for Button Style -->
-    <color name="gradient_start_color">#4C84FF</color>
-    <color name="gradient_end_color">#18a3fe</color>
+    <!-- Material 3 scheme (light), seeded from the brand green -->
+    <color name="md_primary">#3F6F0E</color>
+    <color name="md_on_primary">#FFFFFF</color>
+    <color name="md_primary_container">#C2F08E</color>
+    <color name="md_on_primary_container">#0F2000</color>
+    <color name="md_secondary">#56624B</color>
+    <color name="md_on_secondary">#FFFFFF</color>
+    <color name="md_secondary_container">#DAE7C9</color>
+    <color name="md_on_secondary_container">#141E0C</color>
+    <color name="md_tertiary">#386666</color>
+    <color name="md_on_tertiary">#FFFFFF</color>
+    <color name="md_tertiary_container">#BBEBEB</color>
+    <color name="md_on_tertiary_container">#002020</color>
+    <color name="md_error">#BA1A1A</color>
+    <color name="md_on_error">#FFFFFF</color>
+    <color name="md_error_container">#FFDAD6</color>
+    <color name="md_on_error_container">#410002</color>
+    <color name="md_surface">#F9FAF1</color>
+    <color name="md_on_surface">#1A1C16</color>
+    <color name="md_surface_variant">#E0E4D6</color>
+    <color name="md_on_surface_variant">#44483D</color>
+    <color name="md_outline">#75796C</color>
+    <color name="md_outline_variant">#C4C8BA</color>
+    <color name="md_surface_container_lowest">#FFFFFF</color>
+    <color name="md_surface_container_low">#F3F5EB</color>
+    <color name="md_surface_container">#EEF0E5</color>
+    <color name="md_surface_container_high">#E8EAE0</color>
+    <color name="md_surface_container_highest">#E2E3DA</color>
+    <color name="md_inverse_surface">#2F312A</color>
+    <color name="md_inverse_on_surface">#F1F2E8</color>
+    <color name="md_inverse_primary">#A6D475</color>
 
-    <!-- Night Theme Color-->
-    <color name="black_200">#151e27</color>
-    <color name="black_500">#212d3b</color>
-    <color name="black_700">#1a242e</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="gray">#C1C1C1</color>
+    <!-- Semantic -->
+    <color name="correct">#1B7F3B</color>
+    <color name="correct_container">#C8F2D0</color>
+    <color name="on_correct_container">#00210B</color>
+    <color name="on_correct">#FFFFFF</color>
+    <color name="wrong">#BA1A1A</color>
+    <color name="on_wrong">#FFFFFF</color>
+    <color name="wrong_container">#FFDAD6</color>
+    <color name="on_wrong_container">#410002</color>
+    <color name="skipped">#75796C</color>
+    <color name="coin">#B07800</color>
+    <color name="coin_container">#FFE7B3</color>
+    <color name="on_coin_container">#2A1800</color>
+    <color name="splash_background">#F9FAF1</color>
+
+    <!-- Code blocks use a dark palette in both themes -->
+    <color name="code_background">#1F2430</color>
+    <color name="code_text">#D5DAE3</color>
+    <color name="code_keyword">#C792EA</color>
+    <color name="code_string">#A5D6A7</color>
+    <color name="code_number">#F7B267</color>
+    <color name="code_comment">#7F8797</color>
+    <color name="code_tag">#F07178</color>
+    <color name="code_attr">#FFCB6B</color>
+    <color name="inline_code_background">#1A3F6F0E</color>
 </resources>

@@ -1,123 +1,59 @@
 package net.golbarg.skillassessment.models;
 
 public class QuestionResult {
-    private int id;
-    private int categoryId;
+    private long id;
+    private final int categoryId;
     private int correctAnswer;
     private int wrongAnswer;
     private int noAnswer;
+    private long createdAt;
+    private long durationMs;
 
-    public QuestionResult(int id, int categoryId, int correctAnswer, int wrongAnswer, int noAnswer) {
+    public QuestionResult(long id, int categoryId, int correctAnswer, int wrongAnswer, int noAnswer, long createdAt, long durationMs) {
         this.id = id;
         this.categoryId = categoryId;
         this.correctAnswer = correctAnswer;
         this.wrongAnswer = wrongAnswer;
         this.noAnswer = noAnswer;
+        this.createdAt = createdAt;
+        this.durationMs = durationMs;
     }
 
-    public QuestionResult(int categoryId, int correctAnswer, int wrongAnswer, int noAnswer) {
-        this.id = -1;
-        this.categoryId = categoryId;
-        this.correctAnswer = correctAnswer;
-        this.wrongAnswer = wrongAnswer;
-        this.noAnswer = noAnswer;
-    }
+    public long getId() { return id; }
 
-    public QuestionResult(int categoryId) {
-        this.id = -1;
-        this.categoryId = categoryId;
-        setCorrectAnswer(0);
-        setWrongAnswer(0);
-        setNoAnswer(0);
-    }
+    public void setId(long id) { this.id = id; }
 
-    public int getId() {
-        return id;
-    }
+    public int getCategoryId() { return categoryId; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public int getCorrectAnswer() { return correctAnswer; }
 
-    public int getCategoryId() {
-        return categoryId;
-    }
+    public int getWrongAnswer() { return wrongAnswer; }
 
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
-    }
+    public int getNoAnswer() { return noAnswer; }
 
-    public int getCorrectAnswer() {
-        return correctAnswer;
-    }
+    /** 0 for results recorded before version 2 of the app. */
+    public long getCreatedAt() { return createdAt; }
 
-    public void setCorrectAnswer(int correctAnswer) {
-        if(correctAnswer >= 0) {
-            this.correctAnswer = correctAnswer;
-        } else {
-            this.correctAnswer = 0;
+    public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
+
+    public long getDurationMs() { return durationMs; }
+
+    public void setDurationMs(long durationMs) { this.durationMs = durationMs; }
+
+    public void record(AnswerResponseType type) {
+        switch (type) {
+            case CORRECT: correctAnswer++; break;
+            case WRONG: wrongAnswer++; break;
+            default: noAnswer++; break;
         }
-
     }
 
-    public void incrementCorrectAnswer() {
-        this.correctAnswer++;
+    public int getTotal() {
+        return correctAnswer + wrongAnswer + noAnswer;
     }
 
-    public void decrementCorrectAnswer() {
-        this.correctAnswer--;
-    }
-
-    public int getWrongAnswer() {
-        return wrongAnswer;
-    }
-
-    public void setWrongAnswer(int wrongAnswer) {
-        if(wrongAnswer >= 0) {
-            this.wrongAnswer = wrongAnswer;
-        } else {
-            this.wrongAnswer = 0;
-        }
-
-    }
-
-    public void incrementWrongAnswer() {
-        this.wrongAnswer++;
-    }
-
-    public void decrementWrongAnswer() {
-        this.wrongAnswer--;
-    }
-
-    public int getNoAnswer() {
-        return noAnswer;
-    }
-
-    public void setNoAnswer(int noAnswer) {
-        if(noAnswer >= 0) {
-            this.noAnswer = noAnswer;
-        } else {
-            this.noAnswer = 0;
-        }
-
-    }
-
-    public void incrementNoAnswer() {
-        this.noAnswer++;
-    }
-
-    public void decrementNoAnswer() {
-        this.noAnswer--;
-    }
-
-    @Override
-    public String toString() {
-        return "ExamResult{" +
-                "id=" + id +
-                ", categoryId=" + categoryId +
-                ", correctAnswer=" + correctAnswer +
-                ", wrongAnswer=" + wrongAnswer +
-                ", noAnswer=" + noAnswer +
-                '}';
+    public int getScorePercent() {
+        int total = getTotal();
+        return total == 0 ? 0 : Math.round(correctAnswer * 100f / total);
     }
 }

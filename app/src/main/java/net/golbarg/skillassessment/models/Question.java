@@ -1,18 +1,17 @@
 package net.golbarg.skillassessment.models;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Question {
-    private int id;
-    private int categoryId;
-    private int number;
-    private String title;
-    private int numberOfCorrectAnswer;
-
-    private ArrayList<QuestionAnswer> answers;
+    private final int id;
+    private final int categoryId;
+    private final int number;
+    private final String title;
+    private final int numberOfCorrectAnswer;
+    private final List<QuestionAnswer> answers = new ArrayList<>();
 
     public Question(int id, int categoryId, int number, String title, int numberOfCorrectAnswer) {
         this.id = id;
@@ -20,73 +19,30 @@ public class Question {
         this.number = number;
         this.title = title;
         this.numberOfCorrectAnswer = numberOfCorrectAnswer;
-        this.answers = new ArrayList<>();
     }
 
-    public int getId() {
-        return id;
+    public int getId() { return id; }
+
+    public int getCategoryId() { return categoryId; }
+
+    public int getNumber() { return number; }
+
+    public String getTitle() { return title; }
+
+    public List<QuestionAnswer> getAnswers() { return answers; }
+
+    /** Positions (0-based, in display order) of the correct answers. */
+    public Set<Integer> getCorrectPositions() {
+        Set<Integer> result = new LinkedHashSet<>();
+        for (int i = 0; i < answers.size(); i++) {
+            if (answers.get(i).isCorrect()) result.add(i);
+        }
+        return result;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public int getNumberOfCorrectAnswer() {
-        return numberOfCorrectAnswer;
-    }
-
-    public void setNumberOfCorrectAnswer(int numberOfCorrectAnswer) {
-        this.numberOfCorrectAnswer = numberOfCorrectAnswer;
-    }
-
-    public ArrayList<QuestionAnswer> getAnswers() {
-        return answers;
-    }
-
-    public void setAnswers(ArrayList<QuestionAnswer> answers) {
-        this.answers = answers;
-    }
-
-    @Override
-    public String toString() {
-        return "Question{" +
-                "id=" + id +
-                ", categoryId=" + categoryId +
-                ", number=" + number +
-                ", title='" + title + '\'' +
-                ", numberOfCorrectAnswer=" + numberOfCorrectAnswer +
-                ", answers=" + answers +
-                '}';
-    }
-
-    public static Question createFromJson(JSONObject json) throws JSONException {
-        return new Question(
-                    json.getInt("id"), json.getInt("category_id"),
-                    json.getInt("number"), json.getString("title"),
-                    json.getInt("number_of_correct"));
+    /** How many answers the user has to pick. Falls back to the metadata if no answer is flagged. */
+    public int getRequiredSelections() {
+        int actual = getCorrectPositions().size();
+        return Math.max(1, actual > 0 ? actual : numberOfCorrectAnswer);
     }
 }
