@@ -1,133 +1,78 @@
 package net.golbarg.skillassessment;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.MotionEvent;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import net.golbarg.skillassessment.controller.JsonController;
-import net.golbarg.skillassessment.db.DatabaseHandler;
-import net.golbarg.skillassessment.db.TableCategory;
-import net.golbarg.skillassessment.db.TableConfig;
-import net.golbarg.skillassessment.db.TableQuestion;
-import net.golbarg.skillassessment.db.TableQuestionAnswer;
-import net.golbarg.skillassessment.models.Config;
+import net.golbarg.skillassessment.databinding.ActivitySplashBinding;
 import net.golbarg.skillassessment.ui.intro.IntroActivity;
-import net.golbarg.skillassessment.util.CryptUtil;
-import net.golbarg.skillassessment.util.UtilController;
+import net.golbarg.skillassessment.util.Prefs;
+import net.golbarg.skillassessment.util.UiUtils;
 
+/**
+ * Splash activity: displays the branded splash screen on cold start
+ * without showing the OS launcher icon, then routes to onboarding or main.
+ */
 public class SplashScreenActivity extends AppCompatActivity {
-    public static final String TAG = SplashScreenActivity.class.getName();
-    SharedPreferences pref;
 
-    boolean isActive = true;
-
-    ProgressBar progressLoading;
-    TextView txtStatus;
+    private static final long SPLASH_DURATION_MS = 1800;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private ActivitySplashBinding binding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        UiUtils.enableEdgeToEdge(this);
         super.onCreate(savedInstanceState);
-        pref = UtilController.getSharedPref(getApplicationContext(), "db_content");
-        setContentView(R.layout.activity_splash);
-        getSupportActionBar().hide();
 
-        progressLoading = findViewById(R.id.progress_loading);
-        txtStatus = findViewById(R.id.txt_status);
-        txtStatus.setText("");
+        binding = ActivitySplashBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        Thread splashThread = new Thread(){
-            @Override
-            public void run() {
-                try {
-                    boolean isIntroLoaded = IntroActivity.restorePrefData(getApplicationContext());
-                    checkUserCredit(getApplicationContext());
-                    showWaiting();
+        // Display version from build config
+        binding.txtSplashVersion.setText(getString(R.string.splash_version, BuildConfig.VERSION_NAME));
 
-                    finish();
-                    if(isIntroLoaded) {
-                        startActivity(new Intent(getBaseContext(), MainActivity.class));
-                    } else {
-                        startActivity(new Intent(getBaseContext(), IntroActivity.class));
-                    }
+        // Entrance animation for center brand
+        binding.layoutCenterBrand.setAlpha(0f);
+        binding.layoutCenterBrand.setScaleX(0.85f);
+        binding.layoutCenterBrand.setScaleY(0.85f);
+        binding.layoutCenterBrand.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(800)
+                .setInterpolator(new DecelerateInterpolator())
+                .start();
 
-                } catch (Exception e) {
-                    finish();
-                    e.printStackTrace();
-                }
-            }
+        // Subtle fade-in for bottom indicator and version
+        binding.layoutSplashBottom.setAlpha(0f);
+        binding.layoutSplashBottom.animate()
+                .alpha(1f)
+                .setDuration(600)
+                .setStartDelay(250)
+                .start();
 
-            private void showWaiting() {
-                int waitTime = 0;
+        // Delay then proceed to main or intro
+        handler.postDelayed(this::proceedToNextScreen, SPLASH_DURATION_MS);
+    }
 
-                while(waitTime <= 2) {
-                    try{
-                        sleep(1000);
-                    }catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    waitTime += 1;
-                }
-            }
-        };
-        splashThread.start();
+    private void proceedToNextScreen() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        Class<?> target = Prefs.isIntroSeen(this) ? MainActivity.class : IntroActivity.class;
+        Intent intent = new Intent(this, target);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        finish();
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if(event.getAction() == MotionEvent.ACTION_DOWN) {
-            isActive = false;
-        }
-        return true;
-    }
-
-    private void checkUserCredit(Context context) {
-        TableConfig tableConfig = new TableConfig(new DatabaseHandler(context));
-
-        if(tableConfig.getByKey(UtilController.KEY_CREDIT) == null) {
-            try {
-                Config config = new Config(UtilController.KEY_CREDIT, CryptUtil.encrypt(String.valueOf(UtilController.DEFAULT_CREDIT)));
-                tableConfig.create(config);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void addDataToDatabase() {
-        String categoryAdded = pref.getString(TableCategory.TABLE_NAME, null);
-        if(!"added".equals(categoryAdded)) {
-            txtStatus.setText("reading Categories");
-            JsonController.insertCategoriesToDB(getApplicationContext());
-            txtStatus.setText("loading Categories");
-            UtilController.insertSharedPref(pref, TableCategory.TABLE_NAME, "added");
-        }
-
-        String questionAdded = pref.getString(TableQuestion.TABLE_NAME, null);
-        if(!"added".equals(questionAdded)) {
-            txtStatus.setText("reading questions");
-            JsonController.insertQuestionsToDB(getApplicationContext());
-            txtStatus.setText("loading questions");
-            UtilController.insertSharedPref(pref, TableQuestion.TABLE_NAME, "added");
-        }
-
-        String answerAdded = pref.getString(TableQuestionAnswer.TABLE_NAME, null);
-        if(!"added".equals(answerAdded)) {
-            txtStatus.setText("reading Answers");
-            JsonController.insertAnswersToDB(getApplicationContext());
-            txtStatus.setText("loading Answers");
-            UtilController.insertSharedPref(pref, TableQuestion.TABLE_NAME, "added");
-        }
-
-        // After Successful All Data Insertion
-        txtStatus.setText("Done.");
-        UtilController.insertSharedPref(pref, UtilController.KEY_DB_STATUS, "success");
-
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
     }
 }

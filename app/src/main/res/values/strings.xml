@@ -1,57 +1,299 @@
 <resources>
     <string name="app_name">Programming Questions</string>
-    <string name="app_desc">This Application will help you in improving your programming skills to pass the tests well with great score</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
-    <string name="title_bookmark">Bookmark</string>
-    <string name="title_profile">Profile</string>
-    <string name="heart">Heart</string>
-    <string name="title">Title</string>
-    <string name="content_count">10 Questions</string>
-    <string name="no_internet_connection_try_again">No Internet Connection Try Again!</string>
-    <string name="try_again">Try Again</string>
-    <string name="category_title">Category Title</string>
-    <string name="start_test">Start Test</string>
-    <string name="description">Description</string>
-    <string name="download">Download</string>
-    <string name="add">Add</string>
-    <string name="added">Added</string>
-    <string name="add_failed_try_again">adding failed try again</string>
-    <string name="you_dont_have_enough_credit">You don\'t have enough credit</string>
-    <string name="total_credits">Total Credits</string>
-    <string name="view_ad">view ad</string>
-    <string name="to_view_question_add_first">to view questions try to add first</string>
-    <string name="added_successfully">Added Successfully</string>
-    <string name="credits">Credits</string>
-    <string name="retry">Retry</string>
-    <string name="delete">delete</string>
-    <string name="share_content">share</string>
-    <string name="share_using">share using</string>
-    <string name="bookmark_deleted">bookmark deleted</string>
-    <string name="coins">Coins</string>
-    <string name="added_to_bookmark">Added to bookmark</string>
+    <string name="app_desc">Practice real-world skill assessment questions across 58 technologies and track how you improve.</string>
+
+    <!-- Navigation -->
+    <string name="title_home">Explore</string>
+    <string name="title_bookmark">Saved</string>
+    <string name="title_profile">Progress</string>
+    <string name="title_about">About</string>
+
+    <!-- Onboarding -->
+    <string name="intro_1_title">Sharpen your skills</string>
+    <string name="intro_1_desc">Thousands of assessment-style questions across 58 languages, frameworks and tools.</string>
+    <string name="intro_2_title">Practice your way</string>
+    <string name="intro_2_desc">Pick a quick 10-question round or a full exam, with an optional timer and shuffled order.</string>
+    <string name="intro_3_title">Learn from every answer</string>
+    <string name="intro_3_desc">See the correct answer instantly, review your mistakes and save tricky questions for later.</string>
+    <string name="intro_4_title">Watch yourself improve</string>
+    <string name="intro_4_desc">Scores, accuracy and best results for every topic, all stored privately on your device.</string>
+    <string name="skip">Skip</string>
     <string name="next">Next</string>
-    <string name="finish">Finish</string>
+    <string name="get_started">Get started</string>
+
+    <!-- Home -->
+    <string name="greeting_named">Hi, %1$s</string>
+    <string name="greeting_default">Welcome back</string>
+    <string name="home_subtitle">What do you want to practice today?</string>
+    <string name="search_topics">Search topics</string>
+    <string name="filter_all">All</string>
+    <string name="filter_unlocked">Unlocked</string>
+    <string name="filter_locked">Locked</string>
+    <string name="unlock">Unlock</string>
+    <string name="unlock_cost">Unlock · %1$d</string>
+    <string name="unlock_confirm_message">Spend %1$d of your %2$d coins to unlock %3$s. Unlocked topics stay unlocked forever.</string>
+    <string name="unlocking">Unlocking…</string>
+    <string name="unlocked_successfully">%1$s unlocked</string>
+    <string name="unlock_failed">Couldn\'t unlock this topic. Please try again.</string>
+    <string name="not_enough_coins">You need %1$d coins to unlock a topic</string>
+    <string name="get_coins">Get coins</string>
+    <string name="best_score">Best %1$d%%</string>
+    <string name="not_attempted">Not attempted yet</string>
+    <string name="no_topics_found">No topics match \"%1$s\"</string>
+    <string name="no_topics_in_filter">Nothing here yet</string>
+    <string name="stat_tests">Tests</string>
+    <string name="stat_accuracy">Accuracy</string>
+    <string name="stat_topics">Topics</string>
+    <string name="coin_balance_cd">%1$d coins. Tap to get more</string>
+
+    <!-- Test setup -->
+    <string name="test_setup_questions">How many questions?</string>
+    <string name="length_quick">Quick</string>
+    <string name="length_standard">Standard</string>
+    <string name="length_full">Full exam</string>
+    <string name="timer_option">Timer</string>
+    <string name="timer_option_desc">60 seconds per question</string>
+    <string name="shuffle_option">Shuffle questions</string>
+    <string name="shuffle_option_desc">Randomize the question order</string>
+    <string name="start_test">Start test</string>
+    <string name="attempts_best">%1$s · best %2$d%%</string>
+
+    <!-- Coins -->
+    <string name="coins_title">Your coins</string>
+    <string name="coins_desc">Each topic costs %1$d coins to unlock and stays unlocked forever. Watch a short video to earn %2$d coin.</string>
+    <string name="watch_ad">Watch a video · +%1$d</string>
+    <string name="loading_ad">Loading video…</string>
+    <string name="ad_not_available">No video is available right now. Please try again in a moment.</string>
+    <string name="coins_earned">You earned %1$d coin</string>
+
+    <!-- Question -->
+    <string name="question_progress">%1$d of %2$d</string>
+    <string name="question_label">Question %1$d</string>
+    <string name="select_n_answers">Select %1$d answers</string>
+    <string name="check">Check</string>
+    <string name="continue_label">Continue</string>
+    <string name="see_results">See results</string>
+    <string name="feedback_correct">Correct!</string>
+    <string name="feedback_wrong">Not quite</string>
+    <string name="feedback_skipped">Skipped</string>
+    <string name="feedback_timeout">Time\'s up</string>
+    <string name="feedback_answer_is">Correct answer: %1$s</string>
+    <string name="quit_test_title">Quit this test?</string>
+    <string name="quit_test_message">Your progress in this test won\'t be saved.</string>
+    <string name="quit">Quit</string>
+    <string name="keep_going">Keep going</string>
+    <string name="finish_early">Finish now</string>
+    <string name="bookmark_add">Save question</string>
+    <string name="bookmark_remove">Remove from saved</string>
+    <string name="added_to_bookmark">Saved for later</string>
+    <string name="bookmark_deleted">Removed from saved</string>
+    <string name="close">Close</string>
+    <string name="undo">Undo</string>
+    <string name="image_failed">Image unavailable</string>
+
+    <!-- Result -->
+    <string name="result_excellent">Outstanding!</string>
+    <string name="result_good">Great job!</string>
+    <string name="result_ok">Good effort</string>
+    <string name="result_low">Keep practicing</string>
+    <string name="result_summary">You answered %1$d of %2$d correctly</string>
     <string name="correct">Correct</string>
     <string name="wrong">Wrong</string>
-    <string name="please_wait_for_download_to_finish">Please wait for download to be finished</string>
-    <string name="choice">Choice</string>
-    <string name="no_response">No response</string>
-    <string name="test_result">Test Result</string>
-    <string name="performance">Performance</string>
-    <string name="skip">Skip</string>
-    <string name="check">Check</string>
-    <string name="keep_practicing">Keep Practicing!</string>
-    <string name="number_of_life">Available life: </string>
-    <string name="end_test">End Test</string>
-    <string name="code">Code</string>
-    <string name="connect_with_us">Connect with us</string>
-    <string name="version">version: 1.0</string>
-    <string name="title_about">About</string>
-    <string name="donation_title">Donate</string>
-    <string name="donate">Donate</string>
-    <string name="add_more_coin">Add More Coin</string>
-    <string name="get_more_coin">get more coin</string>
-    <string name="coin_dialog_title">add more coins</string>
+    <string name="skipped">Skipped</string>
+    <string name="time_taken">Time</string>
+    <string name="review_answers">Review answers</string>
+    <string name="best_streak">Best streak: %1$d in a row</string>
+    <string name="try_again">Try again</string>
+    <string name="back_home">Done</string>
+    <string name="your_answer">Your answer: %1$s</string>
+    <string name="no_answer_given">No answer given</string>
+
+    <!-- Saved -->
+    <string name="saved_title">Saved questions</string>
+    <string name="saved_empty_title">No saved questions yet</string>
+    <string name="saved_empty_desc">Tap the bookmark icon during a test to keep a question here for revision.</string>
+    <string name="answer_label">Answer</string>
+
+    <!-- Progress -->
+    <string name="progress_title">Your progress</string>
+    <string name="your_name">Your name</string>
+    <string name="add_your_name">Add your name</string>
+    <string name="edit_name">Edit name</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="overall_accuracy">Overall accuracy</string>
+    <string name="questions_answered">Questions answered</string>
+    <string name="recent_tests">Recent tests</string>
+    <string name="history_empty_title">No tests yet</string>
+    <string name="history_empty_desc">Finish your first test and your scores will appear here.</string>
+    <string name="clear_history">Clear history</string>
+    <string name="clear_history_message">This permanently deletes all your test results.</string>
+    <string name="clear">Clear</string>
+    <string name="history_score">%1$d/%2$d correct</string>
+
+    <!-- About -->
+    <string name="about_tagline">Made by Golbarg</string>
+    <string name="version_format">Version %1$s</string>
+    <string name="section_preferences">Preferences</string>
+    <string name="section_support">Support</string>
+    <string name="section_connect">Connect with us</string>
+    <string name="theme">Theme</string>
+    <string name="sound_effects">Sound effects</string>
+    <string name="sound_effects_desc">Chimes for answers, countdown and results</string>
+    <string name="vibration">Vibration</string>
+    <string name="vibration_desc">Haptic feedback on taps and answers</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="rate_app">Rate the app</string>
+    <string name="rate_app_desc">Enjoying it? A review helps a lot</string>
+    <string name="share_app">Share with a friend</string>
+    <string name="share_app_message">I\'m practicing programming assessments with this app: %1$s</string>
+    <string name="contact_us">Send feedback</string>
+    <string name="website">Website</string>
+    <string name="facebook">Facebook</string>
+    <string name="youtube">YouTube</string>
+    <string name="copyright">© %1$d Golbarg. All rights reserved.</string>
+    <string name="no_app_to_open">No app found to open this</string>
+
+    <!-- Home: today -->
+    <string name="today_title">Today</string>
+    <string name="daily_challenge">Daily challenge</string>
+    <string name="daily_challenge_desc">%1$d mixed questions · +%2$d coin</string>
+    <string name="daily_done">Completed. Come back tomorrow!</string>
+    <string name="daily_locked">Unlock a topic to get daily challenges</string>
+    <string name="start">Start</string>
+    <string name="day_streak_zero">Start a streak today</string>
+    <string name="mistakes_review">Mistakes review</string>
+    <string name="mistakes_none">All caught up</string>
+    <string name="mixed_practice">Mixed practice</string>
+    <string name="mixed_practice_desc">All unlocked topics</string>
+    <string name="mastery_format">%1$d%% mastered</string>
+    <string name="mastered_badge">Mastered</string>
+
+    <!-- Test modes -->
+    <string name="mode_title">Mode</string>
+    <string name="mode_practice">Practice</string>
+    <string name="mode_practice_desc">See the answer after each question</string>
+    <string name="mode_exam">Exam</string>
+    <string name="mode_exam_desc">One timer for the whole test, answers revealed at the end</string>
+    <string name="exam_timer_desc">1 minute per question, for the whole exam</string>
+    <string name="next_question">Next</string>
+    <string name="finish_exam">Finish exam</string>
+    <string name="exam_time_up">Time\'s up! Your exam has been submitted.</string>
+    <string name="exam_badge">Exam</string>
+    <string name="no_review_questions">Nothing to review right now. Great work!</string>
+    <string name="unlock_topic_first">Unlock a topic first</string>
+
+    <!-- Result extras -->
+    <string name="share_result">Share result</string>
+    <string name="share_result_message">I scored %1$d%% on %2$s in Programming Questions! Can you beat it? %3$s</string>
+    <string name="share_card_score_label">%1$d of %2$d correct</string>
+    <string name="share_card_footer">Get it on Google Play</string>
+    <string name="daily_bonus_earned">Daily challenge complete · +%1$d coin</string>
+    <string name="achievement_unlocked">Achievement unlocked</string>
+    <string name="practice_mistakes">Practice mistakes</string>
+
+    <!-- Achievements -->
+    <string name="achievements">Achievements</string>
+    <string name="achievements_progress">%1$d of %2$d unlocked</string>
+    <string name="achievement_locked">Not yet unlocked</string>
+    <string name="achievement_unlocked_on">Unlocked %1$s</string>
+    <string name="ach_first_test">First steps</string>
+    <string name="ach_first_test_desc">Finish your first test</string>
+    <string name="ach_perfect">Flawless</string>
+    <string name="ach_perfect_desc">Score 100% on a test of 5+ questions</string>
+    <string name="ach_streak_5">On fire</string>
+    <string name="ach_streak_5_desc">Answer 5 questions in a row correctly</string>
+    <string name="ach_streak_10">Unstoppable</string>
+    <string name="ach_streak_10_desc">Answer 10 questions in a row correctly</string>
+    <string name="ach_day_3">Habit forming</string>
+    <string name="ach_day_3_desc">Practice 3 days in a row</string>
+    <string name="ach_day_7">Week warrior</string>
+    <string name="ach_day_7_desc">Practice 7 days in a row</string>
+    <string name="ach_day_30">Dedicated</string>
+    <string name="ach_day_30_desc">Practice 30 days in a row</string>
+    <string name="ach_daily_7">Daily regular</string>
+    <string name="ach_daily_7_desc">Complete 7 daily challenges</string>
+    <string name="ach_topics_3">Explorer</string>
+    <string name="ach_topics_3_desc">Unlock 3 topics</string>
+    <string name="ach_topics_10">Polyglot</string>
+    <string name="ach_topics_10_desc">Unlock 10 topics</string>
+    <string name="ach_answered_100">Century</string>
+    <string name="ach_answered_100_desc">Answer 100 questions</string>
+    <string name="ach_answered_500">Seasoned</string>
+    <string name="ach_answered_500_desc">Answer 500 questions</string>
+    <string name="ach_answered_1000">Veteran</string>
+    <string name="ach_answered_1000_desc">Answer 1,000 questions</string>
+    <string name="ach_master">Topic master</string>
+    <string name="ach_master_desc">Answer every question of a topic correctly</string>
+    <string name="ach_review">Comeback</string>
+    <string name="ach_review_desc">Get 25 review questions right</string>
+    <string name="ach_exam">Certified</string>
+    <string name="ach_exam_desc">Pass an exam with 70% or more</string>
+
+    <!-- Reminders -->
+    <string name="reminder">Daily reminder</string>
+    <string name="reminder_off">Off</string>
+    <string name="reminder_at">Every day at %1$s</string>
+    <string name="reminder_pick_time">Reminder time</string>
+    <string name="reminder_turn_off">Turn off</string>
+    <string name="reminder_channel">Practice reminders</string>
+    <string name="reminder_channel_desc">A daily nudge to keep your streak going</string>
+    <string name="reminder_title_streak">Keep your %1$d-day streak alive 🔥</string>
+    <string name="reminder_title">Time for a quick practice</string>
+    <string name="reminder_text">Your daily challenge is ready: %1$d questions, about two minutes.</string>
+    <string name="notifications_denied">Allow notifications in system settings to get reminders</string>
+
+    <!-- Premium -->
+    <string name="premium">Premium</string>
+    <string name="premium_title">Go Premium</string>
+    <string name="premium_desc">Remove all ads and unlock every topic for free. One-time purchase.</string>
+    <string name="premium_buy">Get Premium · %1$s</string>
+    <string name="premium_buy_no_price">Get Premium</string>
+    <string name="premium_active">Premium active. Thank you!</string>
+    <string name="premium_active_desc">No ads, and every topic unlocks for free</string>
+    <string name="premium_unavailable">Premium isn\'t available right now. Please try again later.</string>
+    <string name="premium_restore">Restore purchase</string>
+    <string name="premium_restored">Premium restored</string>
+    <string name="premium_not_found">No previous purchase found</string>
+    <string name="premium_thanks">Welcome to Premium!</string>
+    <string name="unlock_free">Unlock</string>
+
+    <!-- Widget -->
+    <string name="widget_name">Question of the day</string>
+    <string name="widget_desc">A new practice question on your home screen every day</string>
+    <string name="widget_empty">Unlock a topic in the app to get a daily question.</string>
+    <string name="widget_answer">Answer now</string>
+    <string name="widget_preview_question">Which keyword defines a function in Python?</string>
+
+    <plurals name="day_streak">
+        <item quantity="one">%d-day streak</item>
+        <item quantity="other">%d-day streak</item>
+    </plurals>
+    <plurals name="review_due">
+        <item quantity="one">%d to review</item>
+        <item quantity="other">%d to review</item>
+    </plurals>
+    <plurals name="question_count">
+        <item quantity="one">%d question</item>
+        <item quantity="other">%d questions</item>
+    </plurals>
+    <plurals name="quit_test_message_partial">
+        <item quantity="one">Quit discards this test. Finish now saves the %d question you\'ve answered.</item>
+        <item quantity="other">Quit discards this test. Finish now saves the %d questions you\'ve answered.</item>
+    </plurals>
+    <plurals name="streak_message">
+        <item quantity="one">%d in a row</item>
+        <item quantity="other">%d in a row! Keep it up</item>
+    </plurals>
+    <plurals name="tests_taken">
+        <item quantity="one">%d test</item>
+        <item quantity="other">%d tests</item>
+    </plurals>
+
+    <!-- Splash Screen -->
+    <string name="splash_tagline">Sharpen your programming skills</string>
+    <string name="splash_version">Version %1$s</string>
+    <string name="splash_publisher">Golbarg</string>
 </resources>

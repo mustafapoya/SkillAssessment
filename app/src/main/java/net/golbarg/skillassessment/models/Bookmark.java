@@ -1,39 +1,19 @@
 package net.golbarg.skillassessment.models;
 
 public class Bookmark {
-    private int id;
-    private int questionId;
+    private final int id;
+    private final Question question;
+    private final Category category;
 
-    public Bookmark(int questionId) {
-        this.questionId = questionId;
-    }
-
-    public Bookmark(int id, int questionId) {
+    public Bookmark(int id, Question question, Category category) {
         this.id = id;
-        this.questionId = questionId;
+        this.question = question;
+        this.category = category;
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public Question getQuestion() { return question; }
 
-    public int getQuestionId() {
-        return questionId;
-    }
-
-    public void setQuestionId(int questionId) {
-        this.questionId = questionId;
-    }
-
-    @Override
-    public String toString() {
-        return "Bookmark{" +
-                "id=" + id +
-                ", questionId=" + questionId +
-                '}';
-    }
+    public Category getCategory() { return category; }
 }
