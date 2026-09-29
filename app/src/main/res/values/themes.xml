@@ -42,7 +42,6 @@
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheet</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.Dialog</item>
         <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
-        <item name="bottomNavigationStyle">@style/Widget.App.BottomNav</item>
     </style>
 
     <style name="Theme.SkillAssessment" parent="Base.Theme.SkillAssessment" />
@@ -174,20 +173,6 @@
         <item name="android:background">@drawable/bg_ad_slot</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
-    </style>
-
-    <style name="Widget.App.BottomNav" parent="Widget.Material3.BottomNavigationView">
-        <item name="backgroundTint">?attr/colorSurfaceContainer</item>
-        <item name="itemActiveIndicatorStyle">@style/Widget.App.BottomNav.Indicator</item>
-        <item name="itemIconTint">@color/nav_item_icon</item>
-        <item name="itemTextColor">@color/nav_item_text</item>
-        <item name="itemTextAppearanceActive">@style/TextAppearance.App.NavLabel.Active</item>
-        <item name="itemTextAppearanceInactive">@style/TextAppearance.Material3.LabelMedium</item>
-        <item name="elevation">0dp</item>
-    </style>
-
-    <style name="Widget.App.BottomNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">?attr/colorPrimaryContainer</item>
     </style>
 
     <style name="TextAppearance.App.NavLabel.Active" parent="TextAppearance.Material3.LabelMedium">

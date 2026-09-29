@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CompactNavBar">
+        <!-- Menu resource with one item per tab (id, icon and title) -->
+        <attr name="menu" />
+    </declare-styleable>
+</resources>
