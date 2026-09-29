@@ -26,9 +26,11 @@ import net.golbarg.skillassessment.databinding.FragmentProfileBinding;
 import net.golbarg.skillassessment.databinding.ItemAchievementBinding;
 import net.golbarg.skillassessment.databinding.ItemHistoryBinding;
 import net.golbarg.skillassessment.databinding.ItemProfileHeaderBinding;
+import net.golbarg.skillassessment.databinding.ItemTopicProgressBinding;
 import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.QuestionResult;
+import net.golbarg.skillassessment.ui.home.TestSetupSheet;
 import net.golbarg.skillassessment.ui.question.QuestionResultActivity;
 import net.golbarg.skillassessment.ui.widget.StaticViewAdapter;
 import net.golbarg.skillassessment.util.Async;
@@ -37,19 +39,28 @@ import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.ProgressTracker;
 import net.golbarg.skillassessment.util.UiUtils;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class ProfileFragment extends Fragment {
+    private static final int TOPICS_COLLAPSED = 4;
 
     private static final class Data {
         QuizRepository.Stats stats;
         List<QuestionResult> results;
         Map<Integer, Category> categories = new HashMap<>();
+        List<Category> unlockedTopics = new ArrayList<>();
         List<ProgressTracker.AchievementState> achievements;
+        int[] week = new int[7];
     }
 
     private FragmentProfileBinding binding;
@@ -58,6 +69,8 @@ public class ProfileFragment extends Fragment {
     private final HistoryAdapter historyAdapter = new HistoryAdapter();
     private Data data;
     private boolean firstLoad = true;
+    private boolean topicsExpanded;
+    private boolean firstWeekLoad = true;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -98,11 +111,26 @@ public class ProfileFragment extends Fragment {
             Data d = new Data();
             d.stats = repository.getStats();
             d.results = repository.getResults();
-            for (Category c : repository.getCategories()) d.categories.put(c.getId(), c);
-            for (int id : new int[]{Category.MIXED, Category.DAILY, Category.REVIEW}) d.categories.put(id, Category.pseudo(id, 0));
+            for (Category c : repository.getCategories()) {
+                d.categories.put(c.getId(), c);
+                if (c.isUnlocked()) d.unlockedTopics.add(c);
+            }
+            // Weakest first: the topic most worth practising next leads the list.
+            Collections.sort(d.unlockedTopics, (a, b) -> a.getMasteryPercent() != b.getMasteryPercent()
+                    ? Integer.compare(a.getMasteryPercent(), b.getMasteryPercent())
+                    : a.getDisplayName().compareToIgnoreCase(b.getDisplayName()));
+            for (int id : new int[]{Category.MIXED, Category.DAILY, Category.REVIEW, Category.BOOKMARKED}) d.categories.put(id, Category.pseudo(id, 0));
             // Catch up on achievements earned before they existed (e.g. after an update).
             ProgressTracker.evaluate(requireContext().getApplicationContext(), repository);
             d.achievements = ProgressTracker.getAchievements(requireContext().getApplicationContext());
+            // Questions answered per day, oldest of the last seven days first.
+            LocalDate today = LocalDate.now();
+            ZoneId zone = ZoneId.systemDefault();
+            for (QuestionResult r : d.results) {
+                if (r.getCreatedAt() <= 0) continue;
+                long daysAgo = ChronoUnit.DAYS.between(Instant.ofEpochMilli(r.getCreatedAt()).atZone(zone).toLocalDate(), today);
+                if (daysAgo >= 0 && daysAgo < 7) d.week[6 - (int) daysAgo] += r.getTotal();
+            }
             return d;
         }, d -> {
             if (binding == null || d == null) return;
@@ -117,6 +145,9 @@ public class ProfileFragment extends Fragment {
             header.txtProfileMeta.setText(getResources().getQuantityString(R.plurals.tests_taken, s.tests, s.tests)
                     + " · " + s.unlockedTopics + " " + getString(R.string.filter_unlocked).toLowerCase(Locale.getDefault()));
             bindAchievements(d.achievements);
+            bindTopics();
+            bindWeek(d.week, firstWeekLoad);
+            firstWeekLoad = false;
             header.empty.getRoot().setVisibility(d.results.isEmpty() ? View.VISIBLE : View.GONE);
             header.btnClear.setVisibility(d.results.isEmpty() ? View.GONE : View.VISIBLE);
             historyAdapter.notifyDataSetChanged();
@@ -156,6 +187,61 @@ public class ProfileFragment extends Fragment {
             header.gridAchievements.addView(item.getRoot(), lp);
         }
         header.txtAchievementsCount.setText(getString(R.string.achievements_progress, unlocked, states.size()));
+    }
+
+    private void bindWeek(int[] week, boolean animate) {
+        String[] labels = new String[7];
+        LocalDate today = LocalDate.now();
+        int total = 0;
+        int activeDays = 0;
+        for (int i = 0; i < 7; i++) {
+            labels[i] = today.minusDays(6 - i).getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.getDefault());
+            total += week[i];
+            if (week[i] > 0) activeDays++;
+        }
+        header.weekBars.setData(week, labels, animate);
+        header.txtWeekSummary.setText(getResources().getQuantityString(R.plurals.week_questions, total, total)
+                + " · " + getResources().getQuantityString(R.plurals.active_days, activeDays, activeDays));
+    }
+
+    private void bindTopics() {
+        List<Category> topics = data.unlockedTopics;
+        header.sectionTopics.setVisibility(topics.isEmpty() ? View.GONE : View.VISIBLE);
+        header.listTopics.removeAllViews();
+        int shown = topicsExpanded ? topics.size() : Math.min(TOPICS_COLLAPSED, topics.size());
+        boolean dark = UiUtils.isNightMode(requireContext());
+        for (int i = 0; i < shown; i++) {
+            Category c = topics.get(i);
+            ItemTopicProgressBinding row = ItemTopicProgressBinding.inflate(getLayoutInflater(), header.listTopics, false);
+            GradientDrawable badge = new GradientDrawable();
+            badge.setCornerRadius(UiUtils.dp(requireContext(), 12));
+            badge.setColor(CategoryNames.badgeBackground(c.getSlug(), dark));
+            row.txtBadge.setBackground(badge);
+            row.txtBadge.setTextColor(CategoryNames.badgeForeground(c.getSlug(), dark));
+            row.txtBadge.setText(CategoryNames.monogram(c.getSlug()));
+            row.txtTitle.setText(c.getDisplayName());
+            int percent = c.getMasteryPercent();
+            row.progress.setProgressCompat(percent, false);
+            row.txtPercent.setText(percent + "%");
+            row.txtSubtitle.setText(c.getAttempts() > 0 && c.getBestScore() >= 0
+                    ? getString(R.string.topic_progress_detail, c.getMastered(), c.getNumberOfQuestion(), c.getBestScore())
+                    : getString(R.string.topic_progress_new, c.getMastered(), c.getNumberOfQuestion()));
+            row.getRoot().setContentDescription(c.getDisplayName() + ", " + row.txtSubtitle.getText());
+            row.getRoot().setOnClickListener(v -> {
+                if (getChildFragmentManager().findFragmentByTag(TestSetupSheet.TAG) == null) {
+                    TestSetupSheet.newInstance(c).show(getChildFragmentManager(), TestSetupSheet.TAG);
+                }
+            });
+            header.listTopics.addView(row.getRoot());
+        }
+        boolean collapsible = topics.size() > TOPICS_COLLAPSED;
+        header.btnTopicsMore.setVisibility(collapsible ? View.VISIBLE : View.GONE);
+        header.btnTopicsMore.setText(topicsExpanded ? getString(R.string.topics_show_less)
+                : getString(R.string.topics_show_all, topics.size()));
+        header.btnTopicsMore.setOnClickListener(v -> {
+            topicsExpanded = !topicsExpanded;
+            bindTopics();
+        });
     }
 
     private void bindName() {

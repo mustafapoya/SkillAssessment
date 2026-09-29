@@ -46,6 +46,13 @@
         <activity
             android:name=".ui.question.QuestionResultActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.study.StudyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.search.SearchActivity"
+            android:exported="false"
+            android:windowSoftInputMode="stateVisible|adjustResize" />
 
         <receiver
             android:name=".reminder.ReminderReceiver"

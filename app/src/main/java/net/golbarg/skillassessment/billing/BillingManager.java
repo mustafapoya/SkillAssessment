@@ -33,6 +33,11 @@ import java.util.List;
 public final class BillingManager {
     private static final String TAG = "BillingManager";
     public static final String PRODUCT_ID = "premium_lifetime";
+    /**
+     * Whether Premium is offered in the UI. Off while the app is free; existing purchases are still
+     * restored in the background so past buyers keep their benefits.
+     */
+    public static final boolean FOR_SALE = false;
 
     private static final String FILE = "billing";
     private static final String KEY_PREMIUM = "premium";

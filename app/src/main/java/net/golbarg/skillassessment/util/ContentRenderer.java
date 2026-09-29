@@ -117,7 +117,8 @@ public final class ContentRenderer {
         int pad = UiUtils.dp(context, 14);
         code.setPadding(pad, UiUtils.dp(context, 12), pad, UiUtils.dp(context, 12));
         code.setTypeface(Typeface.MONOSPACE);
-        code.setTextSize(style.codeSizeSp);
+        int fontSize = Prefs.isLargeCodeFont(context) ? style.codeSizeSp + 2 : style.codeSizeSp;
+        code.setTextSize(fontSize);
         code.setLineSpacing(0, 1.2f);
         code.setTextColor(ContextCompat.getColor(context, R.color.code_text));
         code.setText(CodeHighlighter.highlight(context, block.getContent(), block.getLanguage(), slug));

@@ -48,6 +48,7 @@ dependencies {
     implementation libs.navigation.ui
     implementation libs.glide
     implementation libs.play.services.ads
+    implementation libs.ump
     implementation libs.billing
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

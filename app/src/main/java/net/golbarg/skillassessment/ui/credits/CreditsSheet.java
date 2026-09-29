@@ -29,6 +29,7 @@ public class CreditsSheet extends AppBottomSheet {
     private SheetCreditsBinding binding;
     private QuizRepository repository;
     private boolean earnedThisSession;
+    private final AdManager.RewardedListener rewardedListener = this::onRewardedLoaded;
 
     @Nullable
     @Override
@@ -63,6 +64,7 @@ public class CreditsSheet extends AppBottomSheet {
 
     private void bindPremium(BillingManager.State state) {
         if (binding == null || state == null) return;
+        binding.cardPremium.setVisibility(BillingManager.FOR_SALE || state.premium ? View.VISIBLE : View.GONE);
         if (state.premium) {
             binding.txtPremiumTitle.setText(R.string.premium_active);
             binding.txtPremiumDesc.setText(R.string.premium_active_desc);
@@ -90,17 +92,19 @@ public class CreditsSheet extends AppBottomSheet {
         binding.btnWatch.setEnabled(false);
         binding.btnWatch.setText(R.string.loading_ad);
         if (!earnedThisSession) binding.txtStatus.setVisibility(View.GONE);
-        AdManager.loadRewarded(requireContext(), available -> {
-            if (binding == null) return;
-            if (available) {
-                showReady();
-            } else {
-                binding.btnWatch.setEnabled(true);
-                binding.btnWatch.setText(R.string.try_again);
-                binding.txtStatus.setVisibility(View.VISIBLE);
-                binding.txtStatus.setText(R.string.ad_not_available);
-            }
-        });
+        AdManager.loadRewarded(requireContext(), rewardedListener);
+    }
+
+    private void onRewardedLoaded(boolean available) {
+        if (binding == null) return;
+        if (available) {
+            showReady();
+        } else {
+            binding.btnWatch.setEnabled(true);
+            binding.btnWatch.setText(R.string.try_again);
+            binding.txtStatus.setVisibility(View.VISIBLE);
+            binding.txtStatus.setText(R.string.ad_not_available);
+        }
     }
 
     private void showReady() {
@@ -137,6 +141,7 @@ public class CreditsSheet extends AppBottomSheet {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        AdManager.cancelRewardedListener(rewardedListener);
         binding = null;
     }
 }

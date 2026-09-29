@@ -41,6 +41,10 @@ public class QuizViewModel extends AndroidViewModel {
     private static final long TICK_MS = 250L;
     private static final int DEFAULT_MIXED_LENGTH = 15;
     private static final int MAX_REVIEW_LENGTH = 20;
+    /** Questions in the free preview of a locked topic. */
+    public static final int PREVIEW_LENGTH = 5;
+    /** Result id reported for a finished preview, which is never saved. */
+    public static final long PREVIEW_RESULT_ID = -2;
 
     public enum Phase { LOADING, ANSWERING, REVEALED, EMPTY }
 
@@ -94,6 +98,14 @@ public class QuizViewModel extends AndroidViewModel {
     private boolean saving;
     private int version;
 
+    private boolean preview;
+    private int startLength;
+    private boolean startShuffle;
+    private boolean hintUsed;
+    private boolean abandoned;
+    /** Options removed by the 50/50 hint on the current question. */
+    private final Set<Integer> hidden = new HashSet<>();
+
     private final Runnable tick = new Runnable() {
         @Override
         public void run() {
@@ -126,13 +138,22 @@ public class QuizViewModel extends AndroidViewModel {
      * @param categoryId a topic id, or {@link Category#MIXED}, {@link Category#DAILY} or {@link Category#REVIEW}
      * @param length     number of questions; 0 means all (or the mode's default)
      */
-    public void start(int categoryId, int length, boolean timer, boolean shuffle, boolean examMode) {
+    public void start(int categoryId, int length, boolean timer, boolean shuffle, boolean examMode, boolean previewMode) {
         if (started) return;
         started = true;
         timerEnabled = timer;
-        exam = examMode;
+        exam = examMode && !previewMode;
+        preview = previewMode;
+        startLength = length;
+        startShuffle = shuffle;
         Async.run(null, () -> {
             List<Question> loaded;
+            if (preview) {
+                loaded = repository.getPreviewQuestions(categoryId, PREVIEW_LENGTH);
+                slugs = repository.getSlugs();
+                category = repository.getCategory(categoryId);
+                return loaded;
+            }
             switch (categoryId) {
                 case Category.DAILY:
                     loaded = repository.getMixedQuestions(ProgressTracker.DAILY_QUESTIONS, ProgressTracker.dailySeed());
@@ -142,6 +163,10 @@ public class QuizViewModel extends AndroidViewModel {
                     break;
                 case Category.REVIEW:
                     loaded = repository.getReviewQuestions(length > 0 ? length : MAX_REVIEW_LENGTH);
+                    break;
+                case Category.BOOKMARKED:
+                    loaded = repository.getBookmarkedQuestions(length > 0 ? length : 0);
+                    if (shuffle) Collections.shuffle(loaded);
                     break;
                 default:
                     loaded = repository.getQuestions(categoryId);
@@ -169,6 +194,80 @@ public class QuizViewModel extends AndroidViewModel {
             beginQuestion();
             if (timerEnabled && exam) startTimer(timerTotalMs);
         });
+    }
+
+    /** Continues the test saved in {@link QuizSession}; shows the empty state if it can't be restored. */
+    public void resume() {
+        if (started) return;
+        started = true;
+        QuizSession session = QuizSession.load(getApplication());
+        if (session == null) {
+            phase = Phase.EMPTY;
+            publish();
+            return;
+        }
+        timerEnabled = session.timer;
+        exam = session.exam;
+        startLength = session.length;
+        startShuffle = session.shuffle;
+        hintUsed = session.hintUsed;
+        Async.run(null, () -> {
+            List<Question> loaded = repository.getQuestionsInOrder(session.questionIds);
+            bookmarked.addAll(repository.getBookmarkedQuestionIds());
+            slugs = repository.getSlugs();
+            category = session.categoryId < 0 ? Category.pseudo(session.categoryId, loaded.size()) : repository.getCategory(session.categoryId);
+            return loaded;
+        }, loaded -> {
+            // A topic removed or reset since then can't be continued faithfully.
+            if (loaded == null || category == null || loaded.size() != session.questionIds.size()) {
+                QuizSession.clear(getApplication());
+                phase = Phase.EMPTY;
+                publish();
+                return;
+            }
+            questions = loaded;
+            result = new QuestionResult(-1, category.getId(), 0, 0, 0, session.createdAt, 0);
+            for (ResultItem item : session.answers) {
+                result.record(item.getOutcome());
+                answers.add(item);
+            }
+            streak = session.streak;
+            bestStreak = session.bestStreak;
+            activeAccumulated = session.activeMs;
+            activeSince = SystemClock.elapsedRealtime();
+            index = answers.size();
+            timerTotalMs = exam ? TIME_PER_QUESTION_MS * questions.size() : TIME_PER_QUESTION_MS;
+            beginQuestion();
+            if (timerEnabled && exam) startTimer(Math.max(1000, session.examRemainingMs));
+        });
+    }
+
+    /** Stores the test so it can be continued later. Previews and finished tests aren't kept. */
+    private void saveSession() {
+        if (preview || abandoned || saving || result == null || questions.isEmpty()) return;
+        if (phase != Phase.ANSWERING && phase != Phase.REVEALED) return;
+        if (answers.size() >= questions.size()) return;
+        QuizSession s = new QuizSession();
+        s.categoryId = category.getId();
+        s.length = startLength;
+        s.timer = timerEnabled;
+        s.shuffle = startShuffle;
+        s.exam = exam;
+        for (Question q : questions) s.questionIds.add(q.getId());
+        s.answers.addAll(answers);
+        s.streak = streak;
+        s.bestStreak = bestStreak;
+        s.activeMs = activeAccumulated;
+        s.createdAt = result.getCreatedAt();
+        s.examRemainingMs = exam ? remainingMs : 0;
+        s.hintUsed = hintUsed;
+        s.save(getApplication());
+    }
+
+    /** The user quit on purpose: nothing to continue later. */
+    public void abandon() {
+        abandoned = true;
+        QuizSession.clear(getApplication());
     }
 
     // region Getters used for rendering
@@ -213,6 +312,28 @@ public class QuizViewModel extends AndroidViewModel {
 
     public int getAnsweredCount() { return answers.size(); }
 
+    public boolean isPreview() { return preview; }
+
+    /** Setup this test was started with, so "Try again" can repeat it (also after resuming). */
+    public int getStartLength() { return startLength; }
+
+    public boolean isStartShuffle() { return startShuffle; }
+
+    /** Correct answers so far; used for the preview summary, which has no result screen. */
+    public int getCorrectCount() { return result == null ? 0 : result.getCorrectAnswer(); }
+
+    /** Options removed by the 50/50 hint on the current question. */
+    public Set<Integer> getHidden() { return Collections.unmodifiableSet(hidden); }
+
+    /** One hint per practice test, on a question with at least two wrong options. */
+    public boolean canUseHint() {
+        Question q = getCurrentQuestion();
+        if (q == null || exam || preview || hintUsed || phase != Phase.ANSWERING) return false;
+        return q.getAnswers().size() - q.getCorrectPositions().size() >= 2;
+    }
+
+    public boolean isHintUsed() { return hintUsed; }
+
     /** Consecutive correct answers ending with the current question. */
     public int getStreak() { return streak; }
 
@@ -224,7 +345,7 @@ public class QuizViewModel extends AndroidViewModel {
 
     public void toggleOption(int position) {
         Question q = getCurrentQuestion();
-        if (phase != Phase.ANSWERING || q == null) return;
+        if (phase != Phase.ANSWERING || q == null || hidden.contains(position)) return;
         int required = q.getRequiredSelections();
         if (required == 1) {
             selected.clear();
@@ -261,13 +382,35 @@ public class QuizViewModel extends AndroidViewModel {
         advance();
     }
 
+    /** 50/50: removes half of the wrong options (rounded up) from the current question. */
+    public void useHint() {
+        if (!canUseHint()) return;
+        Question q = getCurrentQuestion();
+        Set<Integer> correct = q.getCorrectPositions();
+        List<Integer> wrong = new ArrayList<>();
+        for (int i = 0; i < q.getAnswers().size(); i++) if (!correct.contains(i)) wrong.add(i);
+        Collections.shuffle(wrong);
+        int remove = (wrong.size() + 1) / 2;
+        hidden.addAll(wrong.subList(0, remove));
+        selected.removeAll(hidden);
+        hintUsed = true;
+        publish();
+    }
+
     /** Saves the questions answered so far and ends the test. */
     public void finish() {
         if (saving || result == null) return;
         saving = true;
         stopTimer();
         pauseActiveClock();
+        QuizSession.clear(getApplication());
+        if (preview) {
+            // Previews are a taste of a locked topic: nothing is recorded.
+            finished.setValue(new FinishInfo(PREVIEW_RESULT_ID, new ProgressTracker.Outcome()));
+            return;
+        }
         result.setDurationMs(activeAccumulated);
+        result.setExam(exam);
         List<ResultItem> items = new ArrayList<>(answers);
         int best = bestStreak;
         boolean isExam = exam;
@@ -299,6 +442,7 @@ public class QuizViewModel extends AndroidViewModel {
             pausedTimer = true;
         }
         pauseActiveClock();
+        saveSession();
     }
 
     public void onScreenVisible() {
@@ -323,6 +467,7 @@ public class QuizViewModel extends AndroidViewModel {
         phase = Phase.ANSWERING;
         reveal = Reveal.NONE;
         selected.clear();
+        hidden.clear();
         publish();
         if (timerEnabled && !exam) startTimer(TIME_PER_QUESTION_MS);
     }

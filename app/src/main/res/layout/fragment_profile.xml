@@ -16,6 +16,7 @@
         android:paddingBottom="16dp" />
 
     <FrameLayout
+        style="@style/Widget.App.AdSlot"
         android:id="@+id/ad_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

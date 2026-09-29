@@ -47,6 +47,7 @@ public final class CategoryNames {
         OVERRIDES.put("mixed-practice", "Mixed practice");
         OVERRIDES.put("daily-challenge", "Daily challenge");
         OVERRIDES.put("mistakes-review", "Mistakes review");
+        OVERRIDES.put("bookmarked-questions", "Saved questions");
 
         MONOGRAMS.put("c#", "C#");
         MONOGRAMS.put("c++", "C++");
@@ -62,6 +63,94 @@ public final class CategoryNames {
         MONOGRAMS.put("mixed-practice", "MX");
         MONOGRAMS.put("daily-challenge", "DC");
         MONOGRAMS.put("mistakes-review", "RV");
+        MONOGRAMS.put("bookmarked-questions", "SV");
+    }
+
+    public enum Domain {
+        ALL(net.golbarg.skillassessment.R.string.domain_all),
+        LANGUAGES(net.golbarg.skillassessment.R.string.domain_languages),
+        FRONTEND(net.golbarg.skillassessment.R.string.domain_frontend),
+        BACKEND(net.golbarg.skillassessment.R.string.domain_backend),
+        MOBILE(net.golbarg.skillassessment.R.string.domain_mobile),
+        DATABASES(net.golbarg.skillassessment.R.string.domain_databases),
+        CLOUD_DEVOPS(net.golbarg.skillassessment.R.string.domain_cloud_devops),
+        AI_DATA(net.golbarg.skillassessment.R.string.domain_ai_data),
+        TOOLS_OTHER(net.golbarg.skillassessment.R.string.domain_tools);
+
+        public final int titleRes;
+
+        Domain(int titleRes) {
+            this.titleRes = titleRes;
+        }
+    }
+
+    public static Domain getDomain(String slug) {
+        if (slug == null) return Domain.TOOLS_OTHER;
+        switch (slug) {
+            case "c":
+            case "c#":
+            case "c++":
+            case "go":
+            case "java":
+            case "kotlin":
+            case "php":
+            case "python":
+            case "r":
+            case "rust":
+            case "scala":
+            case "swift":
+            case "objective-c":
+            case "vba":
+                return Domain.LANGUAGES;
+
+            case "html":
+            case "css":
+            case "javascript":
+            case "react":
+            case "angular":
+            case "jquery":
+            case "front-end-development":
+                return Domain.FRONTEND;
+
+            case "node.js":
+            case "django":
+            case "spring-framework":
+            case "dotnet-framework":
+            case "ruby-on-rails":
+            case "rest-api":
+                return Domain.BACKEND;
+
+            case "android":
+            case "unity":
+                return Domain.MOBILE;
+
+            case "mysql":
+            case "t-sql":
+            case "mongodb":
+            case "nosql":
+            case "microsoft-access":
+                return Domain.DATABASES;
+
+            case "aws":
+            case "aws-lambda":
+            case "google-cloud-platform":
+            case "microsoft-azure":
+            case "git":
+            case "linux":
+            case "bash":
+            case "it-operations":
+            case "cybersecurity":
+                return Domain.CLOUD_DEVOPS;
+
+            case "machine-learning":
+            case "matlab":
+            case "hadoop":
+            case "microsoft-power-bi":
+                return Domain.AI_DATA;
+
+            default:
+                return Domain.TOOLS_OTHER;
+        }
     }
 
     private CategoryNames() {

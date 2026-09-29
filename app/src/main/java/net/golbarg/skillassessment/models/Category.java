@@ -8,6 +8,7 @@ public class Category {
     public static final int MIXED = -1;
     public static final int DAILY = -2;
     public static final int REVIEW = -3;
+    public static final int BOOKMARKED = -4;
 
     private final int id;
     private final String slug;
@@ -23,9 +24,12 @@ public class Category {
         this.numberOfQuestion = numberOfQuestion;
     }
 
-    /** A synthetic topic for mixed, daily and review tests. */
+    /** A synthetic topic for mixed, daily, review and bookmarked tests. */
     public static Category pseudo(int id, int questionCount) {
-        String slug = id == DAILY ? "daily-challenge" : id == REVIEW ? "mistakes-review" : "mixed-practice";
+        String slug = id == DAILY ? "daily-challenge"
+                : id == REVIEW ? "mistakes-review"
+                : id == BOOKMARKED ? "bookmarked-questions"
+                : "mixed-practice";
         Category category = new Category(id, slug, questionCount);
         category.setUnlocked(true);
         return category;

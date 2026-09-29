@@ -1,5 +1,7 @@
 package net.golbarg.skillassessment.models;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,6 +14,7 @@ public class Question {
     private final String title;
     private final int numberOfCorrectAnswer;
     private final List<QuestionAnswer> answers = new ArrayList<>();
+    @Nullable private String explanation;
 
     public Question(int id, int categoryId, int number, String title, int numberOfCorrectAnswer) {
         this.id = id;
@@ -30,6 +33,14 @@ public class Question {
     public String getTitle() { return title; }
 
     public List<QuestionAnswer> getAnswers() { return answers; }
+
+    /** Why the correct answer is correct; null until the content provides one. */
+    @Nullable
+    public String getExplanation() { return explanation; }
+
+    public void setExplanation(@Nullable String explanation) {
+        this.explanation = explanation == null || explanation.trim().isEmpty() ? null : explanation.trim();
+    }
 
     /** Positions (0-based, in display order) of the correct answers. */
     public Set<Integer> getCorrectPositions() {

@@ -25,6 +25,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.billing.BillingManager;
 import net.golbarg.skillassessment.databinding.ActivityQuestionBinding;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
@@ -45,6 +46,10 @@ public class QuestionActivity extends AppCompatActivity {
     private static final String EXTRA_TIMER = "timer";
     private static final String EXTRA_SHUFFLE = "shuffle";
     private static final String EXTRA_EXAM = "exam";
+    private static final String EXTRA_RESUME = "resume";
+    private static final String EXTRA_PREVIEW = "preview";
+    /** Returned when a finished preview asks to unlock its topic. */
+    public static final String EXTRA_UNLOCK_CATEGORY = "unlock_category";
 
     private ActivityQuestionBinding binding;
     private QuizViewModel vm;
@@ -52,6 +57,8 @@ public class QuestionActivity extends AppCompatActivity {
     private int renderedQuestionId = -1;
     private QuizViewModel.Reveal lastReveal = QuizViewModel.Reveal.NONE;
     private boolean dialogShowing;
+    /** A rewarded video for the hint is on screen; the question timer must stay paused. */
+    private boolean rewardedShowing;
     private ColorStateList defaultButtonTint;
     private ColorStateList defaultButtonText;
     private MaterialShapeDrawable panelBackground;
@@ -77,6 +84,16 @@ public class QuestionActivity extends AppCompatActivity {
                 .putExtra(EXTRA_EXAM, exam);
     }
 
+    /** Continues the test saved in {@link QuizSession}. */
+    public static Intent resumeIntent(Context context) {
+        return new Intent(context, QuestionActivity.class).putExtra(EXTRA_RESUME, true);
+    }
+
+    /** A few free questions from a locked topic; nothing is recorded. */
+    public static Intent previewIntent(Context context, int categoryId, boolean timer) {
+        return intent(context, categoryId, QuizViewModel.PREVIEW_LENGTH, timer, true, false).putExtra(EXTRA_PREVIEW, true);
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         UiUtils.enableEdgeToEdge(this);
@@ -93,9 +110,16 @@ public class QuestionActivity extends AppCompatActivity {
 
         vm = new ViewModelProvider(this).get(QuizViewModel.class);
         Intent intent = getIntent();
-        vm.start(intent.getIntExtra(EXTRA_CATEGORY, -1), intent.getIntExtra(EXTRA_LENGTH, 0),
-                intent.getBooleanExtra(EXTRA_TIMER, true), intent.getBooleanExtra(EXTRA_SHUFFLE, true),
-                intent.getBooleanExtra(EXTRA_EXAM, false));
+        boolean preview = intent.getBooleanExtra(EXTRA_PREVIEW, false);
+        // After the process was killed in the background, pick up the saved snapshot instead of starting over.
+        boolean restoredProcess = savedInstanceState != null && !preview && QuizSession.load(this) != null;
+        if (intent.getBooleanExtra(EXTRA_RESUME, false) || restoredProcess) {
+            vm.resume();
+        } else {
+            vm.start(intent.getIntExtra(EXTRA_CATEGORY, -1), intent.getIntExtra(EXTRA_LENGTH, 0),
+                    intent.getBooleanExtra(EXTRA_TIMER, true), intent.getBooleanExtra(EXTRA_SHUFFLE, true),
+                    intent.getBooleanExtra(EXTRA_EXAM, false), preview);
+        }
         // After a rotation the current reveal was already celebrated; don't replay it.
         if (savedInstanceState != null) lastReveal = vm.getReveal();
         lastStreakShown = vm.getStreak();
@@ -108,6 +132,7 @@ public class QuestionActivity extends AppCompatActivity {
                     .setAnchorView(binding.panel)
                     .show();
         });
+        binding.btnHint.setOnClickListener(v -> offerHint());
         binding.btnSkip.setOnClickListener(v -> vm.skip());
         binding.btnPrimary.setOnClickListener(v -> {
             if (vm.getPhase() == QuizViewModel.Phase.ANSWERING) vm.check();
@@ -125,8 +150,12 @@ public class QuestionActivity extends AppCompatActivity {
         vm.getTimeLeft().observe(this, this::renderTimer);
         vm.getFinished().observe(this, this::openResult);
 
-        AdManager.loadBanner(this, binding.adContainer, AdManager.Banner.QUESTION);
-        AdManager.preloadInterstitial(this, AdManager.Interstitial.TEST_FINISH);
+        // No banner here: an ad beside the answer buttons invites accidental taps.
+        AdManager.preloadInterstitial(this);
+        // The optional 50/50 hint is paid for with a rewarded video; load one early.
+        if (!preview && !intent.getBooleanExtra(EXTRA_EXAM, false) && !BillingManager.isPremium(this)) {
+            AdManager.loadRewarded(this, null);
+        }
     }
 
     @Override
@@ -175,7 +204,8 @@ public class QuestionActivity extends AppCompatActivity {
         boolean active = phase == QuizViewModel.Phase.ANSWERING || phase == QuizViewModel.Phase.REVEALED;
         binding.scroll.setVisibility(active ? View.VISIBLE : View.INVISIBLE);
         binding.panel.setVisibility(active ? View.VISIBLE : View.GONE);
-        binding.btnBookmark.setVisibility(active ? View.VISIBLE : View.INVISIBLE);
+        binding.btnBookmark.setVisibility(active && !vm.isPreview() ? View.VISIBLE : View.INVISIBLE);
+        binding.btnHint.setVisibility(active && !vm.isExam() && !vm.isPreview() ? View.VISIBLE : View.GONE);
         binding.timerRing.setVisibility(active && vm.isTimerEnabled() ? View.VISIBLE : View.GONE);
         binding.txtCounter.setVisibility(active ? View.VISIBLE : View.INVISIBLE);
         Question question = vm.getCurrentQuestion();
@@ -199,19 +229,32 @@ public class QuestionActivity extends AppCompatActivity {
                 : UiUtils.color(this, com.google.android.material.R.attr.colorOnSurfaceVariant)));
         binding.btnBookmark.setContentDescription(getString(bookmarked ? R.string.bookmark_remove : R.string.bookmark_add));
 
+        boolean hintReady = vm.canUseHint();
+        binding.btnHint.setEnabled(hintReady);
+        binding.btnHint.setAlpha(hintReady ? 1f : 0.38f);
+        binding.btnHint.setContentDescription(getString(vm.isHintUsed() ? R.string.hint_used : R.string.hint_title));
+
         Set<Integer> selected = vm.getSelected();
         Set<Integer> correct = question.getCorrectPositions();
+        Set<Integer> hidden = vm.getHidden();
         for (int i = 0; i < optionViews.size(); i++) {
             OptionView option = optionViews.get(i);
             if (phase == QuizViewModel.Phase.ANSWERING) {
-                option.setState(selected.contains(i) ? OptionView.State.SELECTED : OptionView.State.NORMAL);
+                option.setState(hidden.contains(i) ? OptionView.State.DIMMED
+                        : selected.contains(i) ? OptionView.State.SELECTED : OptionView.State.NORMAL);
             } else if (correct.contains(i)) {
                 option.setState(selected.contains(i) ? OptionView.State.CORRECT : OptionView.State.MISSED);
             } else {
                 option.setState(selected.contains(i) ? OptionView.State.WRONG : OptionView.State.DIMMED);
             }
-            option.setEnabled(phase == QuizViewModel.Phase.ANSWERING);
+            option.setEnabled(phase == QuizViewModel.Phase.ANSWERING && !hidden.contains(i));
         }
+
+        boolean explain = phase == QuizViewModel.Phase.REVEALED && question.getExplanation() != null;
+        if (explain && binding.cardExplanation.getVisibility() != View.VISIBLE) {
+            ContentRenderer.render(binding.explanationContent, question.getExplanation(), vm.getSlug(question), ContentRenderer.Style.BODY, null);
+        }
+        binding.cardExplanation.setVisibility(explain ? View.VISIBLE : View.GONE);
 
         renderPanel(phase, question, selected);
     }
@@ -228,7 +271,9 @@ public class QuestionActivity extends AppCompatActivity {
         String topic = CategoryNames.displayName(slug);
         binding.txtTopic.setText(category.isPseudo() ? topic + " · " + category.getDisplayName() : topic);
         String number = getString(R.string.question_label, vm.getIndex() + 1);
-        binding.txtQuestionNumber.setText(vm.isExam() ? number + " · " + getString(R.string.exam_badge) : number);
+        if (vm.isExam()) number += " · " + getString(R.string.exam_badge);
+        else if (vm.isPreview()) number += " · " + getString(R.string.preview_badge);
+        binding.txtQuestionNumber.setText(number);
         ContentRenderer.render(binding.questionContent, question.getTitle(), slug, ContentRenderer.Style.QUESTION, null);
 
         int required = question.getRequiredSelections();
@@ -435,7 +480,10 @@ public class QuestionActivity extends AppCompatActivity {
                 .setTitle(R.string.quit_test_title)
                 .setMessage(R.string.quit_test_message)
                 .setPositiveButton(R.string.keep_going, null)
-                .setNegativeButton(R.string.quit, (d, w) -> finish())
+                .setNegativeButton(R.string.quit, (d, w) -> {
+                    vm.abandon();
+                    finish();
+                })
                 .setOnDismissListener(d -> {
                     dialogShowing = false;
                     if (!isFinishing()) vm.onScreenVisible();
@@ -447,8 +495,73 @@ public class QuestionActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /** Offers the 50/50 hint: free with Premium, otherwise after an opt-in rewarded video. */
+    private void offerHint() {
+        if (!vm.canUseHint()) return;
+        if (BillingManager.isPremium(this)) {
+            vm.useHint();
+            Feedback.haptic(binding.getRoot(), Feedback.Haptic.LIGHT);
+            return;
+        }
+        dialogShowing = true;
+        vm.onScreenHidden();
+        boolean ready = AdManager.isRewardedReady();
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+                .setIcon(R.drawable.ic_lightbulb)
+                .setTitle(R.string.hint_title)
+                .setMessage(ready ? getString(R.string.hint_message) : getString(R.string.hint_message) + "\n\n" + getString(R.string.hint_unavailable))
+                .setNegativeButton(R.string.cancel, null)
+                .setOnDismissListener(d -> {
+                    // While the video plays the clock stays stopped; it restarts when the ad closes.
+                    if (rewardedShowing) return;
+                    dialogShowing = false;
+                    if (!isFinishing()) vm.onScreenVisible();
+                });
+        if (ready) {
+            builder.setPositiveButton(R.string.hint_watch, (d, w) -> {
+                rewardedShowing = true;
+                AdManager.showRewarded(this, () -> {
+                    vm.useHint();
+                    Feedback.play(Feedback.Sound.UNLOCK);
+                }, () -> {
+                    rewardedShowing = false;
+                    dialogShowing = false;
+                    if (!isFinishing()) vm.onScreenVisible();
+                });
+            });
+        } else {
+            AdManager.loadRewarded(this, null);
+        }
+        builder.show();
+    }
+
+    /** Previews have no result screen: show the score and offer to unlock the topic. */
+    private void showPreviewSummary() {
+        Category category = vm.getCategory();
+        if (category == null) {
+            finish();
+            return;
+        }
+        Feedback.play(Feedback.Sound.COMPLETE);
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.preview_done_title)
+                .setMessage(getString(R.string.preview_done_message, vm.getCorrectCount(), vm.getCount(),
+                        category.getDisplayName(), category.getNumberOfQuestion()))
+                .setCancelable(false)
+                .setNegativeButton(R.string.not_now, (d, w) -> finish())
+                .setPositiveButton(R.string.preview_unlock, (d, w) -> {
+                    setResult(RESULT_OK, new Intent().putExtra(EXTRA_UNLOCK_CATEGORY, category.getId()));
+                    finish();
+                })
+                .show();
+    }
+
     private void openResult(QuizViewModel.FinishInfo info) {
         if (info == null) return;
+        if (info.resultId == QuizViewModel.PREVIEW_RESULT_ID) {
+            showPreviewSummary();
+            return;
+        }
         if (info.resultId < 0) {
             finish();
             return;
@@ -456,8 +569,12 @@ public class QuestionActivity extends AppCompatActivity {
         if (vm.isExamTimedOut()) {
             Snackbar.make(binding.getRoot(), R.string.exam_time_up, Snackbar.LENGTH_SHORT).show();
         }
-        Intent resultIntent = QuestionResultActivity.intent(this, info.resultId, getIntent().getExtras(), vm.getBestStreak(), info.outcome);
-        AdManager.showInterstitial(this, AdManager.Interstitial.TEST_FINISH, () -> {
+        // Built from the running test rather than the launch intent, which may have been a "resume".
+        Category category = vm.getCategory();
+        Bundle testArgs = category == null ? null : intent(this, category.getId(), vm.getStartLength(), vm.isTimerEnabled(),
+                vm.isStartShuffle(), vm.isExam()).getExtras();
+        Intent resultIntent = QuestionResultActivity.intent(this, info.resultId, testArgs, vm.getBestStreak(), info.outcome);
+        AdManager.showInterstitialAfterTest(this, vm.getAnsweredCount(), () -> {
             startActivity(resultIntent);
             finish();
         });

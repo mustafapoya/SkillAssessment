@@ -2,12 +2,14 @@ package net.golbarg.skillassessment.ui.about;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,12 +31,18 @@ import com.google.android.material.timepicker.TimeFormat;
 
 import net.golbarg.skillassessment.BuildConfig;
 import net.golbarg.skillassessment.R;
+import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.billing.BillingManager;
 import net.golbarg.skillassessment.databinding.FragmentAboutBinding;
+import net.golbarg.skillassessment.db.BackupManager;
+import net.golbarg.skillassessment.db.ContentUpdater;
 import net.golbarg.skillassessment.databinding.ViewSettingRowBinding;
 import net.golbarg.skillassessment.databinding.ViewSettingSwitchRowBinding;
 import net.golbarg.skillassessment.reminder.ReminderScheduler;
+import net.golbarg.skillassessment.util.Async;
 import net.golbarg.skillassessment.util.Feedback;
+import net.golbarg.skillassessment.util.GoalPicker;
+import net.golbarg.skillassessment.widget.DailyQuestionWidget;
 import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.UiUtils;
 
@@ -42,7 +50,7 @@ import java.util.Calendar;
 
 public class AboutFragment extends Fragment {
     private static final String PACKAGE = "net.golbarg.skillassessment";
-    private static final String EMAIL = "contact@golbarg.net";
+    public static final String EMAIL = "contact@golbarg.net";
     private static final String WEBSITE = "https://golbarg.net";
     private static final String FACEBOOK = "https://www.facebook.com/golbargnet";
     private static final String YOUTUBE = "https://www.youtube.com/channel/UCooKZ969-pMyYN0WAbOUaAg";
@@ -54,6 +62,8 @@ public class AboutFragment extends Fragment {
 
     private FragmentAboutBinding binding;
     private ActivityResultLauncher<String> notificationPermission;
+    private ActivityResultLauncher<String> createBackup;
+    private ActivityResultLauncher<String[]> openBackup;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,6 +71,45 @@ public class AboutFragment extends Fragment {
         notificationPermission = registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
             if (granted) pickReminderTime();
             else if (binding != null) UiUtils.snackbar(binding.getRoot(), R.string.notifications_denied, Snackbar.LENGTH_LONG).show();
+        });
+        createBackup = registerForActivityResult(new ActivityResultContracts.CreateDocument("application/json"), uri -> {
+            if (uri == null) return;
+            Async.run(this, () -> {
+                try {
+                    BackupManager.export(requireContext(), uri);
+                    return true;
+                } catch (Exception e) {
+                    Log.e("AboutFragment", "Backup failed", e);
+                    return false;
+                }
+            }, ok -> {
+                if (binding != null) UiUtils.snackbar(binding.getRoot(), Boolean.TRUE.equals(ok) ? R.string.backup_saved : R.string.backup_export_failed, Snackbar.LENGTH_LONG).show();
+            });
+        });
+        openBackup = registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+            if (uri == null || binding == null) return;
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.backup_import_confirm_title)
+                    .setMessage(R.string.backup_import_confirm_message)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.backup_restore, (d, w) -> restoreBackup(uri))
+                    .show();
+        });
+    }
+
+    private void restoreBackup(Uri uri) {
+        Context app = requireContext().getApplicationContext();
+        Async.run(this, () -> {
+            try {
+                BackupManager.restore(app, uri);
+                return true;
+            } catch (Exception e) {
+                Log.e("AboutFragment", "Restore failed", e);
+                return false;
+            }
+        }, ok -> {
+            if (Boolean.TRUE.equals(ok)) DailyQuestionWidget.refresh(app);
+            if (binding != null) UiUtils.snackbar(binding.getRoot(), Boolean.TRUE.equals(ok) ? R.string.backup_restored : R.string.backup_failed, Snackbar.LENGTH_LONG).show();
         });
     }
 
@@ -77,6 +126,9 @@ public class AboutFragment extends Fragment {
         binding.txtCopyright.setText(getString(R.string.copyright, Calendar.getInstance().get(Calendar.YEAR)));
 
         row(binding.rowTheme, R.drawable.ic_contrast, getString(R.string.theme), themeLabel(), v -> chooseTheme());
+        bindGoalRow();
+        toggle(binding.rowFontSize, R.drawable.ic_format_size, R.string.font_size, R.string.font_size_desc,
+                Prefs.isLargeCodeFont(requireContext()), on -> Prefs.setLargeCodeFont(requireContext(), on));
         toggle(binding.rowSound, R.drawable.ic_volume, R.string.sound_effects, R.string.sound_effects_desc,
                 Prefs.isSoundEnabled(requireContext()), on -> {
                     Prefs.setSoundEnabled(requireContext(), on);
@@ -96,6 +148,15 @@ public class AboutFragment extends Fragment {
             if (binding == null) return;
             UiUtils.snackbar(binding.getRoot(), owned ? R.string.premium_restored : R.string.premium_not_found, Snackbar.LENGTH_SHORT).show();
         }));
+
+        bindPrivacyRow();
+
+        row(binding.rowBackup, R.drawable.ic_upload, getString(R.string.backup_export), getString(R.string.backup_export_desc),
+                v -> createBackup.launch("skill-assessment-backup-" + java.time.LocalDate.now() + ".json"));
+        row(binding.rowRestoreBackup, R.drawable.ic_download, getString(R.string.backup_import), getString(R.string.backup_import_desc),
+                v -> openBackup.launch(new String[]{"application/json", "application/octet-stream", "text/plain"}));
+        bindContentRow();
+        binding.rowContentUpdates.getRoot().setOnClickListener(v -> checkContent());
 
         row(binding.rowRate, R.drawable.ic_star, getString(R.string.rate_app), getString(R.string.rate_app_desc), v -> rate());
         row(binding.rowShare, R.drawable.ic_share, getString(R.string.share_app), null, v -> share());
@@ -133,7 +194,47 @@ public class AboutFragment extends Fragment {
                 }
             });
         });
-        binding.rowRestore.getRoot().setVisibility(state.premium ? View.GONE : View.VISIBLE);
+        // While Premium isn't sold, only past buyers see the section (as "Premium active").
+        boolean showSection = BillingManager.FOR_SALE || state.premium;
+        binding.txtPremiumHeader.setVisibility(showSection ? View.VISIBLE : View.GONE);
+        binding.cardPremium.setVisibility(showSection ? View.VISIBLE : View.GONE);
+        binding.rowRestore.getRoot().setVisibility(BillingManager.FOR_SALE && !state.premium ? View.VISIBLE : View.GONE);
+    }
+
+    private void bindGoalRow() {
+        row(binding.rowGoal, R.drawable.ic_flag, getString(R.string.daily_goal),
+                GoalPicker.label(requireContext(), Prefs.getDailyGoal(requireContext())),
+                v -> GoalPicker.show(requireContext(), () -> {
+                    if (binding != null) bindGoalRow();
+                }));
+    }
+
+    private void bindContentRow() {
+        long last = ContentUpdater.getLastCheck(requireContext());
+        String subtitle = last > 0 ? getString(R.string.content_updates_desc, UiUtils.formatDate(last)) : getString(R.string.content_updates_never);
+        row(binding.rowContentUpdates, R.drawable.ic_sync, getString(R.string.content_updates), subtitle, v -> checkContent());
+    }
+
+    private void checkContent() {
+        binding.rowContentUpdates.txtSubtitle.setVisibility(View.VISIBLE);
+        binding.rowContentUpdates.txtSubtitle.setText(R.string.content_checking);
+        binding.rowContentUpdates.getRoot().setEnabled(false);
+        Context app = requireContext().getApplicationContext();
+        Async.run(this, () -> ContentUpdater.check(app), status -> {
+            if (binding == null) return;
+            binding.rowContentUpdates.getRoot().setEnabled(true);
+            bindContentRow();
+            int message = status == ContentUpdater.Status.UPDATED ? R.string.content_updated
+                    : status == ContentUpdater.Status.UP_TO_DATE ? R.string.content_up_to_date : R.string.content_failed;
+            UiUtils.snackbar(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
+        });
+    }
+
+    private void bindPrivacyRow() {
+        boolean required = AdManager.isPrivacyOptionsRequired(requireContext());
+        binding.rowPrivacy.getRoot().setVisibility(required ? View.VISIBLE : View.GONE);
+        row(binding.rowPrivacy, R.drawable.ic_privacy, getString(R.string.ad_privacy), getString(R.string.ad_privacy_desc),
+                v -> AdManager.showPrivacyOptions(requireActivity(), null));
     }
 
     private void bindReminder() {

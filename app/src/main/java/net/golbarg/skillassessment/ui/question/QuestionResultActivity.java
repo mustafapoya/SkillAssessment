@@ -13,9 +13,12 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.databinding.ActivityQuestionResultBinding;
+import net.golbarg.skillassessment.databinding.DialogEditNameBinding;
 import net.golbarg.skillassessment.databinding.ItemResultHeaderBinding;
 import net.golbarg.skillassessment.databinding.ViewProgressBannerBinding;
 import net.golbarg.skillassessment.databinding.ViewStatTileBinding;
@@ -32,6 +35,7 @@ import net.golbarg.skillassessment.util.ProgressTracker;
 import net.golbarg.skillassessment.util.ShareCard;
 import net.golbarg.skillassessment.util.UiUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +46,7 @@ public class QuestionResultActivity extends AppCompatActivity {
     private static final String EXTRA_DAY_STREAK = "day_streak";
     private static final String EXTRA_BONUS = "bonus_coins";
     private static final String EXTRA_ACHIEVEMENTS = "achievements";
+    private static final String EXTRA_GOAL_REACHED = "goal_reached";
 
     private static final class Data {
         QuestionResult result;
@@ -72,6 +77,7 @@ public class QuestionResultActivity extends AppCompatActivity {
         if (outcome != null) {
             intent.putExtra(EXTRA_DAY_STREAK, outcome.dayStreakIncreased ? outcome.dayStreak : 0);
             intent.putExtra(EXTRA_BONUS, outcome.bonusCoins);
+            intent.putExtra(EXTRA_GOAL_REACHED, outcome.goalReached);
             String[] names = new String[outcome.newAchievements.size()];
             for (int i = 0; i < names.length; i++) names[i] = outcome.newAchievements.get(i).name();
             intent.putExtra(EXTRA_ACHIEVEMENTS, names);
@@ -98,6 +104,8 @@ public class QuestionResultActivity extends AppCompatActivity {
 
         long resultId = getIntent().getLongExtra(EXTRA_RESULT_ID, -1);
         QuizRepository repository = QuizRepository.get(this);
+        reviewAdapter.setBookmarkListener((qId, bookmarked) -> Async.io(() -> repository.setBookmarked(qId, bookmarked)));
+
         Async.run(this, () -> {
             Data data = new Data();
             data.result = repository.getResult(resultId);
@@ -111,7 +119,10 @@ public class QuestionResultActivity extends AppCompatActivity {
                 finish();
                 return;
             }
-            bind(data, savedInstanceState == null);
+            Async.run(this, repository::getBookmarkedQuestionIds, ids -> {
+                reviewAdapter.setBookmarkedIds(ids);
+                bind(data, savedInstanceState == null);
+            });
         });
 
         AdManager.loadBanner(this, binding.adContainer, AdManager.Banner.RESULT);
@@ -151,6 +162,9 @@ public class QuestionResultActivity extends AppCompatActivity {
         binding.btnShare.setVisibility(View.VISIBLE);
         binding.btnShare.setOnClickListener(v -> ShareCard.share(this, r, data.category.getDisplayName(), Math.max(bestStreak, 0)));
 
+        header.btnCertificate.setVisibility(ShareCard.earnsCertificate(r) ? View.VISIBLE : View.GONE);
+        header.btnCertificate.setOnClickListener(v -> withName(name -> ShareCard.shareCertificate(this, r, data.category.getDisplayName(), name)));
+
         boolean hasMistakes = r.getWrongAnswer() + r.getNoAnswer() > 0;
         header.btnPracticeMistakes.setVisibility(hasMistakes ? View.VISIBLE : View.GONE);
         header.btnPracticeMistakes.setOnClickListener(v -> {
@@ -177,8 +191,34 @@ public class QuestionResultActivity extends AppCompatActivity {
             finish();
         });
 
+        int totalCount = data.items.size();
+        int mistakesCount = r.getWrongAnswer() + r.getNoAnswer();
+        int correctCount = r.getCorrectAnswer();
+
+        header.chipReviewAll.setText(getString(R.string.filter_review_all, totalCount));
+        header.chipReviewMistakes.setText(getString(R.string.filter_review_mistakes, mistakesCount));
+        header.chipReviewCorrect.setText(getString(R.string.filter_review_correct, correctCount));
+
+        header.chipGroupReview.setOnCheckedStateChangeListener((group, checkedIds) -> applyReviewFilter(data));
+
         header.txtReviewTitle.setVisibility(data.items.isEmpty() ? View.GONE : View.VISIBLE);
-        reviewAdapter.setItems(data.items, data.slugs);
+        header.chipGroupReview.setVisibility(data.items.isEmpty() ? View.GONE : View.VISIBLE);
+        applyReviewFilter(data);
+    }
+
+    private void applyReviewFilter(Data data) {
+        int checked = header.chipGroupReview.getCheckedChipId();
+        List<ResultItem> filtered = new ArrayList<>();
+        List<Integer> positions = new ArrayList<>();
+        for (int i = 0; i < data.items.size(); i++) {
+            ResultItem item = data.items.get(i);
+            boolean isCorrect = item.getOutcome() == net.golbarg.skillassessment.models.AnswerResponseType.CORRECT;
+            if (checked == R.id.chip_review_mistakes && isCorrect) continue;
+            if (checked == R.id.chip_review_correct && !isCorrect) continue;
+            filtered.add(item);
+            positions.add(i);
+        }
+        reviewAdapter.setItems(filtered, positions, data.slugs);
     }
 
     /** Daily bonus, day streak and new achievements, only right after finishing a test. */
@@ -188,6 +228,9 @@ public class QuestionResultActivity extends AppCompatActivity {
         int bonus = intent.getIntExtra(EXTRA_BONUS, 0);
         if (bonus > 0) {
             addBanner(R.drawable.ic_today, getString(R.string.today_title), getString(R.string.daily_bonus_earned, bonus));
+        }
+        if (intent.getBooleanExtra(EXTRA_GOAL_REACHED, false)) {
+            addBanner(R.drawable.ic_flag, getString(R.string.daily_goal), getString(R.string.goal_reached_banner));
         }
         int dayStreak = intent.getIntExtra(EXTRA_DAY_STREAK, 0);
         if (dayStreak >= 2) {
@@ -215,6 +258,32 @@ public class QuestionResultActivity extends AppCompatActivity {
                 child.animate().alpha(1f).translationY(0).setStartDelay(700L + i * 120L).setDuration(300).start();
             }
         }
+    }
+
+    private interface NameCallback {
+        void onName(String name);
+    }
+
+    /** Certificates need a name: use the profile name, or ask for one once and remember it. */
+    private void withName(NameCallback callback) {
+        String saved = Prefs.getUserName(this);
+        if (!saved.isEmpty()) {
+            callback.onName(saved);
+            return;
+        }
+        DialogEditNameBinding dialog = DialogEditNameBinding.inflate(getLayoutInflater());
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.certificate_name_prompt)
+                .setView(dialog.getRoot())
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.get_certificate, (d, w) -> {
+                    String name = dialog.editName.getText() == null ? "" : dialog.editName.getText().toString().trim();
+                    if (name.isEmpty()) return;
+                    Prefs.setUserName(this, name);
+                    callback.onName(name);
+                })
+                .show();
+        dialog.editName.requestFocus();
     }
 
     private void addBanner(int icon, String overline, String title) {

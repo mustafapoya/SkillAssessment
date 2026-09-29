@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * that existing users keep their unlocked topics, coins, bookmarks and results on upgrade.
  */
 public final class DatabaseHandler extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "skill_assessment_db";
 
     public static final String T_CONFIG = "configs";
@@ -50,6 +50,7 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + T_RESULT + " (id INTEGER PRIMARY KEY, category_id INTEGER, correct_answer INTEGER, wrong_answer INTEGER, no_answer INTEGER)");
         upgradeToV2(db);
         upgradeToV3(db);
+        upgradeToV4(db);
     }
 
     @Override
@@ -59,6 +60,9 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
         }
         if (oldVersion < 3) {
             upgradeToV3(db);
+        }
+        if (oldVersion < 4) {
+            upgradeToV4(db);
         }
     }
 
@@ -70,6 +74,14 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_answers_question ON " + T_ANSWER + "(question_id)");
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_bookmarks_question ON " + T_BOOKMARK + "(question_id)");
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_result_items_result ON " + T_RESULT_ITEM + "(result_id)");
+    }
+
+    /** Answer explanations (delivered by content updates) and which results were exams. */
+    private static void upgradeToV4(SQLiteDatabase db) {
+        db.execSQL("ALTER TABLE " + T_QUESTION + " ADD COLUMN explanation TEXT");
+        db.execSQL("ALTER TABLE " + T_RESULT + " ADD COLUMN exam INTEGER NOT NULL DEFAULT 0");
+        // An interrupted import in an older version could insert some answers twice.
+        db.execSQL("DELETE FROM " + T_ANSWER + " WHERE id NOT IN (SELECT MIN(id) FROM " + T_ANSWER + " GROUP BY question_id, number, title)");
     }
 
     /** Spaced-repetition queue: missed questions come back after growing intervals (Leitner boxes). */

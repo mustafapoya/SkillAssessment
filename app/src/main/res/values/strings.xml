@@ -27,6 +27,7 @@
     <string name="home_subtitle">What do you want to practice today?</string>
     <string name="search_topics">Search topics</string>
     <string name="filter_all">All</string>
+    <string name="filter_any_status">Any status</string>
     <string name="filter_unlocked">Unlocked</string>
     <string name="filter_locked">Locked</string>
     <string name="unlock">Unlock</string>
@@ -258,6 +259,23 @@
     <string name="premium_restored">Premium restored</string>
     <string name="premium_not_found">No previous purchase found</string>
     <string name="premium_thanks">Welcome to Premium!</string>
+    <string name="this_week">This week</string>
+    <plurals name="week_questions">
+        <item quantity="one">%d question</item>
+        <item quantity="other">%d questions</item>
+    </plurals>
+    <plurals name="active_days">
+        <item quantity="one">%d active day</item>
+        <item quantity="other">%d active days</item>
+    </plurals>
+    <string name="your_topics">Your topics</string>
+    <string name="your_topics_hint">Weakest first</string>
+    <string name="topic_progress_detail">%1$d of %2$d mastered · best %3$d%%</string>
+    <string name="topic_progress_new">%1$d of %2$d mastered · not tested yet</string>
+    <string name="topics_show_all">Show all %1$d</string>
+    <string name="topics_show_less">Show less</string>
+    <string name="ad_privacy">Ad privacy choices</string>
+    <string name="ad_privacy_desc">Review how ads use your data</string>
     <string name="unlock_free">Unlock</string>
 
     <!-- Widget -->
@@ -296,4 +314,139 @@
     <string name="splash_tagline">Sharpen your programming skills</string>
     <string name="splash_version">Version %1$s</string>
     <string name="splash_publisher">Golbarg</string>
+
+    <!-- Domain Categories -->
+    <string name="domain_all">All topics</string>
+    <string name="domain_languages">Languages</string>
+    <string name="domain_frontend">Frontend</string>
+    <string name="domain_backend">Backend</string>
+    <string name="domain_mobile">Mobile</string>
+    <string name="domain_databases">Databases</string>
+    <string name="domain_cloud_devops">Cloud &amp; DevOps</string>
+    <string name="domain_ai_data">AI &amp; Data</string>
+    <string name="domain_tools">Tools &amp; More</string>
+
+    <!-- Bookmark Practice & Search -->
+    <string name="practice_saved">Practice Saved</string>
+    <string name="practice_saved_desc">%1$d questions saved for review</string>
+    <string name="search_saved">Search saved questions…</string>
+    <string name="no_saved_match">No saved questions match \"%1$s\"</string>
+    <string name="copy_question">Copy question</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="more_options">More options</string>
+    <string name="report_question">Report a problem</string>
+    <string name="report_question_subject">Question report · %1$s #%2$d</string>
+    <string name="report_question_body">What\'s wrong with this question? (wrong answer, typo, unclear wording…)\n\n\n---\nTopic: %1$s\nQuestion ID: %2$d\nApp version: %3$s\n\n%4$s</string>
+    <string name="study_mode">Study mode</string>
+    <string name="study_mode_desc">Browse questions and reveal answers at your own pace</string>
+    <string name="study_tap_to_reveal">Tap to reveal</string>
+    <string name="study_hide_answer">Hide answer</string>
+    <string name="study_show_all">Show all answers</string>
+    <string name="study_hide_all">Hide all answers</string>
+    <string name="study_progress">%1$d of %2$d revealed</string>
+    <string name="study_empty">No questions to study yet.</string>
+    <string name="length_express">Express</string>
+
+    <!-- Review Filter -->
+    <string name="filter_review_all">All (%1$d)</string>
+    <string name="filter_review_mistakes">Mistakes (%1$d)</string>
+    <string name="filter_review_correct">Correct (%1$d)</string>
+
+    <!-- Font Size & Appearance Settings -->
+    <string name="font_size">Code font size</string>
+    <string name="font_size_desc">Adjust code snippet text size</string>
+    <string name="font_size_normal">Normal</string>
+    <string name="font_size_large">Large</string>
+
+    <!-- Category Mastery -->
+    <string name="mastery_level">%1$d / %2$d mastered (%3$d%%)</string>
+    <string name="bookmarked_test_title">Saved Questions</string>
+
+    <!-- 50/50 hint -->
+    <string name="hint_title">50/50 hint</string>
+    <string name="hint_message">Remove half of the wrong answers on this question. You get one hint per test.</string>
+    <string name="hint_watch">Watch video</string>
+    <string name="hint_use">Use hint</string>
+    <string name="hint_used">Hint used for this test</string>
+    <string name="hint_unavailable">No video is available right now. Try again in a moment.</string>
+
+    <!-- Explanations -->
+    <string name="explanation">Explanation</string>
+
+    <!-- Free preview of locked topics -->
+    <string name="preview_try">Try %1$d free</string>
+    <string name="preview_badge">Free preview</string>
+    <string name="preview_done_title">Preview complete</string>
+    <string name="preview_done_message">You got %1$d of %2$d right. Unlock %3$s to practise all %4$d questions.</string>
+    <string name="preview_unlock">Unlock topic</string>
+    <string name="not_now">Not now</string>
+
+    <!-- Resume an interrupted test -->
+    <string name="resume_title">Continue your test</string>
+    <string name="resume_desc">%2$d of %3$d answered · %1$s</string>
+    <string name="resume_continue">Continue</string>
+    <string name="resume_discard">Discard</string>
+    <string name="resume_failed">That test can\'t be continued anymore.</string>
+
+    <!-- Daily goal -->
+    <string name="daily_goal">Daily goal</string>
+    <string name="daily_goal_progress">%1$d of %2$d questions today</string>
+    <string name="daily_goal_done">Goal reached · %1$d questions today</string>
+    <string name="daily_goal_off">Off</string>
+    <string name="daily_goal_value">%d questions a day</string>
+    <string name="daily_goal_set">Tap to set a goal</string>
+    <string name="goal_reached_banner">Daily goal reached!</string>
+    <string name="reminder_goal_text">%1$d questions left to reach today\'s goal.</string>
+
+    <!-- Streak freeze -->
+    <string name="streak_restore_title">Save your %1$d-day streak</string>
+    <string name="streak_restore_desc">You missed yesterday. Watch a short video to keep your streak going.</string>
+    <string name="streak_restore_desc_premium">You missed yesterday. You can restore a streak once a week.</string>
+    <string name="streak_restore_button">Restore</string>
+    <string name="streak_restored">Streak restored: %1$d days</string>
+
+    <!-- Question search -->
+    <string name="search_questions">Search questions</string>
+    <string name="search_questions_hint">Search all unlocked questions</string>
+    <plurals name="search_results">
+        <item quantity="one">%d question found</item>
+        <item quantity="other">%d questions found</item>
+    </plurals>
+    <string name="search_results_capped">Showing the first %d matches</string>
+    <string name="search_min_chars">Type at least 2 characters to search your unlocked topics.</string>
+    <string name="search_no_results">No questions match “%1$s”.</string>
+
+    <!-- Certificates -->
+    <string name="get_certificate">Get certificate</string>
+    <string name="certificate_title">Certificate of Achievement</string>
+    <string name="certificate_presented">This certifies that</string>
+    <string name="certificate_body">passed the %1$s exam</string>
+    <string name="certificate_score">%1$d%% · %2$d of %3$d correct</string>
+    <string name="certificate_date">Issued %1$s</string>
+    <string name="certificate_name_prompt">Name on the certificate</string>
+    <string name="certificate_share_message">I passed the %1$s exam with %2$d%%! %3$s</string>
+    <string name="certificate_requirement">Pass an exam of %1$d+ questions with %2$d%% or more to earn a certificate.</string>
+
+    <!-- Backup & restore -->
+    <string name="section_data">Your data</string>
+    <string name="backup_export">Back up progress</string>
+    <string name="backup_export_desc">Save history, bookmarks, topics and coins to a file</string>
+    <string name="backup_import">Restore from backup</string>
+    <string name="backup_import_desc">Replace current progress with a backup file</string>
+    <string name="backup_import_confirm_title">Restore backup?</string>
+    <string name="backup_import_confirm_message">This replaces your current history, bookmarks, streaks, achievements and coins with the ones in the backup.</string>
+    <string name="backup_restore">Restore</string>
+    <string name="backup_saved">Backup saved</string>
+    <string name="backup_restored">Progress restored</string>
+    <string name="backup_failed">That file couldn\'t be read as a backup.</string>
+    <string name="backup_export_failed">Couldn\'t save the backup.</string>
+
+    <!-- Content updates -->
+    <string name="content_updates">Question updates</string>
+    <string name="content_updates_desc">Last checked %1$s</string>
+    <string name="content_updates_never">Tap to check for corrected questions</string>
+    <string name="content_checking">Checking for updates…</string>
+    <string name="content_updated">Questions updated</string>
+    <string name="content_up_to_date">Questions are up to date</string>
+    <string name="content_failed">Couldn\'t check for updates. Check your connection.</string>
 </resources>

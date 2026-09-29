@@ -160,16 +160,21 @@ public final class QuizRepository {
      * repaired for free.
      */
     public synchronized UnlockResult unlockCategory(int categoryId) {
+        return unlockCategory(categoryId, false);
+    }
+
+    /** @param free restore a topic without charging (used when restoring a backup). */
+    public synchronized UnlockResult unlockCategory(int categoryId, boolean free) {
         Category catalogEntry = null;
         for (Category c : getCatalog()) if (c.getId() == categoryId) catalogEntry = c;
         if (catalogEntry == null) return UnlockResult.FAILED;
 
-        boolean alreadyPaid = categoryRowExists(categoryId) || BillingManager.isPremium(appContext);
+        boolean alreadyPaid = free || categoryRowExists(categoryId) || BillingManager.isPremium(appContext);
         if (!alreadyPaid && getCredits() < UNLOCK_COST) return UnlockResult.NOT_ENOUGH_COINS;
 
         List<Question> questions;
         try {
-            questions = readQuestionsFromAsset(categoryId);
+            questions = ContentUpdater.applyOverrides(appContext, categoryId, readQuestionsFromAsset(categoryId));
         } catch (Exception e) {
             Log.e(TAG, "Unable to read questions for category " + categoryId, e);
             return UnlockResult.FAILED;
@@ -190,23 +195,7 @@ public final class QuizRepository {
             cv.put("number_of_question", catalogEntry.getNumberOfQuestion());
             db.insertOrThrow(DatabaseHandler.T_CATEGORY, null, cv);
 
-            for (Question q : questions) {
-                ContentValues qv = new ContentValues();
-                qv.put("id", q.getId());
-                qv.put("category_id", q.getCategoryId());
-                qv.put("number", q.getNumber());
-                qv.put("title", q.getTitle());
-                qv.put("number_of_correct_answer", q.getRequiredSelections());
-                db.insertOrThrow(DatabaseHandler.T_QUESTION, null, qv);
-                for (QuestionAnswer a : q.getAnswers()) {
-                    ContentValues av = new ContentValues();
-                    av.put("question_id", a.getQuestionId());
-                    av.put("number", a.getNumber());
-                    av.put("title", a.getTitle());
-                    av.put("is_correct", a.isCorrect() ? "1" : "0");
-                    db.insertOrThrow(DatabaseHandler.T_ANSWER, null, av);
-                }
-            }
+            for (Question q : questions) writeQuestion(db, q);
             if (!alreadyPaid) {
                 writeCredits(db, getCredits() - UNLOCK_COST);
             }
@@ -220,7 +209,28 @@ public final class QuizRepository {
         }
     }
 
-    private boolean categoryRowExists(int categoryId) {
+    /** Inserts or replaces a question together with its answers. Caller owns the transaction. */
+    static void writeQuestion(SQLiteDatabase db, Question q) {
+        ContentValues qv = new ContentValues();
+        qv.put("id", q.getId());
+        qv.put("category_id", q.getCategoryId());
+        qv.put("number", q.getNumber());
+        qv.put("title", q.getTitle());
+        qv.put("number_of_correct_answer", q.getRequiredSelections());
+        qv.put("explanation", q.getExplanation());
+        db.insertWithOnConflict(DatabaseHandler.T_QUESTION, null, qv, SQLiteDatabase.CONFLICT_REPLACE);
+        db.delete(DatabaseHandler.T_ANSWER, "question_id = ?", new String[]{String.valueOf(q.getId())});
+        for (QuestionAnswer a : q.getAnswers()) {
+            ContentValues av = new ContentValues();
+            av.put("question_id", q.getId());
+            av.put("number", a.getNumber());
+            av.put("title", a.getTitle());
+            av.put("is_correct", a.isCorrect() ? "1" : "0");
+            db.insertOrThrow(DatabaseHandler.T_ANSWER, null, av);
+        }
+    }
+
+    public boolean categoryRowExists(int categoryId) {
         try (Cursor c = db().rawQuery("SELECT 1 FROM " + DatabaseHandler.T_CATEGORY + " WHERE id = ?", new String[]{String.valueOf(categoryId)})) {
             return c.moveToFirst();
         }
@@ -262,9 +272,10 @@ public final class QuizRepository {
         return result;
     }
 
-    private static Question readQuestion(JsonReader reader, int categoryId) throws Exception {
+    static Question readQuestion(JsonReader reader, int categoryId) throws Exception {
         int id = 0, number = 0, numberOfCorrect = 1;
         String title = "";
+        String explanation = null;
         List<QuestionAnswer> answers = new ArrayList<>();
         reader.beginObject();
         while (reader.hasNext()) {
@@ -278,6 +289,7 @@ public final class QuizRepository {
                 case "number": number = reader.nextInt(); break;
                 case "title": title = reader.nextString(); break;
                 case "number_of_correct": numberOfCorrect = reader.nextInt(); break;
+                case "explanation": explanation = reader.nextString(); break;
                 case "answers":
                     reader.beginArray();
                     while (reader.hasNext()) answers.add(readAnswer(reader));
@@ -288,6 +300,7 @@ public final class QuizRepository {
         }
         reader.endObject();
         Question question = new Question(id, categoryId, number, title, numberOfCorrect);
+        question.setExplanation(explanation);
         for (QuestionAnswer a : answers) {
             question.getAnswers().add(new QuestionAnswer(id, a.getNumber(), a.getTitle(), a.isCorrect()));
         }
@@ -324,7 +337,7 @@ public final class QuizRepository {
 
     public List<Question> getQuestions(int categoryId) {
         LinkedHashMap<Integer, Question> byId = new LinkedHashMap<>();
-        try (Cursor c = db().rawQuery("SELECT id, category_id, number, title, number_of_correct_answer FROM " + DatabaseHandler.T_QUESTION
+        try (Cursor c = db().rawQuery(QUESTION_COLUMNS
                 + " WHERE category_id = ? ORDER BY number, id", new String[]{String.valueOf(categoryId)})) {
             while (c.moveToNext()) byId.put(c.getInt(0), mapQuestion(c));
         }
@@ -336,29 +349,70 @@ public final class QuizRepository {
         LinkedHashMap<Integer, Question> byId = new LinkedHashMap<>();
         if (ids.isEmpty()) return byId;
         String in = "(" + TextUtils.join(",", ids) + ")";
-        try (Cursor c = db().rawQuery("SELECT id, category_id, number, title, number_of_correct_answer FROM " + DatabaseHandler.T_QUESTION
-                + " WHERE id IN " + in, null)) {
+        try (Cursor c = db().rawQuery(QUESTION_COLUMNS + " WHERE id IN " + in, null)) {
             while (c.moveToNext()) byId.put(c.getInt(0), mapQuestion(c));
         }
         attachAnswers(byId, "question_id IN " + in, null);
         return byId;
     }
 
+    private static final String QUESTION_COLUMNS = "SELECT id, category_id, number, title, number_of_correct_answer, explanation FROM " + DatabaseHandler.T_QUESTION;
+
     private static Question mapQuestion(Cursor c) {
-        return new Question(c.getInt(0), c.getInt(1), c.getInt(2), c.getString(3), c.getInt(4));
+        Question q = new Question(c.getInt(0), c.getInt(1), c.getInt(2), c.getString(3), c.getInt(4));
+        q.setExplanation(c.getString(5));
+        return q;
     }
 
     private void attachAnswers(Map<Integer, Question> byId, String where, String[] args) {
         try (Cursor c = db().rawQuery("SELECT question_id, number, title, is_correct FROM " + DatabaseHandler.T_ANSWER
                 + " WHERE " + where + " ORDER BY question_id, number, id", args)) {
+            Set<String> seen = new HashSet<>();
             while (c.moveToNext()) {
                 Question q = byId.get(c.getInt(0));
                 if (q == null) continue;
+                // Skip duplicated rows left by an interrupted import in an older version.
+                if (!seen.add(c.getInt(0) + ":" + c.getInt(1) + ":" + c.getString(2))) continue;
                 String flag = c.getString(3);
                 boolean correct = "1".equals(flag) || "true".equalsIgnoreCase(flag);
                 q.getAnswers().add(new QuestionAnswer(c.getInt(0), c.getInt(1), c.getString(2), correct));
             }
         }
+    }
+
+    /**
+     * A few random questions from a topic that isn't unlocked yet, read straight from the bundled
+     * content. Nothing is written to the database.
+     */
+    public List<Question> getPreviewQuestions(int categoryId, int count) {
+        try {
+            List<Question> all = ContentUpdater.applyOverrides(appContext, categoryId, readQuestionsFromAsset(categoryId));
+            List<Question> usable = new ArrayList<>();
+            for (Question q : all) if (q.getAnswers().size() >= 2) usable.add(q);
+            Collections.shuffle(usable);
+            return new ArrayList<>(usable.subList(0, Math.min(count, usable.size())));
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to read preview for category " + categoryId, e);
+            return new ArrayList<>();
+        }
+    }
+
+    /** Questions in unlocked topics whose text or answers contain {@code query}. */
+    public List<Question> searchQuestions(String query, int limit) {
+        String escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        String like = "%" + escaped + "%";
+        List<Integer> ids = new ArrayList<>();
+        try (Cursor c = db().rawQuery("SELECT q.id FROM " + DatabaseHandler.T_QUESTION + " q WHERE q.title LIKE ? ESCAPE '\\' "
+                + "OR EXISTS (SELECT 1 FROM " + DatabaseHandler.T_ANSWER + " a WHERE a.question_id = q.id AND a.title LIKE ? ESCAPE '\\') "
+                + "ORDER BY q.category_id, q.number LIMIT " + limit, new String[]{like, like})) {
+            while (c.moveToNext()) ids.add(c.getInt(0));
+        }
+        return ordered(ids);
+    }
+
+    /** Questions in the given order; ids without data are dropped. */
+    public List<Question> getQuestionsInOrder(List<Integer> ids) {
+        return ordered(ids);
     }
 
     // endregion
@@ -407,6 +461,16 @@ public final class QuizRepository {
         return result;
     }
 
+    /** Returns all bookmarked questions as Question objects, with answers attached. */
+    public List<Question> getBookmarkedQuestions(int limit) {
+        List<Integer> ids = new ArrayList<>();
+        String limitClause = limit > 0 ? " LIMIT " + limit : "";
+        try (Cursor c = db().rawQuery("SELECT question_id FROM " + DatabaseHandler.T_BOOKMARK + " ORDER BY id DESC" + limitClause, null)) {
+            while (c.moveToNext()) ids.add(c.getInt(0));
+        }
+        return ordered(ids);
+    }
+
     // endregion
 
     // region Results
@@ -422,6 +486,7 @@ public final class QuizRepository {
             cv.put("no_answer", result.getNoAnswer());
             cv.put("created_at", result.getCreatedAt());
             cv.put("duration_ms", result.getDurationMs());
+            cv.put("exam", result.isExam() ? 1 : 0);
             long id = db.insertOrThrow(DatabaseHandler.T_RESULT, null, cv);
             for (int i = 0; i < items.size(); i++) {
                 ResultItem item = items.get(i);
@@ -458,10 +523,12 @@ public final class QuizRepository {
         return list;
     }
 
-    private static final String RESULT_COLUMNS = "SELECT id, category_id, correct_answer, wrong_answer, no_answer, created_at, duration_ms FROM " + DatabaseHandler.T_RESULT;
+    private static final String RESULT_COLUMNS = "SELECT id, category_id, correct_answer, wrong_answer, no_answer, created_at, duration_ms, exam FROM " + DatabaseHandler.T_RESULT;
 
     private static QuestionResult mapResult(Cursor c) {
-        return new QuestionResult(c.getLong(0), c.getInt(1), c.getInt(2), c.getInt(3), c.getInt(4), c.getLong(5), c.getLong(6));
+        QuestionResult r = new QuestionResult(c.getLong(0), c.getInt(1), c.getInt(2), c.getInt(3), c.getInt(4), c.getLong(5), c.getLong(6));
+        r.setExam(c.getInt(7) == 1);
+        return r;
     }
 
     /** Answers of a finished test with their questions attached, in the order they were asked. */
@@ -649,6 +716,10 @@ public final class QuizRepository {
         }
         writeCredits(db(), DEFAULT_CREDIT);
         return DEFAULT_CREDIT;
+    }
+
+    public synchronized void setCredits(int value) {
+        writeCredits(db(), value);
     }
 
     public synchronized int addCredits(int delta) {

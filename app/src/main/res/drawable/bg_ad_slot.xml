@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Banner slot: a hairline and padding keep the ad visibly apart from app content and navigation. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/colorSurfaceContainerLow" />
+        </shape>
+    </item>
+    <item
+        android:gravity="top|fill_horizontal"
+        android:height="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/colorOutlineVariant" />
+        </shape>
+    </item>
+</layer-list>

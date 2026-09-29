@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -26,11 +28,16 @@ import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.ui.credits.CreditsSheet;
 import net.golbarg.skillassessment.ui.question.QuestionActivity;
+import net.golbarg.skillassessment.ui.question.QuizSession;
+import net.golbarg.skillassessment.ui.question.QuizViewModel;
+import net.golbarg.skillassessment.ui.search.SearchActivity;
 import net.golbarg.skillassessment.ui.widget.GridGapDecoration;
 import net.golbarg.skillassessment.ui.widget.StaticViewAdapter;
 import net.golbarg.skillassessment.util.Async;
+import net.golbarg.skillassessment.util.CategoryNames;
 import net.golbarg.skillassessment.widget.DailyQuestionWidget;
 import net.golbarg.skillassessment.util.Feedback;
+import net.golbarg.skillassessment.util.GoalPicker;
 import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.ProgressTracker;
 import net.golbarg.skillassessment.util.UiUtils;
@@ -50,6 +57,11 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
         int unlockedQuestions;
         int dayStreak;
         boolean dailyDone;
+        @Nullable QuizSession session;
+        String sessionTopic;
+        int restorableStreak;
+        int answeredToday;
+        int goal;
     }
 
     /** Topic cards per row: one on phones, more on tablets and landscape. */
@@ -62,6 +74,20 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     private List<Category> allCategories = Collections.emptyList();
     private int credits;
     private boolean loadedOnce;
+    /** Finished previews come back here when the user chose to unlock the topic. */
+    private ActivityResultLauncher<Intent> previewLauncher;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        previewLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() != android.app.Activity.RESULT_OK || result.getData() == null) return;
+            int id = result.getData().getIntExtra(QuestionActivity.EXTRA_UNLOCK_CATEGORY, -1);
+            for (Category c : allCategories) {
+                if (c.getId() == id && !c.isUnlocked()) unlockNow(c);
+            }
+        });
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -97,17 +123,25 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
             @Override public void afterTextChanged(Editable s) { applyFilter(); }
         });
+        header.chipGroupDomain.setOnCheckedStateChangeListener((group, checkedIds) -> applyFilter());
         header.chipGroupFilter.setOnCheckedStateChangeListener((group, checkedIds) -> applyFilter());
         binding.cardCoins.setOnClickListener(v -> openCredits());
         header.btnDaily.setOnClickListener(v -> startDaily());
         header.cardDaily.setOnClickListener(v -> startDaily());
         header.cardReview.setOnClickListener(v -> startReview());
         header.cardMixed.setOnClickListener(v -> startMixed());
+        header.cardGoal.setOnClickListener(v -> GoalPicker.show(requireContext(), this::load));
+        header.btnResume.setOnClickListener(v -> startActivity(QuestionActivity.resumeIntent(requireContext())));
+        header.btnResumeDiscard.setOnClickListener(v -> {
+            QuizSession.clear(requireContext());
+            load();
+        });
+        header.btnStreakRestore.setOnClickListener(v -> restoreStreak());
+        binding.btnSearchQuestions.setOnClickListener(v -> startActivity(new Intent(requireContext(), SearchActivity.class)));
 
         getChildFragmentManager().setFragmentResultListener(CreditsSheet.RESULT_KEY, getViewLifecycleOwner(), (key, bundle) -> load());
 
         AdManager.loadBanner(getViewLifecycleOwner(), binding.adContainer, AdManager.Banner.HOME);
-        AdManager.preloadInterstitial(requireContext(), AdManager.Interstitial.TEST_START);
     }
 
     @Override
@@ -129,6 +163,15 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             for (Category c : data.categories) if (c.isUnlocked()) data.unlockedQuestions += c.getNumberOfQuestion();
             data.dayStreak = ProgressTracker.getDayStreak(requireContext());
             data.dailyDone = ProgressTracker.isDailyDone(requireContext());
+            data.session = QuizSession.load(requireContext());
+            if (data.session != null) {
+                int id = data.session.categoryId;
+                data.sessionTopic = Category.pseudo(id, 0).getDisplayName();
+                for (Category c : data.categories) if (c.getId() == id) data.sessionTopic = c.getDisplayName();
+            }
+            data.restorableStreak = ProgressTracker.getRestorableStreak(requireContext());
+            data.answeredToday = ProgressTracker.getAnsweredToday(requireContext());
+            data.goal = Prefs.getDailyGoal(requireContext());
             return data;
         }, data -> {
             if (binding == null || data == null) return;
@@ -142,6 +185,8 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             header.txtStatAccuracy.setText(data.stats.answered() == 0 ? "—" : data.stats.accuracyPercent() + "%");
             header.txtStatTopics.setText(String.format(Locale.getDefault(), "%d/%d", data.stats.unlockedTopics, allCategories.size()));
             bindToday(data);
+            bindNotices(data);
+            bindGoal(data);
             applyFilter();
         });
     }
@@ -179,6 +224,65 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
         header.cardMixed.setAlpha(hasTopics ? 1f : 0.6f);
     }
 
+    private void bindNotices(HomeData data) {
+        QuizSession s = data.session;
+        header.cardResume.setVisibility(s != null ? View.VISIBLE : View.GONE);
+        if (s != null) {
+            header.txtResumeDesc.setText(getString(R.string.resume_desc, data.sessionTopic, s.answeredCount(), s.total()));
+        }
+
+        boolean restorable = data.restorableStreak > 0;
+        header.cardStreakRestore.setVisibility(restorable ? View.VISIBLE : View.GONE);
+        if (restorable) {
+            boolean premium = BillingManager.isPremium(requireContext());
+            header.txtStreakRestoreTitle.setText(getString(R.string.streak_restore_title, data.restorableStreak));
+            header.txtStreakRestoreDesc.setText(premium ? R.string.streak_restore_desc_premium : R.string.streak_restore_desc);
+            if (!premium) AdManager.loadRewarded(requireContext(), null);
+        }
+    }
+
+    private void bindGoal(HomeData data) {
+        int goal = data.goal;
+        int done = data.answeredToday;
+        if (goal <= 0) {
+            header.progressGoal.setProgressCompat(0, false);
+            header.txtGoalDesc.setText(R.string.daily_goal_set);
+            header.imgGoal.setImageResource(R.drawable.ic_flag);
+            return;
+        }
+        boolean reached = done >= goal;
+        header.progressGoal.setProgressCompat(Math.min(100, done * 100 / goal), true);
+        header.imgGoal.setImageResource(reached ? R.drawable.ic_check : R.drawable.ic_flag);
+        header.txtGoalDesc.setText(reached ? getString(R.string.daily_goal_done, done) : getString(R.string.daily_goal_progress, done, goal));
+    }
+
+    /** Streak freeze: free with Premium, otherwise after an opt-in rewarded video. */
+    private void restoreStreak() {
+        if (BillingManager.isPremium(requireContext())) {
+            onStreakRestored(ProgressTracker.restoreStreak(requireContext()));
+            return;
+        }
+        if (!AdManager.isRewardedReady()) {
+            AdManager.loadRewarded(requireContext(), null);
+            UiUtils.snackbar(binding.getRoot(), R.string.hint_unavailable, Snackbar.LENGTH_LONG).show();
+            return;
+        }
+        android.content.Context app = requireContext().getApplicationContext();
+        AdManager.showRewarded(requireActivity(), () -> {
+            int restored = ProgressTracker.restoreStreak(app);
+            if (binding != null) onStreakRestored(restored);
+        }, () -> {
+        });
+    }
+
+    private void onStreakRestored(int streak) {
+        if (streak <= 0 || binding == null) return;
+        Feedback.play(Feedback.Sound.UNLOCK);
+        Feedback.haptic(binding.getRoot(), Feedback.Haptic.SUCCESS);
+        UiUtils.snackbar(binding.getRoot(), getString(R.string.streak_restored, streak), Snackbar.LENGTH_LONG).show();
+        load();
+    }
+
     private boolean requireTopics() {
         if (today != null && today.unlockedQuestions > 0) return true;
         UiUtils.snackbar(binding.getRoot(), R.string.unlock_topic_first, Snackbar.LENGTH_SHORT).show();
@@ -205,17 +309,28 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     }
 
     private void launchTest(Intent intent) {
-        AdManager.showInterstitial(requireActivity(), AdManager.Interstitial.TEST_START, () -> {
-            if (isAdded()) startActivity(intent);
-        });
+        startActivity(intent);
     }
 
     private void applyFilter() {
         if (header == null) return;
         String query = header.editSearch.getText() == null ? "" : header.editSearch.getText().toString().trim().toLowerCase(Locale.ROOT);
         int checked = header.chipGroupFilter.getCheckedChipId();
+        int domainChip = header.chipGroupDomain.getCheckedChipId();
+        CategoryNames.Domain selectedDomain;
+        if (domainChip == R.id.chip_domain_languages) selectedDomain = CategoryNames.Domain.LANGUAGES;
+        else if (domainChip == R.id.chip_domain_frontend) selectedDomain = CategoryNames.Domain.FRONTEND;
+        else if (domainChip == R.id.chip_domain_backend) selectedDomain = CategoryNames.Domain.BACKEND;
+        else if (domainChip == R.id.chip_domain_mobile) selectedDomain = CategoryNames.Domain.MOBILE;
+        else if (domainChip == R.id.chip_domain_databases) selectedDomain = CategoryNames.Domain.DATABASES;
+        else if (domainChip == R.id.chip_domain_cloud_devops) selectedDomain = CategoryNames.Domain.CLOUD_DEVOPS;
+        else if (domainChip == R.id.chip_domain_ai_data) selectedDomain = CategoryNames.Domain.AI_DATA;
+        else if (domainChip == R.id.chip_domain_tools) selectedDomain = CategoryNames.Domain.TOOLS_OTHER;
+        else selectedDomain = CategoryNames.Domain.ALL;
+
         List<Category> filtered = new ArrayList<>();
         for (Category c : allCategories) {
+            if (selectedDomain != CategoryNames.Domain.ALL && CategoryNames.getDomain(c.getSlug()) != selectedDomain) continue;
             if (checked == R.id.chip_unlocked && !c.isUnlocked()) continue;
             if (checked == R.id.chip_locked && c.isUnlocked()) continue;
             if (!query.isEmpty() && !c.getDisplayName().toLowerCase(Locale.ROOT).contains(query) && !c.getSlug().contains(query)) continue;
@@ -238,24 +353,47 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     @Override
     public void onUnlock(Category category) {
         if (adapter.isBusy()) return;
-        if (BillingManager.isPremium(requireContext())) {
+        boolean premium = BillingManager.isPremium(requireContext());
+        boolean canPreview = !Prefs.isPreviewUsed(requireContext(), category.getId());
+        if (premium && !canPreview) {
             startUnlock(category);
             return;
         }
-        if (credits < QuizRepository.UNLOCK_COST) {
+        boolean affordable = premium || credits >= QuizRepository.UNLOCK_COST;
+        String questions = getResources().getQuantityString(R.plurals.question_count, category.getNumberOfQuestion(), category.getNumberOfQuestion());
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
+                .setIcon(R.drawable.ic_lock)
+                .setTitle(getString(R.string.unlock) + " " + category.getDisplayName() + "?")
+                .setMessage(premium ? questions : affordable
+                        ? getString(R.string.unlock_confirm_message, QuizRepository.UNLOCK_COST, credits, questions)
+                        : questions + "\n\n" + getString(R.string.not_enough_coins, QuizRepository.UNLOCK_COST))
+                .setNegativeButton(R.string.cancel, null);
+        if (affordable) {
+            builder.setPositiveButton(premium ? getString(R.string.unlock_free) : getString(R.string.unlock_cost, QuizRepository.UNLOCK_COST),
+                    (d, w) -> startUnlock(category));
+        } else {
+            builder.setPositiveButton(R.string.get_coins, (d, w) -> openCredits());
+        }
+        if (canPreview) {
+            builder.setNeutralButton(getString(R.string.preview_try, QuizViewModel.PREVIEW_LENGTH), (d, w) -> startPreview(category));
+        }
+        builder.show();
+    }
+
+    private void startPreview(Category category) {
+        Prefs.setPreviewUsed(requireContext(), category.getId());
+        previewLauncher.launch(QuestionActivity.previewIntent(requireContext(), category.getId(), Prefs.isTimerEnabled(requireContext())));
+    }
+
+    /** From a finished preview: unlock right away if affordable, otherwise explain how to get coins. */
+    private void unlockNow(Category category) {
+        if (BillingManager.isPremium(requireContext()) || credits >= QuizRepository.UNLOCK_COST) {
+            startUnlock(category);
+        } else {
             UiUtils.snackbar(binding.getRoot(), getString(R.string.not_enough_coins, QuizRepository.UNLOCK_COST), Snackbar.LENGTH_LONG)
                     .setAction(R.string.get_coins, v -> openCredits())
                     .show();
-            return;
         }
-        new MaterialAlertDialogBuilder(requireContext())
-                .setIcon(R.drawable.ic_lock)
-                .setTitle(getString(R.string.unlock) + " " + category.getDisplayName() + "?")
-                .setMessage(getString(R.string.unlock_confirm_message, QuizRepository.UNLOCK_COST, credits,
-                        getResources().getQuantityString(R.plurals.question_count, category.getNumberOfQuestion(), category.getNumberOfQuestion())))
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(getString(R.string.unlock_cost, QuizRepository.UNLOCK_COST), (d, w) -> startUnlock(category))
-                .show();
     }
 
     private void startUnlock(Category category) {

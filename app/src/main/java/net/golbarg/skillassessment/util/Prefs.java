@@ -80,6 +80,40 @@ public final class Prefs {
         return settings(c).getBoolean(KEY_SHUFFLE, true);
     }
 
+    private static final String KEY_LARGE_CODE_FONT = "large_code_font";
+
+    public static boolean isLargeCodeFont(Context c) {
+        return settings(c).getBoolean(KEY_LARGE_CODE_FONT, false);
+    }
+
+    public static void setLargeCodeFont(Context c, boolean large) {
+        settings(c).edit().putBoolean(KEY_LARGE_CODE_FONT, large).apply();
+    }
+
+    private static final String KEY_PREVIEW_PREFIX = "preview_used_";
+
+    /** Each locked topic can be previewed for free once. */
+    public static boolean isPreviewUsed(Context c, int categoryId) {
+        return settings(c).getBoolean(KEY_PREVIEW_PREFIX + categoryId, false);
+    }
+
+    public static void setPreviewUsed(Context c, int categoryId) {
+        settings(c).edit().putBoolean(KEY_PREVIEW_PREFIX + categoryId, true).apply();
+    }
+
+    private static final String KEY_DAILY_GOAL = "daily_goal";
+    /** Choices offered for the daily goal; 0 turns it off. */
+    public static final int[] DAILY_GOALS = {0, 5, 10, 20, 50};
+
+    /** Questions to answer per day; 0 means no goal. */
+    public static int getDailyGoal(Context c) {
+        return settings(c).getInt(KEY_DAILY_GOAL, 10);
+    }
+
+    public static void setDailyGoal(Context c, int goal) {
+        settings(c).edit().putInt(KEY_DAILY_GOAL, Math.max(0, goal)).apply();
+    }
+
     /** Preferred number of questions; 0 means the whole topic. */
     public static int getTestLength(Context c) {
         return settings(c).getInt(KEY_LENGTH, 10);

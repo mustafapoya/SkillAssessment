@@ -8,6 +8,7 @@ public class QuestionResult {
     private int noAnswer;
     private long createdAt;
     private long durationMs;
+    private boolean exam;
 
     public QuestionResult(long id, int categoryId, int correctAnswer, int wrongAnswer, int noAnswer, long createdAt, long durationMs) {
         this.id = id;
@@ -20,6 +21,11 @@ public class QuestionResult {
     }
 
     public long getId() { return id; }
+
+    /** Taken in exam mode (one timer, no feedback); only exams can earn a certificate. */
+    public boolean isExam() { return exam; }
+
+    public void setExam(boolean exam) { this.exam = exam; }
 
     public void setId(long id) { this.id = id; }
 

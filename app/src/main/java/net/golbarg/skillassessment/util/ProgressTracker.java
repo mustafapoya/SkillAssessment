@@ -31,12 +31,19 @@ public final class ProgressTracker {
     private static final String KEY_EXAM_PASSED = "exams_passed";
     private static final String KEY_REVIEW_CORRECT = "review_correct";
     private static final String KEY_ACH_PREFIX = "ach_";
+    private static final String KEY_ANSWERED_DAY = "answered_day";
+    private static final String KEY_ANSWERED_TODAY = "answered_today";
+    private static final String KEY_LAST_RESTORE = "streak_restored_day";
+    /** A missed day can be bought back at most once in this many days. */
+    private static final int RESTORE_COOLDOWN_DAYS = 7;
 
     /** What changed when a test was finished, shown on the result screen. */
     public static final class Outcome {
         public int dayStreak;
         public boolean dayStreakIncreased;
         public int bonusCoins;
+        /** True when this test pushed today's count past the daily goal. */
+        public boolean goalReached;
         public final List<Achievement> newAchievements = new ArrayList<>();
     }
 
@@ -113,6 +120,12 @@ public final class ProgressTracker {
             repository.addCredits(DAILY_BONUS_COINS);
             outcome.bonusCoins = DAILY_BONUS_COINS;
         }
+        int before = getAnsweredToday(c);
+        int after = before + result.getTotal();
+        e.putLong(KEY_ANSWERED_DAY, today).putInt(KEY_ANSWERED_TODAY, after);
+        int goal = Prefs.getDailyGoal(c);
+        outcome.goalReached = goal > 0 && before < goal && after >= goal;
+
         if (bestAnswerStreak > p.getInt(KEY_BEST_ANSWER_STREAK, 0)) e.putInt(KEY_BEST_ANSWER_STREAK, bestAnswerStreak);
         if (result.getTotal() >= 5 && result.getCorrectAnswer() == result.getTotal()) e.putInt(KEY_PERFECT, p.getInt(KEY_PERFECT, 0) + 1);
         if (exam && result.getTotal() >= 5 && result.getScorePercent() >= EXAM_PASS_PERCENT) e.putInt(KEY_EXAM_PASSED, p.getInt(KEY_EXAM_PASSED, 0) + 1);
@@ -121,6 +134,53 @@ public final class ProgressTracker {
 
         outcome.newAchievements.addAll(evaluate(c, repository));
         return outcome;
+    }
+
+    /** Questions answered in finished tests today, for the daily goal. */
+    public static int getAnsweredToday(Context c) {
+        SharedPreferences p = prefs(c);
+        return p.getLong(KEY_ANSWERED_DAY, Long.MIN_VALUE) == today() ? p.getInt(KEY_ANSWERED_TODAY, 0) : 0;
+    }
+
+    /**
+     * The streak that ended because exactly one day (yesterday) was missed, if it can still be
+     * restored; otherwise 0. Short streaks and repeated restores within a week don't qualify.
+     */
+    public static int getRestorableStreak(Context c) {
+        SharedPreferences p = prefs(c);
+        long last = p.getLong(KEY_LAST_ACTIVE, Long.MIN_VALUE);
+        int streak = p.getInt(KEY_DAY_STREAK, 0);
+        if (last != today() - 2 || streak < 2) return 0;
+        long lastRestore = p.getLong(KEY_LAST_RESTORE, Long.MIN_VALUE);
+        if (lastRestore != Long.MIN_VALUE && today() - lastRestore < RESTORE_COOLDOWN_DAYS) return 0;
+        return streak;
+    }
+
+    /** Treats yesterday as practised so the streak continues. Returns the restored streak. */
+    public static synchronized int restoreStreak(Context c) {
+        int streak = getRestorableStreak(c);
+        if (streak == 0) return 0;
+        prefs(c).edit().putLong(KEY_LAST_ACTIVE, today() - 1).putLong(KEY_LAST_RESTORE, today()).apply();
+        return streak;
+    }
+
+    /** Every stored value, for backups. */
+    public static java.util.Map<String, ?> exportState(Context c) {
+        return prefs(c).getAll();
+    }
+
+    /** Replaces all stored values with a backup's. */
+    @SuppressWarnings("unchecked")
+    public static void importState(Context c, java.util.Map<String, Object> values) {
+        SharedPreferences.Editor e = prefs(c).edit().clear();
+        for (java.util.Map.Entry<String, Object> entry : values.entrySet()) {
+            Object v = entry.getValue();
+            if (v instanceof Long) e.putLong(entry.getKey(), (Long) v);
+            else if (v instanceof Integer) e.putInt(entry.getKey(), (Integer) v);
+            else if (v instanceof Boolean) e.putBoolean(entry.getKey(), (Boolean) v);
+            else if (v instanceof String) e.putString(entry.getKey(), (String) v);
+        }
+        e.apply();
     }
 
     /** Unlocks every achievement whose condition now holds and returns the newly unlocked ones. */

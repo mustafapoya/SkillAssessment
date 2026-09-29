@@ -39,6 +39,15 @@
                 tools:text="Correct" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_more"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/more_options"
+                app:icon="@drawable/ic_more_vert"
+                app:iconTint="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_action"
                 style="@style/Widget.Material3.Button.IconButton"
                 android:layout_width="40dp"
@@ -61,5 +70,30 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
             android:orientation="vertical" />
+
+        <LinearLayout
+            android:id="@+id/explanation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/bg_code_block"
+            android:backgroundTint="?attr/colorSurfaceContainerHigh"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/explanation"
+                android:textAppearance="@style/TextAppearance.App.Overline" />
+
+            <LinearLayout
+                android:id="@+id/explanation_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

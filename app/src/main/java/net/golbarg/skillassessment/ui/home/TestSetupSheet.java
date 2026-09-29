@@ -1,19 +1,25 @@
 package net.golbarg.skillassessment.ui.home;
 
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.databinding.SheetTestSetupBinding;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.ui.question.QuestionActivity;
+import net.golbarg.skillassessment.ui.study.StudyActivity;
 import net.golbarg.skillassessment.ui.widget.AppBottomSheet;
 import net.golbarg.skillassessment.util.CategoryNames;
 import net.golbarg.skillassessment.util.Prefs;
@@ -22,6 +28,7 @@ import net.golbarg.skillassessment.util.UiUtils;
 /** Lets the user pick test length, timer and shuffle before starting a topic. */
 public class TestSetupSheet extends AppBottomSheet {
     public static final String TAG = "TestSetupSheet";
+    private static final int EXPRESS = 5;
     private static final int QUICK = 10;
     private static final int STANDARD = 25;
 
@@ -30,6 +37,7 @@ public class TestSetupSheet extends AppBottomSheet {
     private static final String ARG_COUNT = "count";
     private static final String ARG_ATTEMPTS = "attempts";
     private static final String ARG_BEST = "best";
+    private static final String ARG_MASTERED = "mastered";
 
     private SheetTestSetupBinding binding;
 
@@ -40,6 +48,7 @@ public class TestSetupSheet extends AppBottomSheet {
         args.putInt(ARG_COUNT, category.getNumberOfQuestion());
         args.putInt(ARG_ATTEMPTS, category.getAttempts());
         args.putInt(ARG_BEST, category.getBestScore());
+        args.putInt(ARG_MASTERED, category.getMastered());
         TestSetupSheet sheet = new TestSetupSheet();
         sheet.setArguments(args);
         return sheet;
@@ -60,6 +69,7 @@ public class TestSetupSheet extends AppBottomSheet {
         int count = args.getInt(ARG_COUNT);
         int attempts = args.getInt(ARG_ATTEMPTS);
         int best = args.getInt(ARG_BEST, -1);
+        int mastered = args.getInt(ARG_MASTERED, 0);
         boolean dark = UiUtils.isNightMode(requireContext());
 
         GradientDrawable badge = new GradientDrawable();
@@ -72,28 +82,42 @@ public class TestSetupSheet extends AppBottomSheet {
 
         String questions = getResources().getQuantityString(R.plurals.question_count, count, count);
         if (categoryId < 0) {
-            binding.txtSubtitle.setText(questions + " · " + getString(R.string.mixed_practice_desc));
+            String desc = categoryId == Category.BOOKMARKED ? getString(R.string.practice_saved_desc, count)
+                    : categoryId == Category.DAILY ? getString(R.string.daily_challenge)
+                    : categoryId == Category.REVIEW ? getString(R.string.mistakes_review)
+                    : getString(R.string.mixed_practice_desc);
+            binding.txtSubtitle.setText(questions + " · " + desc);
+            binding.layoutMastery.setVisibility(View.GONE);
         } else if (attempts > 0 && best >= 0) {
             String tests = getResources().getQuantityString(R.plurals.tests_taken, attempts, attempts);
             binding.txtSubtitle.setText(questions + " · " + getString(R.string.attempts_best, tests, best));
+            int percent = count > 0 ? Math.round(mastered * 100f / count) : 0;
+            binding.layoutMastery.setVisibility(View.VISIBLE);
+            binding.txtMastery.setText(getString(R.string.mastery_level, mastered, count, percent));
+            binding.progressMastery.setProgressCompat(percent, false);
         } else {
             binding.txtSubtitle.setText(questions + " · " + getString(R.string.not_attempted));
+            binding.layoutMastery.setVisibility(View.GONE);
         }
 
-        binding.btnLenQuick.setText(getString(R.string.length_quick) + "\n" + QUICK);
-        binding.btnLenStandard.setText(getString(R.string.length_standard) + "\n" + STANDARD);
-        binding.btnLenFull.setText(getString(R.string.length_full) + "\n" + count);
+        lengthLabel(binding.btnLenExpress, R.string.length_express, EXPRESS);
+        lengthLabel(binding.btnLenQuick, R.string.length_quick, QUICK);
+        lengthLabel(binding.btnLenStandard, R.string.length_standard, STANDARD);
+        lengthLabel(binding.btnLenFull, R.string.length_full, count);
+
+        binding.btnLenExpress.setVisibility(count > EXPRESS ? View.VISIBLE : View.GONE);
         binding.btnLenQuick.setVisibility(count > QUICK ? View.VISIBLE : View.GONE);
         binding.btnLenStandard.setVisibility(count > STANDARD ? View.VISIBLE : View.GONE);
 
         int preferred = Prefs.getTestLength(requireContext());
-        if (preferred == QUICK && count > QUICK) binding.toggleLength.check(R.id.btn_len_quick);
+        if (preferred == EXPRESS && count > EXPRESS) binding.toggleLength.check(R.id.btn_len_express);
+        else if (preferred == QUICK && count > QUICK) binding.toggleLength.check(R.id.btn_len_quick);
         else if (preferred == STANDARD && count > STANDARD) binding.toggleLength.check(R.id.btn_len_standard);
         else binding.toggleLength.check(R.id.btn_len_full);
 
         binding.switchTimer.setChecked(Prefs.isTimerEnabled(requireContext()));
         binding.switchShuffle.setChecked(Prefs.isShuffleEnabled(requireContext()));
-        // Mixed tests are always drawn at random.
+        // Mixed & Bookmarked tests are always drawn at random.
         if (categoryId < 0) ((View) binding.switchShuffle.getParent()).setVisibility(View.GONE);
 
         binding.toggleMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
@@ -103,18 +127,36 @@ public class TestSetupSheet extends AppBottomSheet {
 
         binding.btnStart.setOnClickListener(v -> {
             int checked = binding.toggleLength.getCheckedButtonId();
-            int length = checked == R.id.btn_len_quick ? QUICK : checked == R.id.btn_len_standard ? STANDARD : 0;
+            int length = checked == R.id.btn_len_express ? EXPRESS : checked == R.id.btn_len_quick ? QUICK : checked == R.id.btn_len_standard ? STANDARD : 0;
             boolean timer = binding.switchTimer.isChecked();
             boolean shuffle = binding.switchShuffle.isChecked();
             boolean exam = binding.toggleMode.getCheckedButtonId() == R.id.btn_mode_exam;
             Prefs.saveTestSetup(requireContext(), length, timer, shuffle);
-            binding.btnStart.setEnabled(false);
-            AdManager.showInterstitial(requireActivity(), AdManager.Interstitial.TEST_START, () -> {
-                if (!isAdded()) return;
-                startActivity(QuestionActivity.intent(requireContext(), categoryId, length, timer, shuffle, exam));
-                dismissAllowingStateLoss();
-            });
+            startActivity(QuestionActivity.intent(requireContext(), categoryId, length, timer, shuffle, exam));
+            dismissAllowingStateLoss();
         });
+
+        binding.btnStudy.setVisibility(categoryId >= 0 ? View.VISIBLE : View.GONE);
+        binding.btnStudy.setContentDescription(getString(R.string.study_mode) + ". " + getString(R.string.study_mode_desc));
+        binding.btnStudy.setOnClickListener(v -> {
+            startActivity(StudyActivity.intent(requireContext(), categoryId));
+            dismissAllowingStateLoss();
+        });
+    }
+
+    /** Two-line label: a small caption over a bold question count, so four options fit side by side. */
+    private void lengthLabel(Button button, int label, int questions) {
+        String caption = getString(label);
+        SpannableStringBuilder text = new SpannableStringBuilder(caption).append('\n');
+        int start = text.length();
+        text.append(String.valueOf(questions));
+        text.setSpan(new RelativeSizeSpan(0.8f), 0, caption.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new StyleSpan(Typeface.BOLD), start, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new RelativeSizeSpan(1.2f), start, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        button.setSingleLine(false);
+        button.setMaxLines(2);
+        button.setText(text);
+        button.setContentDescription(caption + ", " + getResources().getQuantityString(R.plurals.question_count, questions, questions));
     }
 
     private void bindMode(boolean exam) {

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rendered off-screen into an image when an exam is passed. Always uses brand colours. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="520dp"
+    android:layout_height="368dp"
+    android:background="@drawable/bg_share_card"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_certificate_inner"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingStart="32dp"
+        android:paddingTop="22dp"
+        android:paddingEnd="32dp"
+        android:paddingBottom="18dp">
+
+        <ImageView
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/ic_trophy"
+            android:tint="#3F6F0E" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:fontFamily="serif"
+            android:letterSpacing="0.06"
+            android:text="@string/certificate_title"
+            android:textAllCaps="true"
+            android:textColor="#1F3A06"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="@string/certificate_presented"
+            android:textColor="#5B6152"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/txt_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:fontFamily="serif"
+            android:maxLines="1"
+            android:textColor="#1A1C18"
+            android:textSize="30sp"
+            android:textStyle="bold|italic"
+            tools:text="Mustafa Poya" />
+
+        <View
+            android:layout_width="240dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="4dp"
+            android:background="#8FBF5A" />
+
+        <TextView
+            android:id="@+id/txt_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:textColor="#1A1C18"
+            android:textSize="16sp"
+            tools:text="passed the Python exam" />
+
+        <TextView
+            android:id="@+id/txt_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="#3F6F0E"
+            android:textSize="15sp"
+            tools:text="92% · 23 of 25 correct" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/app_logo" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/app_name"
+                android:textColor="#1F3A06"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/txt_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#5B6152"
+                android:textSize="12sp"
+                tools:text="Issued Sep 29, 2026" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

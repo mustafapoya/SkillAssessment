@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat;
 
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.SplashScreenActivity;
+import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.ProgressTracker;
 
 /** Posts the daily reminder, and re-arms it after a reboot or app update. */
@@ -29,8 +30,10 @@ public class ReminderReceiver extends BroadcastReceiver {
             return;
         }
         if (!ACTION_REMIND.equals(action) || !ReminderScheduler.isEnabled(context)) return;
-        // No nudge needed if the user has already practised today.
-        if (ProgressTracker.practicedToday(context)) return;
+        // No nudge needed once today's goal is met (or, without a goal, once the user practised).
+        int goal = Prefs.getDailyGoal(context);
+        int answered = ProgressTracker.getAnsweredToday(context);
+        if (goal > 0 ? answered >= goal : ProgressTracker.practicedToday(context)) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -46,7 +49,8 @@ public class ReminderReceiver extends BroadcastReceiver {
                 .setSmallIcon(R.drawable.ic_stat_notify)
                 .setColor(ContextCompat.getColor(context, R.color.brand_lime_dark))
                 .setContentTitle(title)
-                .setContentText(context.getString(R.string.reminder_text, ProgressTracker.DAILY_QUESTIONS))
+                .setContentText(goal > 0 ? context.getString(R.string.reminder_goal_text, goal - answered)
+                        : context.getString(R.string.reminder_text, ProgressTracker.DAILY_QUESTIONS))
                 .setContentIntent(content)
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER);
