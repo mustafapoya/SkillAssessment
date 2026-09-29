@@ -310,16 +310,34 @@
         app:icon="@drawable/ic_play"
         app:iconGravity="textStart" />
 
-    <!-- Study mode: browse the topic as flashcards without a score. Real topics only. -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_study"
-        style="@style/Widget.App.Button.Text"
+    <!-- Learning path and study mode (flashcards without a score). Real topics only. -->
+    <LinearLayout
+        android:id="@+id/layout_topic_tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="@string/study_mode"
+        android:orientation="horizontal"
         android:visibility="gone"
-        app:icon="@drawable/ic_school"
-        app:iconGravity="textStart"
-        tools:visibility="visible" />
+        tools:visibility="visible">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_path"
+            style="@style/Widget.App.Button.Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/learning_path"
+            app:icon="@drawable/ic_flag"
+            app:iconGravity="textStart" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_study"
+            style="@style/Widget.App.Button.Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/study_mode"
+            app:icon="@drawable/ic_school"
+            app:iconGravity="textStart" />
+    </LinearLayout>
 </LinearLayout>

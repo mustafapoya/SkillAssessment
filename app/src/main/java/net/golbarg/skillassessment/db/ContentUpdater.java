@@ -58,7 +58,6 @@ public final class ContentUpdater {
     private static final String PREFS = "content";
     private static final String KEY_LAST_CHECK = "last_check";
     private static final String KEY_VERSION = "version";
-    private static final String KEY_UPDATED_QUESTIONS = "updated_questions";
     private static final String FILE_NAME = "content_update.json";
 
     public enum Status { UPDATED, UP_TO_DATE, FAILED }
@@ -79,11 +78,6 @@ public final class ContentUpdater {
 
     public static long getLastCheck(Context context) {
         return prefs(context).getLong(KEY_LAST_CHECK, 0);
-    }
-
-    /** Number of questions corrected or added by the installed update. */
-    public static int getUpdatedQuestionCount(Context context) {
-        return prefs(context).getInt(KEY_UPDATED_QUESTIONS, 0);
     }
 
     @WorkerThread
@@ -110,7 +104,7 @@ public final class ContentUpdater {
             cache = update;
             int total = 0;
             for (List<Question> list : update.values()) total += list.size();
-            prefs.edit().putInt(KEY_VERSION, version).putInt(KEY_UPDATED_QUESTIONS, total).apply();
+            prefs.edit().putInt(KEY_VERSION, version).apply();
             Log.i(TAG, "Content v" + version + ": " + total + " questions, " + applied + " applied to unlocked topics");
             return Status.UPDATED;
         } catch (Exception e) {
@@ -231,8 +225,9 @@ public final class ContentUpdater {
         }
     }
 
+    /** Reads the whole stream, failing once it grows past {@code maxBytes}. */
     @NonNull
-    private static byte[] readFully(InputStream in, int maxBytes) throws Exception {
+    static byte[] readFully(InputStream in, int maxBytes) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[16 * 1024];
         int n;

@@ -1,5 +1,6 @@
 package net.golbarg.skillassessment.models;
 
+/** One answer option of a {@link Question}. */
 public class QuestionAnswer {
     private final int questionId;
     private final int number;

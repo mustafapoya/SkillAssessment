@@ -11,6 +11,7 @@ import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.databinding.ActivityMainBinding;
 import net.golbarg.skillassessment.util.UiUtils;
 
+/** Hosts the bottom-navigation tabs: topics, saved questions, progress and settings. */
 public class MainActivity extends AppCompatActivity {
 
     @Override

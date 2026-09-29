@@ -1,6 +1,5 @@
 package net.golbarg.skillassessment.ui.home;
 
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
@@ -18,12 +17,12 @@ import androidx.annotation.Nullable;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.databinding.SheetTestSetupBinding;
 import net.golbarg.skillassessment.models.Category;
+import net.golbarg.skillassessment.ui.path.PathActivity;
 import net.golbarg.skillassessment.ui.question.QuestionActivity;
 import net.golbarg.skillassessment.ui.study.StudyActivity;
 import net.golbarg.skillassessment.ui.widget.AppBottomSheet;
 import net.golbarg.skillassessment.util.CategoryNames;
 import net.golbarg.skillassessment.util.Prefs;
-import net.golbarg.skillassessment.util.UiUtils;
 
 /** Lets the user pick test length, timer and shuffle before starting a topic. */
 public class TestSetupSheet extends AppBottomSheet {
@@ -70,14 +69,8 @@ public class TestSetupSheet extends AppBottomSheet {
         int attempts = args.getInt(ARG_ATTEMPTS);
         int best = args.getInt(ARG_BEST, -1);
         int mastered = args.getInt(ARG_MASTERED, 0);
-        boolean dark = UiUtils.isNightMode(requireContext());
 
-        GradientDrawable badge = new GradientDrawable();
-        badge.setCornerRadius(UiUtils.dp(requireContext(), 16));
-        badge.setColor(CategoryNames.badgeBackground(slug, dark));
-        binding.txtBadge.setBackground(badge);
-        binding.txtBadge.setTextColor(CategoryNames.badgeForeground(slug, dark));
-        binding.txtBadge.setText(CategoryNames.monogram(slug));
+        CategoryNames.styleBadge(binding.txtBadge, slug, 16);
         binding.txtTitle.setText(CategoryNames.displayName(slug));
 
         String questions = getResources().getQuantityString(R.plurals.question_count, count, count);
@@ -117,7 +110,7 @@ public class TestSetupSheet extends AppBottomSheet {
 
         binding.switchTimer.setChecked(Prefs.isTimerEnabled(requireContext()));
         binding.switchShuffle.setChecked(Prefs.isShuffleEnabled(requireContext()));
-        // Mixed & Bookmarked tests are always drawn at random.
+        // Mixed, daily, review and saved-question tests pick their own order.
         if (categoryId < 0) ((View) binding.switchShuffle.getParent()).setVisibility(View.GONE);
 
         binding.toggleMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
@@ -132,11 +125,17 @@ public class TestSetupSheet extends AppBottomSheet {
             boolean shuffle = binding.switchShuffle.isChecked();
             boolean exam = binding.toggleMode.getCheckedButtonId() == R.id.btn_mode_exam;
             Prefs.saveTestSetup(requireContext(), length, timer, shuffle);
-            startActivity(QuestionActivity.intent(requireContext(), categoryId, length, timer, shuffle, exam));
+            // The switch is hidden for pseudo topics; saved questions are always drawn at random.
+            startActivity(QuestionActivity.intent(requireContext(), categoryId, length, timer, shuffle || categoryId < 0, exam));
             dismissAllowingStateLoss();
         });
 
-        binding.btnStudy.setVisibility(categoryId >= 0 ? View.VISIBLE : View.GONE);
+        binding.layoutTopicTools.setVisibility(categoryId >= 0 ? View.VISIBLE : View.GONE);
+        binding.btnPath.setContentDescription(getString(R.string.learning_path) + ". " + getString(R.string.learning_path_desc));
+        binding.btnPath.setOnClickListener(v -> {
+            startActivity(PathActivity.intent(requireContext(), categoryId));
+            dismissAllowingStateLoss();
+        });
         binding.btnStudy.setContentDescription(getString(R.string.study_mode) + ". " + getString(R.string.study_mode_desc));
         binding.btnStudy.setOnClickListener(v -> {
             startActivity(StudyActivity.intent(requireContext(), categoryId));

@@ -50,6 +50,9 @@
             android:name=".ui.study.StudyActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.path.PathActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.search.SearchActivity"
             android:exported="false"
             android:windowSoftInputMode="stateVisible|adjustResize" />

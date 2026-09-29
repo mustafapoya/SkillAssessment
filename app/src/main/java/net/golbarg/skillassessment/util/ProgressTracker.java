@@ -13,6 +13,7 @@ import net.golbarg.skillassessment.models.QuestionResult;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /** Day streaks, the daily challenge and achievements. All state lives in one preferences file. */
 public final class ProgressTracker {
@@ -34,6 +35,7 @@ public final class ProgressTracker {
     private static final String KEY_ANSWERED_DAY = "answered_day";
     private static final String KEY_ANSWERED_TODAY = "answered_today";
     private static final String KEY_LAST_RESTORE = "streak_restored_day";
+    private static final String KEY_SPRINT_BEST = "sprint_best";
     /** A missed day can be bought back at most once in this many days. */
     private static final int RESTORE_COOLDOWN_DAYS = 7;
 
@@ -44,6 +46,12 @@ public final class ProgressTracker {
         public int bonusCoins;
         /** True when this test pushed today's count past the daily goal. */
         public boolean goalReached;
+        /** Correct answers in a speed round, or -1 for other tests. */
+        public int sprintScore = -1;
+        /** The speed round beat the previous best. */
+        public boolean sprintRecord;
+        /** Learning-path level (0-based) this test opened, or -1. */
+        public int levelUnlocked = -1;
         public final List<Achievement> newAchievements = new ArrayList<>();
     }
 
@@ -130,10 +138,20 @@ public final class ProgressTracker {
         if (result.getTotal() >= 5 && result.getCorrectAnswer() == result.getTotal()) e.putInt(KEY_PERFECT, p.getInt(KEY_PERFECT, 0) + 1);
         if (exam && result.getTotal() >= 5 && result.getScorePercent() >= EXAM_PASS_PERCENT) e.putInt(KEY_EXAM_PASSED, p.getInt(KEY_EXAM_PASSED, 0) + 1);
         if (result.getCategoryId() == Category.REVIEW) e.putInt(KEY_REVIEW_CORRECT, p.getInt(KEY_REVIEW_CORRECT, 0) + result.getCorrectAnswer());
+        if (result.getCategoryId() == Category.SPRINT) {
+            outcome.sprintScore = result.getCorrectAnswer();
+            outcome.sprintRecord = outcome.sprintScore > p.getInt(KEY_SPRINT_BEST, 0);
+            if (outcome.sprintRecord) e.putInt(KEY_SPRINT_BEST, outcome.sprintScore);
+        }
         e.apply();
 
         outcome.newAchievements.addAll(evaluate(c, repository));
         return outcome;
+    }
+
+    /** Most correct answers in one speed round; 0 before the first round. */
+    public static int getSprintBest(Context c) {
+        return prefs(c).getInt(KEY_SPRINT_BEST, 0);
     }
 
     /** Questions answered in finished tests today, for the daily goal. */
@@ -165,15 +183,14 @@ public final class ProgressTracker {
     }
 
     /** Every stored value, for backups. */
-    public static java.util.Map<String, ?> exportState(Context c) {
+    public static Map<String, ?> exportState(Context c) {
         return prefs(c).getAll();
     }
 
     /** Replaces all stored values with a backup's. */
-    @SuppressWarnings("unchecked")
-    public static void importState(Context c, java.util.Map<String, Object> values) {
+    public static void importState(Context c, Map<String, Object> values) {
         SharedPreferences.Editor e = prefs(c).edit().clear();
-        for (java.util.Map.Entry<String, Object> entry : values.entrySet()) {
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
             Object v = entry.getValue();
             if (v instanceof Long) e.putLong(entry.getKey(), (Long) v);
             else if (v instanceof Integer) e.putInt(entry.getKey(), (Integer) v);

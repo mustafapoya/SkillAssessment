@@ -13,6 +13,4 @@
         <item name="windowActionBar">false</item>
     </style>
 
-    <style name="Theme.SkillAssessment.Starting" parent="Theme.SkillAssessment.Splash" />
-
 </resources>

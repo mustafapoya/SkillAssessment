@@ -24,7 +24,7 @@
     <!-- Home -->
     <string name="greeting_named">Hi, %1$s</string>
     <string name="greeting_default">Welcome back</string>
-    <string name="home_subtitle">What do you want to practice today?</string>
+    <string name="home_subtitle">Ready to practice?</string>
     <string name="search_topics">Search topics</string>
     <string name="filter_all">All</string>
     <string name="filter_any_status">Any status</string>
@@ -68,7 +68,6 @@
     <string name="coins_earned">You earned %1$d coin</string>
 
     <!-- Question -->
-    <string name="question_progress">%1$d of %2$d</string>
     <string name="question_label">Question %1$d</string>
     <string name="select_n_answers">Select %1$d answers</string>
     <string name="check">Check</string>
@@ -90,7 +89,6 @@
     <string name="bookmark_deleted">Removed from saved</string>
     <string name="close">Close</string>
     <string name="undo">Undo</string>
-    <string name="image_failed">Image unavailable</string>
 
     <!-- Result -->
     <string name="result_excellent">Outstanding!</string>
@@ -106,14 +104,13 @@
     <string name="best_streak">Best streak: %1$d in a row</string>
     <string name="try_again">Try again</string>
     <string name="back_home">Done</string>
-    <string name="your_answer">Your answer: %1$s</string>
-    <string name="no_answer_given">No answer given</string>
 
     <!-- Saved -->
     <string name="saved_title">Saved questions</string>
     <string name="saved_empty_title">No saved questions yet</string>
     <string name="saved_empty_desc">Tap the bookmark icon during a test to keep a question here for revision.</string>
     <string name="answer_label">Answer</string>
+    <string name="answer_selected">selected</string>
 
     <!-- Progress -->
     <string name="progress_title">Your progress</string>
@@ -123,7 +120,6 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="overall_accuracy">Overall accuracy</string>
-    <string name="questions_answered">Questions answered</string>
     <string name="recent_tests">Recent tests</string>
     <string name="history_empty_title">No tests yet</string>
     <string name="history_empty_desc">Finish your first test and your scores will appear here.</string>
@@ -135,9 +131,10 @@
     <!-- About -->
     <string name="about_tagline">Made by Golbarg</string>
     <string name="version_format">Version %1$s</string>
+    <string name="section_practice">Practice</string>
+    <string name="section_topics">Topics</string>
     <string name="section_preferences">Preferences</string>
     <string name="section_support">Support</string>
-    <string name="section_connect">Connect with us</string>
     <string name="theme">Theme</string>
     <string name="sound_effects">Sound effects</string>
     <string name="sound_effects_desc">Chimes for answers, countdown and results</string>
@@ -152,8 +149,6 @@
     <string name="share_app_message">I\'m practicing programming assessments with this app: %1$s</string>
     <string name="contact_us">Send feedback</string>
     <string name="website">Website</string>
-    <string name="facebook">Facebook</string>
-    <string name="youtube">YouTube</string>
     <string name="copyright">© %1$d Golbarg. All rights reserved.</string>
     <string name="no_app_to_open">No app found to open this</string>
 
@@ -355,18 +350,14 @@
     <!-- Font Size & Appearance Settings -->
     <string name="font_size">Code font size</string>
     <string name="font_size_desc">Adjust code snippet text size</string>
-    <string name="font_size_normal">Normal</string>
-    <string name="font_size_large">Large</string>
 
     <!-- Category Mastery -->
     <string name="mastery_level">%1$d / %2$d mastered (%3$d%%)</string>
-    <string name="bookmarked_test_title">Saved Questions</string>
 
     <!-- 50/50 hint -->
     <string name="hint_title">50/50 hint</string>
     <string name="hint_message">Remove half of the wrong answers on this question. You get one hint per test.</string>
     <string name="hint_watch">Watch video</string>
-    <string name="hint_use">Use hint</string>
     <string name="hint_used">Hint used for this test</string>
     <string name="hint_unavailable">No video is available right now. Try again in a moment.</string>
 
@@ -386,7 +377,6 @@
     <string name="resume_desc">%2$d of %3$d answered · %1$s</string>
     <string name="resume_continue">Continue</string>
     <string name="resume_discard">Discard</string>
-    <string name="resume_failed">That test can\'t be continued anymore.</string>
 
     <!-- Daily goal -->
     <string name="daily_goal">Daily goal</string>
@@ -425,7 +415,6 @@
     <string name="certificate_date">Issued %1$s</string>
     <string name="certificate_name_prompt">Name on the certificate</string>
     <string name="certificate_share_message">I passed the %1$s exam with %2$d%%! %3$s</string>
-    <string name="certificate_requirement">Pass an exam of %1$d+ questions with %2$d%% or more to earn a certificate.</string>
 
     <!-- Backup & restore -->
     <string name="section_data">Your data</string>
@@ -449,4 +438,59 @@
     <string name="content_updated">Questions updated</string>
     <string name="content_up_to_date">Questions are up to date</string>
     <string name="content_failed">Couldn\'t check for updates. Check your connection.</string>
+    <!-- Speed round -->
+    <string name="speed_round">Speed round</string>
+    <string name="sprint_desc">Beat the 60s clock</string>
+    <string name="sprint_desc_best">Best score %1$d</string>
+    <string name="sprint_score">Score %1$d</string>
+    <string name="sprint_no_answers">Time ran out before your first answer.</string>
+    <string name="sprint_new_record">New speed record!</string>
+    <plurals name="sprint_correct">
+        <item quantity="one">%d correct answer in a minute</item>
+        <item quantity="other">%d correct answers in a minute</item>
+    </plurals>
+
+    <!-- Interview prep -->
+    <string name="interview_prep">Interview prep</string>
+    <string name="interview_prep_desc">Exams by job role</string>
+    <string name="interview_prep_intro">20-question timed exams mixing the topics each role is usually asked about. Only your unlocked topics are used. Score 80% or more for a certificate.</string>
+    <string name="pack_topics_unlocked">%1$d of %2$d topics unlocked</string>
+    <string name="pack_locked">Unlock one of these topics first: %1$s</string>
+    <string name="pack_android">Android developer</string>
+    <string name="pack_ios">iOS developer</string>
+    <string name="pack_frontend">Frontend developer</string>
+    <string name="pack_backend">Backend developer</string>
+    <string name="pack_dotnet">.NET developer</string>
+    <string name="pack_data">Data scientist</string>
+    <string name="pack_devops">DevOps &amp; cloud engineer</string>
+
+    <!-- Learning path -->
+    <string name="learning_path">Learning path</string>
+    <string name="learning_path_desc">Short levels that open as you improve</string>
+    <string name="path_title">Learning path · %1$s</string>
+    <string name="path_progress">%1$d of %2$d levels complete</string>
+    <string name="path_intro">Each level has about %1$d questions. Answer %2$d%% of a level correctly to open the next one.</string>
+    <string name="level_label">Level %1$d</string>
+    <string name="level_progress">%1$d of %2$d mastered</string>
+    <string name="level_complete">Complete · %1$d of %2$d mastered</string>
+    <string name="level_locked">Get %2$d%% on level %1$d to open</string>
+    <string name="level_unlocked">Level %1$d is now open</string>
+
+    <!-- Focus areas -->
+    <string name="focus_badge">Fixing mistakes</string>
+    <string name="focus_areas">Focus areas</string>
+    <string name="focus_areas_hint">Lowest accuracy</string>
+    <string name="focus_accuracy_cd">%1$d%% correct</string>
+    <plurals name="focus_to_fix">
+        <item quantity="one">%d mistake to fix</item>
+        <item quantity="other">%d mistakes to fix</item>
+    </plurals>
+    <plurals name="focus_answers">
+        <item quantity="one">%d answer</item>
+        <item quantity="other">%d answers</item>
+    </plurals>
+    <plurals name="reminder_review_text">
+        <item quantity="one">%d question is due for review. A quick round keeps it fresh.</item>
+        <item quantity="other">%d questions are due for review. A quick round keeps them fresh.</item>
+    </plurals>
 </resources>

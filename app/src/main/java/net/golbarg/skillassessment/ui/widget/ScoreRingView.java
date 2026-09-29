@@ -22,8 +22,8 @@ public class ScoreRingView extends View {
     private final RectF bounds = new RectF();
     private final int[] colors = new int[3];
     private final float[] values = new float[3];
+    private final float strokeWidth;
     private float progress = 1f;
-    private float strokeWidth;
 
     public ScoreRingView(Context context) {
         this(context, null);
@@ -41,13 +41,6 @@ public class ScoreRingView extends View {
         colors[0] = ContextCompat.getColor(context, R.color.correct);
         colors[1] = ContextCompat.getColor(context, R.color.wrong);
         colors[2] = ContextCompat.getColor(context, R.color.skipped);
-    }
-
-    public void setStrokeWidthDp(float dp) {
-        strokeWidth = UiUtils.dp(getContext(), dp);
-        track.setStrokeWidth(strokeWidth);
-        segment.setStrokeWidth(strokeWidth);
-        invalidate();
     }
 
     public void setValues(int correct, int wrong, int skipped, boolean animate) {

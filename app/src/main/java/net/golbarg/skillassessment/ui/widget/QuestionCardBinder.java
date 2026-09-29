@@ -174,8 +174,7 @@ public final class QuestionCardBinder {
         sb.append(question.getTitle()).append("\n\n");
         Set<Integer> correct = question.getCorrectPositions();
         for (int i = 0; i < question.getAnswers().size(); i++) {
-            String letter = i < QuestionActivity.LETTERS.length ? QuestionActivity.LETTERS[i] : String.valueOf(i + 1);
-            sb.append(letter).append(") ").append(question.getAnswers().get(i).getTitle());
+            sb.append(QuestionActivity.letter(i)).append(") ").append(question.getAnswers().get(i).getTitle());
             if (correct.contains(i)) sb.append(" ✓");
             sb.append("\n");
         }
@@ -210,8 +209,7 @@ public final class QuestionCardBinder {
     private static void addAnswer(LinearLayout container, int position, String text, String slug, OptionView.State state) {
         Context context = container.getContext();
         OptionView option = new OptionView(context);
-        String letter = position < QuestionActivity.LETTERS.length ? QuestionActivity.LETTERS[position] : String.valueOf(position + 1);
-        option.bind(letter, text, slug);
+        option.bind(QuestionActivity.letter(position), text, slug);
         option.setState(state);
         option.setClickable(false);
         option.setFocusable(false);

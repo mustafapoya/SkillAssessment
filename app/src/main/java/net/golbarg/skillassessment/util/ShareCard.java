@@ -16,6 +16,7 @@ import androidx.core.content.FileProvider;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.databinding.ViewCertificateBinding;
 import net.golbarg.skillassessment.databinding.ViewShareCardBinding;
+import net.golbarg.skillassessment.models.InterviewPack;
 import net.golbarg.skillassessment.models.QuestionResult;
 
 import java.io.File;
@@ -32,8 +33,10 @@ public final class ShareCard {
     private ShareCard() {
     }
 
+    /** Topic exams and interview exams count; mixed and other practice modes don't. */
     public static boolean earnsCertificate(QuestionResult result) {
-        return result.isExam() && result.getCategoryId() >= 0 && result.getTotal() >= CERTIFICATE_MIN_QUESTIONS
+        boolean certifiable = result.getCategoryId() >= 0 || InterviewPack.fromId(result.getCategoryId()) != null;
+        return result.isExam() && certifiable && result.getTotal() >= CERTIFICATE_MIN_QUESTIONS
                 && result.getScorePercent() >= CERTIFICATE_MIN_PERCENT;
     }
 

@@ -9,6 +9,7 @@ public class Category {
     public static final int DAILY = -2;
     public static final int REVIEW = -3;
     public static final int BOOKMARKED = -4;
+    public static final int SPRINT = -5;
 
     private final int id;
     private final String slug;
@@ -24,11 +25,14 @@ public class Category {
         this.numberOfQuestion = numberOfQuestion;
     }
 
-    /** A synthetic topic for mixed, daily, review and bookmarked tests. */
+    /** A synthetic topic for the special modes and the interview packs. */
     public static Category pseudo(int id, int questionCount) {
-        String slug = id == DAILY ? "daily-challenge"
+        InterviewPack pack = InterviewPack.fromId(id);
+        String slug = pack != null ? pack.slug
+                : id == DAILY ? "daily-challenge"
                 : id == REVIEW ? "mistakes-review"
                 : id == BOOKMARKED ? "bookmarked-questions"
+                : id == SPRINT ? "speed-round"
                 : "mixed-practice";
         Category category = new Category(id, slug, questionCount);
         category.setUnlocked(true);

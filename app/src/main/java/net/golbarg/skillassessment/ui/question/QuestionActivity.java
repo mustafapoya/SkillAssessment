@@ -5,12 +5,12 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
@@ -27,7 +27,9 @@ import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.billing.BillingManager;
 import net.golbarg.skillassessment.databinding.ActivityQuestionBinding;
+import net.golbarg.skillassessment.models.AnswerResponseType;
 import net.golbarg.skillassessment.models.Category;
+import net.golbarg.skillassessment.models.InterviewPack;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.util.CategoryNames;
 import net.golbarg.skillassessment.util.ContentRenderer;
@@ -38,8 +40,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/** Runs a test: one question at a time, with practice or exam rules from {@link QuizViewModel}. */
 public class QuestionActivity extends AppCompatActivity {
-    public static final String[] LETTERS = {"A", "B", "C", "D", "E", "F", "G", "H"};
+    /** Answers beyond this many letters are not shown. */
+    private static final String[] LETTERS = {"A", "B", "C", "D", "E", "F", "G", "H"};
 
     private static final String EXTRA_CATEGORY = "category_id";
     private static final String EXTRA_LENGTH = "length";
@@ -48,6 +52,8 @@ public class QuestionActivity extends AppCompatActivity {
     private static final String EXTRA_EXAM = "exam";
     private static final String EXTRA_RESUME = "resume";
     private static final String EXTRA_PREVIEW = "preview";
+    private static final String EXTRA_LEVEL = "level";
+    private static final String EXTRA_FOCUS = "focus";
     /** Returned when a finished preview asks to unlock its topic. */
     public static final String EXTRA_UNLOCK_CATEGORY = "unlock_category";
 
@@ -66,13 +72,21 @@ public class QuestionActivity extends AppCompatActivity {
     private int panelColor;
     private long lastTickSecond = -1;
     private int lastStreakShown;
+    /** Answers already given feedback for in a speed round. */
+    private int lastAnsweredShown;
+
+    /** "A", "B", … for the answer at {@code position}; a number once the letters run out. */
+    public static String letter(int position) {
+        return position < LETTERS.length ? LETTERS[position] : String.valueOf(position + 1);
+    }
 
     public static Intent intent(Context context, int categoryId, int length, boolean timer, boolean shuffle) {
         return intent(context, categoryId, length, timer, shuffle, false);
     }
 
     /**
-     * @param categoryId a topic id or one of the pseudo topics ({@link Category#DAILY}, {@link Category#MIXED}, {@link Category#REVIEW})
+     * @param categoryId a topic id, a pseudo topic ({@link Category#DAILY}, {@link Category#MIXED},
+     *                   {@link Category#REVIEW}, {@link Category#BOOKMARKED}) or an {@link InterviewPack} id
      * @param exam       exam mode: one timer for the whole test and no per-question feedback
      */
     public static Intent intent(Context context, int categoryId, int length, boolean timer, boolean shuffle, boolean exam) {
@@ -94,6 +108,26 @@ public class QuestionActivity extends AppCompatActivity {
         return intent(context, categoryId, QuizViewModel.PREVIEW_LENGTH, timer, true, false).putExtra(EXTRA_PREVIEW, true);
     }
 
+    /** One level of a topic's learning path, in practice mode. */
+    public static Intent levelIntent(Context context, int categoryId, int levelIndex, boolean timer) {
+        return intent(context, categoryId, 0, timer, true, false).putExtra(EXTRA_LEVEL, levelIndex);
+    }
+
+    /** The topic's questions still waiting in the mistakes queue. */
+    public static Intent focusIntent(Context context, int categoryId, boolean timer) {
+        return intent(context, categoryId, 0, timer, false, false).putExtra(EXTRA_FOCUS, true);
+    }
+
+    /** One minute, as many correct answers as possible, from every unlocked topic. */
+    public static Intent sprintIntent(Context context) {
+        return intent(context, Category.SPRINT, 0, true, true, false);
+    }
+
+    /** A timed interview exam drawn from the pack's unlocked topics. */
+    public static Intent packIntent(Context context, InterviewPack pack) {
+        return intent(context, pack.id, InterviewPack.LENGTH, true, true, true);
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         UiUtils.enableEdgeToEdge(this);
@@ -111,18 +145,23 @@ public class QuestionActivity extends AppCompatActivity {
         vm = new ViewModelProvider(this).get(QuizViewModel.class);
         Intent intent = getIntent();
         boolean preview = intent.getBooleanExtra(EXTRA_PREVIEW, false);
-        // After the process was killed in the background, pick up the saved snapshot instead of starting over.
-        boolean restoredProcess = savedInstanceState != null && !preview && QuizSession.load(this) != null;
+        int categoryId = intent.getIntExtra(EXTRA_CATEGORY, -1);
+        // After the process was killed in the background, pick up the saved snapshot instead of starting
+        // over. Previews and speed rounds never save one, so a snapshot found then belongs to another test.
+        boolean restoredProcess = savedInstanceState != null && !preview && categoryId != Category.SPRINT
+                && QuizSession.load(this) != null;
         if (intent.getBooleanExtra(EXTRA_RESUME, false) || restoredProcess) {
             vm.resume();
         } else {
-            vm.start(intent.getIntExtra(EXTRA_CATEGORY, -1), intent.getIntExtra(EXTRA_LENGTH, 0),
+            vm.start(categoryId, intent.getIntExtra(EXTRA_LENGTH, 0),
                     intent.getBooleanExtra(EXTRA_TIMER, true), intent.getBooleanExtra(EXTRA_SHUFFLE, true),
-                    intent.getBooleanExtra(EXTRA_EXAM, false), preview);
+                    intent.getBooleanExtra(EXTRA_EXAM, false), preview,
+                    intent.getIntExtra(EXTRA_LEVEL, -1), intent.getBooleanExtra(EXTRA_FOCUS, false));
         }
         // After a rotation the current reveal was already celebrated; don't replay it.
         if (savedInstanceState != null) lastReveal = vm.getReveal();
         lastStreakShown = vm.getStreak();
+        lastAnsweredShown = vm.getAnsweredCount();
 
         binding.btnClose.setOnClickListener(v -> confirmQuit());
         binding.btnBookmark.setOnClickListener(v -> {
@@ -153,7 +192,8 @@ public class QuestionActivity extends AppCompatActivity {
         // No banner here: an ad beside the answer buttons invites accidental taps.
         AdManager.preloadInterstitial(this);
         // The optional 50/50 hint is paid for with a rewarded video; load one early.
-        if (!preview && !intent.getBooleanExtra(EXTRA_EXAM, false) && !BillingManager.isPremium(this)) {
+        if (!preview && categoryId != Category.SPRINT && !intent.getBooleanExtra(EXTRA_EXAM, false)
+                && !BillingManager.isPremium(this)) {
             AdManager.loadRewarded(this, null);
         }
     }
@@ -205,7 +245,9 @@ public class QuestionActivity extends AppCompatActivity {
         binding.scroll.setVisibility(active ? View.VISIBLE : View.INVISIBLE);
         binding.panel.setVisibility(active ? View.VISIBLE : View.GONE);
         binding.btnBookmark.setVisibility(active && !vm.isPreview() ? View.VISIBLE : View.INVISIBLE);
-        binding.btnHint.setVisibility(active && !vm.isExam() && !vm.isPreview() ? View.VISIBLE : View.GONE);
+        binding.btnHint.setVisibility(active && !vm.isContinuous() && !vm.isPreview() ? View.VISIBLE : View.GONE);
+        // A speed round has no fixed length; the timer ring is its progress.
+        binding.progressStep.setVisibility(vm.isSprint() ? View.INVISIBLE : View.VISIBLE);
         binding.timerRing.setVisibility(active && vm.isTimerEnabled() ? View.VISIBLE : View.GONE);
         binding.txtCounter.setVisibility(active ? View.VISIBLE : View.INVISIBLE);
         Question question = vm.getCurrentQuestion();
@@ -219,8 +261,13 @@ public class QuestionActivity extends AppCompatActivity {
 
         int done = vm.getIndex() + (phase == QuizViewModel.Phase.REVEALED ? 1 : 0);
         binding.progressStep.setProgressCompat(done * 100 / Math.max(1, vm.getCount()), true);
-        binding.txtCounter.setText((vm.getIndex() + 1) + "/" + vm.getCount());
+        binding.txtCounter.setText(vm.isSprint() ? getString(R.string.sprint_score, vm.getCorrectCount())
+                : (vm.getIndex() + 1) + "/" + vm.getCount());
         renderStreak();
+        if (vm.isSprint() && vm.getAnsweredCount() > lastAnsweredShown) {
+            lastAnsweredShown = vm.getAnsweredCount();
+            flashSprintAnswer(vm.getLastOutcome());
+        }
 
         boolean bookmarked = vm.isCurrentBookmarked();
         binding.btnBookmark.setIconResource(bookmarked ? R.drawable.ic_bookmark : R.drawable.ic_bookmark_border);
@@ -260,19 +307,16 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     private void renderQuestion(Question question, Category category, String slug) {
-        boolean dark = UiUtils.isNightMode(this);
-        GradientDrawable badge = new GradientDrawable();
-        badge.setCornerRadius(UiUtils.dp(this, 10));
-        badge.setColor(CategoryNames.badgeBackground(slug, dark));
-        binding.txtBadge.setBackground(badge);
-        binding.txtBadge.setTextColor(CategoryNames.badgeForeground(slug, dark));
-        binding.txtBadge.setText(CategoryNames.monogram(slug));
+        CategoryNames.styleBadge(binding.txtBadge, slug, 10);
         // Mixed tests show each question's own topic, with the mode as context.
         String topic = CategoryNames.displayName(slug);
         binding.txtTopic.setText(category.isPseudo() ? topic + " · " + category.getDisplayName() : topic);
         String number = getString(R.string.question_label, vm.getIndex() + 1);
         if (vm.isExam()) number += " · " + getString(R.string.exam_badge);
         else if (vm.isPreview()) number += " · " + getString(R.string.preview_badge);
+        else if (vm.isSprint()) number = getString(R.string.speed_round);
+        else if (vm.getLevel() >= 0) number += " · " + getString(R.string.level_label, vm.getLevel() + 1);
+        else if (vm.isFocus()) number += " · " + getString(R.string.focus_badge);
         binding.txtQuestionNumber.setText(number);
         ContentRenderer.render(binding.questionContent, question.getTitle(), slug, ContentRenderer.Style.QUESTION, null);
 
@@ -288,9 +332,14 @@ public class QuestionActivity extends AppCompatActivity {
             option.bind(LETTERS[i], question.getAnswers().get(i).getTitle(), slug);
             final int position = i;
             option.setOnClickListener(v -> {
-                Feedback.play(Feedback.Sound.TAP);
                 Feedback.haptic(v, Feedback.Haptic.LIGHT);
                 vm.toggleOption(position);
+                // Speed rounds answer single-choice questions on the first tap.
+                if (vm.isSprint() && question.getRequiredSelections() == 1) {
+                    vm.check();
+                } else {
+                    Feedback.play(Feedback.Sound.TAP);
+                }
             });
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             if (i > 0) lp.topMargin = gap;
@@ -326,10 +375,10 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     private void renderPanel(QuizViewModel.Phase phase, Question question, Set<Integer> selected) {
-        if (phase == QuizViewModel.Phase.ANSWERING && vm.isExam()) {
+        if (phase == QuizViewModel.Phase.ANSWERING && vm.isContinuous()) {
             binding.feedback.setVisibility(View.GONE);
             binding.btnSkip.setVisibility(View.VISIBLE);
-            binding.btnPrimary.setText(vm.isLastQuestion() ? R.string.finish_exam : R.string.next_question);
+            binding.btnPrimary.setText(vm.isExam() && vm.isLastQuestion() ? R.string.finish_exam : R.string.next_question);
             binding.btnPrimary.setEnabled(!selected.isEmpty());
             return;
         }
@@ -449,11 +498,22 @@ public class QuestionActivity extends AppCompatActivity {
                 .setInterpolator(new OvershootInterpolator(2.5f)).start();
     }
 
+    /** A speed round never reveals answers; a short sound and a tint of the panel say how it went. */
+    private void flashSprintAnswer(@Nullable AnswerResponseType outcome) {
+        if (outcome == null) return;
+        boolean correct = outcome == AnswerResponseType.CORRECT;
+        Feedback.play(correct ? Feedback.Sound.CORRECT : Feedback.Sound.WRONG);
+        Feedback.haptic(binding.getRoot(), correct ? Feedback.Haptic.SUCCESS : Feedback.Haptic.ERROR);
+        int base = UiUtils.color(this, com.google.android.material.R.attr.colorSurfaceContainer);
+        animatePanelColor(ContextCompat.getColor(this, correct ? R.color.correct_container : R.color.wrong_container), true);
+        binding.panel.postDelayed(() -> animatePanelColor(base, true), 260);
+    }
+
     private static String letters(Set<Integer> positions) {
         StringBuilder sb = new StringBuilder();
         for (Integer p : positions) {
             if (sb.length() > 0) sb.append(", ");
-            sb.append(p < LETTERS.length ? LETTERS[p] : String.valueOf(p + 1));
+            sb.append(letter(p));
         }
         return sb.toString();
     }
@@ -462,7 +522,7 @@ public class QuestionActivity extends AppCompatActivity {
         if (millis == null) return;
         binding.timerRing.setTime(millis, vm.getTimerTotalMs());
         long seconds = (millis + 999) / 1000;
-        long tickFrom = vm.isExam() ? 10 : 5;
+        long tickFrom = vm.isContinuous() ? 10 : 5;
         if (vm.getPhase() == QuizViewModel.Phase.ANSWERING && seconds <= tickFrom && seconds > 0 && seconds != lastTickSecond) {
             lastTickSecond = seconds;
             Feedback.play(Feedback.Sound.TICK);
@@ -563,16 +623,20 @@ public class QuestionActivity extends AppCompatActivity {
             return;
         }
         if (info.resultId < 0) {
+            if (vm.isSprint()) Toast.makeText(this, R.string.sprint_no_answers, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        if (vm.isExamTimedOut()) {
+        if (vm.isTimedOut() && vm.isExam()) {
             Snackbar.make(binding.getRoot(), R.string.exam_time_up, Snackbar.LENGTH_SHORT).show();
         }
         // Built from the running test rather than the launch intent, which may have been a "resume".
         Category category = vm.getCategory();
         Bundle testArgs = category == null ? null : intent(this, category.getId(), vm.getStartLength(), vm.isTimerEnabled(),
-                vm.isStartShuffle(), vm.isExam()).getExtras();
+                vm.isStartShuffle(), vm.isExam())
+                .putExtra(EXTRA_LEVEL, vm.getLevel())
+                .putExtra(EXTRA_FOCUS, vm.isFocus())
+                .getExtras();
         Intent resultIntent = QuestionResultActivity.intent(this, info.resultId, testArgs, vm.getBestStreak(), info.outcome);
         AdManager.showInterstitialAfterTest(this, vm.getAnsweredCount(), () -> {
             startActivity(resultIntent);

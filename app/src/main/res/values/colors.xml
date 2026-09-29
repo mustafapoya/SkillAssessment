@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Brand -->
-    <color name="brand_lime">#7ED321</color>
     <color name="brand_lime_dark">#57CC02</color>
 
     <!-- Material 3 scheme (light), seeded from the brand green -->

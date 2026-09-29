@@ -1,5 +1,6 @@
 package net.golbarg.skillassessment.models;
 
+/** A saved question together with its topic. */
 public class Bookmark {
     private final int id;
     private final Question question;

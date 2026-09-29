@@ -256,6 +256,54 @@
             android:useDefaultMargins="false" />
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Topics with the lowest accuracy across every answer; tap to practise their mistakes. -->
+    <LinearLayout
+        android:id="@+id/section_focus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/focus_areas"
+                android:textAppearance="@style/TextAppearance.App.Title"
+                android:textColor="?attr/colorOnSurface" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/focus_areas_hint"
+                android:textAppearance="@style/TextAppearance.App.Caption" />
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+
+            <LinearLayout
+                android:id="@+id/list_focus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp" />
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
     <!-- Unlocked topics, weakest first, so the next thing to practise is obvious. -->
     <LinearLayout
         android:id="@+id/section_topics"

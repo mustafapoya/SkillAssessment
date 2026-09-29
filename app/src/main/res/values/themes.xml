@@ -55,8 +55,6 @@
         <item name="windowActionBar">false</item>
     </style>
 
-    <style name="Theme.SkillAssessment.Starting" parent="Theme.SkillAssessment.Splash" />
-
     <!-- Components -->
     <style name="Widget.App.Card" parent="Widget.Material3.CardView.Filled">
         <item name="cardBackgroundColor">?attr/colorSurfaceContainerLow</item>
@@ -98,6 +96,77 @@
     <style name="Widget.App.Button.Text" parent="Widget.Material3.Button.TextButton">
         <item name="android:minHeight">56dp</item>
         <item name="android:textAppearance">@style/TextAppearance.App.Button</item>
+    </style>
+
+    <!-- Home: section label above a group of cards. -->
+    <style name="Widget.App.HomeSection" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.App.Overline</item>
+    </style>
+
+    <!-- Home: compact two-column practice tile (icon, title, one-line detail). -->
+    <style name="Widget.App.HomeTile" parent="Widget.App.Card">
+        <item name="android:layout_width">0dp</item>
+        <!-- Tiles in a row share the tallest one's height. -->
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="Widget.App.HomeTile.Content" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">64dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <style name="Widget.App.HomeTile.IconBox" parent="">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:background">@drawable/bg_circle</item>
+        <item name="android:backgroundTint">?attr/colorTertiaryContainer</item>
+    </style>
+
+    <style name="Widget.App.HomeTile.Icon" parent="">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:importantForAccessibility">no</item>
+        <item name="tint">?attr/colorOnTertiaryContainer</item>
+    </style>
+
+    <style name="Widget.App.HomeTile.Texts" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Widget.App.HomeTile.Title" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textAppearance">@style/TextAppearance.App.Subtitle</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="Widget.App.HomeTile.Desc" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textAppearance">@style/TextAppearance.App.Caption</item>
+        <item name="android:textSize">13sp</item>
     </style>
 
     <!-- Container for banner ads. Spacing keeps taps on nearby controls from landing on the ad. -->

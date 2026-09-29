@@ -6,12 +6,14 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
 import net.golbarg.skillassessment.R;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,7 +37,7 @@ public final class CodeHighlighter {
         try {
             PATTERNS.put(family, Pattern.compile(regex));
         } catch (RuntimeException e) {
-            android.util.Log.e("CodeHighlighter", "Invalid pattern for " + family, e);
+            Log.e("CodeHighlighter", "Invalid pattern for " + family, e);
         }
     }
 
@@ -97,6 +99,7 @@ public final class CodeHighlighter {
         return spannable;
     }
 
+    /** Which named groups a family's pattern defines; asking a pattern for a missing group throws. */
     private static boolean hasGroup(Family family, String group) {
         switch (group) {
             case "tag": return family == Family.MARKUP;
@@ -112,8 +115,8 @@ public final class CodeHighlighter {
     }
 
     private static Family familyFor(String language, String slug) {
-        String lang = language == null ? "" : language.toLowerCase();
-        if (lang.isEmpty()) lang = slug == null ? "" : slug.toLowerCase();
+        String lang = language == null ? "" : language.toLowerCase(Locale.ROOT);
+        if (lang.isEmpty()) lang = slug == null ? "" : slug.toLowerCase(Locale.ROOT);
         switch (lang) {
             case "python": case "py": case "bash": case "sh": case "shell": case "shall": case "linux":
             case "ruby": case "rb": case "ruby-on-rails": case "r": case "yaml": case "yml": case "perl":

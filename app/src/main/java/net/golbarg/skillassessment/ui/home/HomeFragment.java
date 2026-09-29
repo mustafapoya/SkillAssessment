@@ -1,6 +1,9 @@
 package net.golbarg.skillassessment.ui.home;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,6 +15,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -35,18 +39,19 @@ import net.golbarg.skillassessment.ui.widget.GridGapDecoration;
 import net.golbarg.skillassessment.ui.widget.StaticViewAdapter;
 import net.golbarg.skillassessment.util.Async;
 import net.golbarg.skillassessment.util.CategoryNames;
-import net.golbarg.skillassessment.widget.DailyQuestionWidget;
 import net.golbarg.skillassessment.util.Feedback;
 import net.golbarg.skillassessment.util.GoalPicker;
 import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.ProgressTracker;
 import net.golbarg.skillassessment.util.UiUtils;
+import net.golbarg.skillassessment.widget.DailyQuestionWidget;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+/** The topics tab: today's goal and challenges, then every topic with search and filters. */
 public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
 
     private static final class HomeData {
@@ -62,6 +67,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
         int restorableStreak;
         int answeredToday;
         int goal;
+        int sprintBest;
     }
 
     /** Topic cards per row: one on phones, more on tablets and landscape. */
@@ -72,8 +78,24 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     private CategoryAdapter adapter;
     private QuizRepository repository;
     private List<Category> allCategories = Collections.emptyList();
+    /** The last loaded snapshot; null until the first load finishes. */
+    @Nullable private HomeData homeData;
     private int credits;
     private boolean loadedOnce;
+
+    private static final int STATUS_ANY = 0;
+    private static final int STATUS_UNLOCKED = 1;
+    private static final int STATUS_LOCKED = 2;
+    private static final int[] STATUS_LABELS = {R.string.filter_any_status, R.string.filter_unlocked, R.string.filter_locked};
+    private int statusFilter = STATUS_ANY;
+    private static final String STATE_STATUS = "status_filter";
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_STATUS, statusFilter);
+    }
+    private ColorStateList defaultStatusBackground;
     /** Finished previews come back here when the user chose to unlock the topic. */
     private ActivityResultLauncher<Intent> previewLauncher;
 
@@ -81,7 +103,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         previewLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if (result.getResultCode() != android.app.Activity.RESULT_OK || result.getData() == null) return;
+            if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) return;
             int id = result.getData().getIntExtra(QuestionActivity.EXTRA_UNLOCK_CATEGORY, -1);
             for (Category c : allCategories) {
                 if (c.getId() == id && !c.isUnlocked()) unlockNow(c);
@@ -124,12 +146,18 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             @Override public void afterTextChanged(Editable s) { applyFilter(); }
         });
         header.chipGroupDomain.setOnCheckedStateChangeListener((group, checkedIds) -> applyFilter());
-        header.chipGroupFilter.setOnCheckedStateChangeListener((group, checkedIds) -> applyFilter());
+        defaultStatusBackground = header.chipStatus.getChipBackgroundColor();
+        if (savedInstanceState != null) statusFilter = savedInstanceState.getInt(STATE_STATUS, STATUS_ANY);
+        bindStatusChip();
+        header.chipStatus.setOnClickListener(this::chooseStatus);
+        header.chipStatus.setOnCloseIconClickListener(this::chooseStatus);
         binding.cardCoins.setOnClickListener(v -> openCredits());
         header.btnDaily.setOnClickListener(v -> startDaily());
         header.cardDaily.setOnClickListener(v -> startDaily());
         header.cardReview.setOnClickListener(v -> startReview());
         header.cardMixed.setOnClickListener(v -> startMixed());
+        header.cardSprint.setOnClickListener(v -> startSprint());
+        header.cardInterview.setOnClickListener(v -> openInterviewPacks());
         header.cardGoal.setOnClickListener(v -> GoalPicker.show(requireContext(), this::load));
         header.btnResume.setOnClickListener(v -> startActivity(QuestionActivity.resumeIntent(requireContext())));
         header.btnResumeDiscard.setOnClickListener(v -> {
@@ -154,6 +182,8 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
 
     private void load() {
         if (!loadedOnce) binding.progressLoading.setVisibility(View.VISIBLE);
+        // Captured here: the fragment may be detached before the background work runs.
+        Context app = requireContext().getApplicationContext();
         Async.run(getViewLifecycleOwner(), () -> {
             HomeData data = new HomeData();
             data.categories = repository.getCategories();
@@ -161,17 +191,18 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             data.credits = repository.getCredits();
             data.reviewDue = repository.getReviewDueCount();
             for (Category c : data.categories) if (c.isUnlocked()) data.unlockedQuestions += c.getNumberOfQuestion();
-            data.dayStreak = ProgressTracker.getDayStreak(requireContext());
-            data.dailyDone = ProgressTracker.isDailyDone(requireContext());
-            data.session = QuizSession.load(requireContext());
+            data.dayStreak = ProgressTracker.getDayStreak(app);
+            data.dailyDone = ProgressTracker.isDailyDone(app);
+            data.session = QuizSession.load(app);
             if (data.session != null) {
                 int id = data.session.categoryId;
                 data.sessionTopic = Category.pseudo(id, 0).getDisplayName();
                 for (Category c : data.categories) if (c.getId() == id) data.sessionTopic = c.getDisplayName();
             }
-            data.restorableStreak = ProgressTracker.getRestorableStreak(requireContext());
-            data.answeredToday = ProgressTracker.getAnsweredToday(requireContext());
-            data.goal = Prefs.getDailyGoal(requireContext());
+            data.restorableStreak = ProgressTracker.getRestorableStreak(app);
+            data.answeredToday = ProgressTracker.getAnsweredToday(app);
+            data.goal = Prefs.getDailyGoal(app);
+            data.sprintBest = ProgressTracker.getSprintBest(app);
             return data;
         }, data -> {
             if (binding == null || data == null) return;
@@ -191,10 +222,8 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
         });
     }
 
-    private HomeData today;
-
     private void bindToday(HomeData data) {
-        today = data;
+        homeData = data;
         boolean hasTopics = data.unlockedQuestions > 0;
 
         binding.txtDayStreak.setText(String.valueOf(data.dayStreak));
@@ -222,6 +251,10 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
                 : getString(R.string.mistakes_none));
         header.cardReview.setAlpha(data.reviewDue > 0 ? 1f : 0.6f);
         header.cardMixed.setAlpha(hasTopics ? 1f : 0.6f);
+        header.cardSprint.setAlpha(hasTopics ? 1f : 0.6f);
+        header.cardInterview.setAlpha(hasTopics ? 1f : 0.6f);
+        header.txtSprintDesc.setText(data.sprintBest > 0 ? getString(R.string.sprint_desc_best, data.sprintBest)
+                : getString(R.string.sprint_desc));
     }
 
     private void bindNotices(HomeData data) {
@@ -267,7 +300,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             UiUtils.snackbar(binding.getRoot(), R.string.hint_unavailable, Snackbar.LENGTH_LONG).show();
             return;
         }
-        android.content.Context app = requireContext().getApplicationContext();
+        Context app = requireContext().getApplicationContext();
         AdManager.showRewarded(requireActivity(), () -> {
             int restored = ProgressTracker.restoreStreak(app);
             if (binding != null) onStreakRestored(restored);
@@ -284,38 +317,67 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     }
 
     private boolean requireTopics() {
-        if (today != null && today.unlockedQuestions > 0) return true;
+        if (homeData != null && homeData.unlockedQuestions > 0) return true;
         UiUtils.snackbar(binding.getRoot(), R.string.unlock_topic_first, Snackbar.LENGTH_SHORT).show();
         return false;
     }
 
     private void startDaily() {
-        if (!requireTopics() || today.dailyDone) return;
-        launchTest(QuestionActivity.intent(requireContext(), Category.DAILY, ProgressTracker.DAILY_QUESTIONS,
+        if (!requireTopics() || homeData.dailyDone) return;
+        startActivity(QuestionActivity.intent(requireContext(), Category.DAILY, ProgressTracker.DAILY_QUESTIONS,
                 Prefs.isTimerEnabled(requireContext()), false, false));
     }
 
     private void startReview() {
-        if (today == null || today.reviewDue == 0) {
+        if (homeData == null || homeData.reviewDue == 0) {
             UiUtils.snackbar(binding.getRoot(), R.string.no_review_questions, Snackbar.LENGTH_SHORT).show();
             return;
         }
-        launchTest(QuestionActivity.intent(requireContext(), Category.REVIEW, 0, Prefs.isTimerEnabled(requireContext()), false, false));
+        startActivity(QuestionActivity.intent(requireContext(), Category.REVIEW, 0, Prefs.isTimerEnabled(requireContext()), false, false));
     }
 
     private void startMixed() {
         if (!requireTopics()) return;
-        onOpen(Category.pseudo(Category.MIXED, today.unlockedQuestions));
+        onOpen(Category.pseudo(Category.MIXED, homeData.unlockedQuestions));
     }
 
-    private void launchTest(Intent intent) {
-        startActivity(intent);
+    private void startSprint() {
+        if (!requireTopics()) return;
+        startActivity(QuestionActivity.sprintIntent(requireContext()));
+    }
+
+    private void openInterviewPacks() {
+        if (!requireTopics()) return;
+        if (getChildFragmentManager().findFragmentByTag(InterviewPacksSheet.TAG) == null) {
+            new InterviewPacksSheet().show(getChildFragmentManager(), InterviewPacksSheet.TAG);
+        }
+    }
+
+    /** The status filter is one dropdown chip, so it doesn't take a row of its own. */
+    private void chooseStatus(View anchor) {
+        PopupMenu menu = new PopupMenu(requireContext(), anchor);
+        for (int i = 0; i < STATUS_LABELS.length; i++) menu.getMenu().add(0, i, i, STATUS_LABELS[i]);
+        menu.setOnMenuItemClickListener(item -> {
+            statusFilter = item.getItemId();
+            bindStatusChip();
+            applyFilter();
+            return true;
+        });
+        menu.show();
+    }
+
+    private void bindStatusChip() {
+        boolean active = statusFilter != STATUS_ANY;
+        header.chipStatus.setText(STATUS_LABELS[statusFilter]);
+        header.chipStatus.setChipBackgroundColor(active
+                ? ColorStateList.valueOf(UiUtils.color(requireContext(), com.google.android.material.R.attr.colorSecondaryContainer))
+                : defaultStatusBackground);
     }
 
     private void applyFilter() {
         if (header == null) return;
         String query = header.editSearch.getText() == null ? "" : header.editSearch.getText().toString().trim().toLowerCase(Locale.ROOT);
-        int checked = header.chipGroupFilter.getCheckedChipId();
+
         int domainChip = header.chipGroupDomain.getCheckedChipId();
         CategoryNames.Domain selectedDomain;
         if (domainChip == R.id.chip_domain_languages) selectedDomain = CategoryNames.Domain.LANGUAGES;
@@ -331,8 +393,8 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
         List<Category> filtered = new ArrayList<>();
         for (Category c : allCategories) {
             if (selectedDomain != CategoryNames.Domain.ALL && CategoryNames.getDomain(c.getSlug()) != selectedDomain) continue;
-            if (checked == R.id.chip_unlocked && !c.isUnlocked()) continue;
-            if (checked == R.id.chip_locked && c.isUnlocked()) continue;
+            if (statusFilter == STATUS_UNLOCKED && !c.isUnlocked()) continue;
+            if (statusFilter == STATUS_LOCKED && c.isUnlocked()) continue;
             if (!query.isEmpty() && !c.getDisplayName().toLowerCase(Locale.ROOT).contains(query) && !c.getSlug().contains(query)) continue;
             filtered.add(c);
         }

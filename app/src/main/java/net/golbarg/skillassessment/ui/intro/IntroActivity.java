@@ -25,6 +25,7 @@ import net.golbarg.skillassessment.databinding.ItemIntroPageBinding;
 import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.UiUtils;
 
+/** First-run onboarding pages; the last page asks for an optional name. */
 public class IntroActivity extends AppCompatActivity {
 
     private static final class Page {

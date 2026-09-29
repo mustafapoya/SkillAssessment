@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
@@ -91,20 +90,7 @@ public final class UiUtils {
         ViewCompat.requestApplyInsets(view);
     }
 
-    /** Same as {@link #applySystemBarPadding} but grows a bottom margin instead of padding. */
-    public static void applyBottomInsetMargin(View view) {
-        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
-        final int base = lp.bottomMargin;
-        ViewCompat.setOnApplyWindowInsetsListener(view, (v, windowInsets) -> {
-            Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            params.bottomMargin = base + bars.bottom;
-            v.setLayoutParams(params);
-            return windowInsets;
-        });
-    }
-
-    /** "1:05" or "12 min". */
+    /** "1:05" below an hour, "1h 05m" above. */
     public static String formatDuration(long millis) {
         long totalSeconds = TimeUnit.MILLISECONDS.toSeconds(millis);
         long minutes = totalSeconds / 60;

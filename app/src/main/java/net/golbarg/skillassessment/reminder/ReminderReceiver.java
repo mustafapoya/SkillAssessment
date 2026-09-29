@@ -10,14 +10,23 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
 
+import net.golbarg.skillassessment.MainActivity;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.SplashScreenActivity;
+import net.golbarg.skillassessment.db.QuizRepository;
+import net.golbarg.skillassessment.models.Category;
+import net.golbarg.skillassessment.ui.question.QuestionActivity;
+import net.golbarg.skillassessment.util.Async;
 import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.ProgressTracker;
 
-/** Posts the daily reminder, and re-arms it after a reboot or app update. */
+/**
+ * Posts the daily reminder, and re-arms it after a reboot or app update. When mistakes are due for
+ * review the reminder says how many and opens the review directly.
+ */
 public class ReminderReceiver extends BroadcastReceiver {
     public static final String ACTION_REMIND = "net.golbarg.skillassessment.action.REMIND";
     private static final int NOTIFICATION_ID = 4102;
@@ -39,21 +48,52 @@ public class ReminderReceiver extends BroadcastReceiver {
             return;
         }
 
+        // Counting due reviews reads the database, so it runs off the main thread.
+        PendingResult pending = goAsync();
+        Context app = context.getApplicationContext();
+        Async.io(() -> {
+            try {
+                post(app, goal, answered, QuizRepository.get(app).getReviewDueCount());
+            } finally {
+                pending.finish();
+            }
+        });
+    }
+
+    private static void post(Context context, int goal, int answered, int reviewDue) {
         int streak = ProgressTracker.getDayStreak(context);
         String title = streak >= 1 ? context.getString(R.string.reminder_title_streak, streak) : context.getString(R.string.reminder_title);
-        Intent open = new Intent(context, SplashScreenActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent content = PendingIntent.getActivity(context, 0, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        String text;
+        PendingIntent content;
+        if (reviewDue > 0) {
+            text = context.getResources().getQuantityString(R.plurals.reminder_review_text, reviewDue, reviewDue);
+            // Opens the review on top of the main screen, so Back lands in the app.
+            Intent review = QuestionActivity.intent(context, Category.REVIEW, 0, Prefs.isTimerEnabled(context), false);
+            content = TaskStackBuilder.create(context)
+                    .addNextIntent(new Intent(context, MainActivity.class))
+                    .addNextIntent(review)
+                    .getPendingIntent(2, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            text = goal > 0 ? context.getString(R.string.reminder_goal_text, goal - answered)
+                    : context.getString(R.string.reminder_text, ProgressTracker.DAILY_QUESTIONS);
+            Intent open = new Intent(context, SplashScreenActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            content = PendingIntent.getActivity(context, 0, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        }
 
         ReminderScheduler.createChannel(context);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ReminderScheduler.CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_stat_notify)
                 .setColor(ContextCompat.getColor(context, R.color.brand_lime_dark))
                 .setContentTitle(title)
-                .setContentText(goal > 0 ? context.getString(R.string.reminder_goal_text, goal - answered)
-                        : context.getString(R.string.reminder_text, ProgressTracker.DAILY_QUESTIONS))
+                .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                 .setContentIntent(content)
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER);
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build());
+        try {
+            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build());
+        } catch (SecurityException e) {
+            // Notification permission was revoked between the check above and now.
+        }
     }
 }

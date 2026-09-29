@@ -4,5 +4,4 @@
     <dimen name="card_radius_small">14dp</dimen>
     <dimen name="list_gap">10dp</dimen>
     <dimen name="icon_badge">44dp</dimen>
-    <dimen name="bottom_bar_height">88dp</dimen>
 </resources>

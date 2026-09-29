@@ -18,6 +18,13 @@ public final class Prefs {
     private static final String KEY_LENGTH = "test_length";
     private static final String KEY_SOUND = "sound_enabled";
     private static final String KEY_VIBRATION = "vibration_enabled";
+    private static final String KEY_LARGE_CODE_FONT = "large_code_font";
+    private static final String KEY_PREVIEW_PREFIX = "preview_used_";
+    private static final String KEY_DAILY_GOAL = "daily_goal";
+    private static final String KEY_EXPLANATIONS_VERSION = "explanations_version";
+
+    /** Choices offered for the daily goal; 0 turns it off. */
+    public static final int[] DAILY_GOALS = {0, 5, 10, 20, 50};
 
     private Prefs() {
     }
@@ -80,8 +87,6 @@ public final class Prefs {
         return settings(c).getBoolean(KEY_SHUFFLE, true);
     }
 
-    private static final String KEY_LARGE_CODE_FONT = "large_code_font";
-
     public static boolean isLargeCodeFont(Context c) {
         return settings(c).getBoolean(KEY_LARGE_CODE_FONT, false);
     }
@@ -89,8 +94,6 @@ public final class Prefs {
     public static void setLargeCodeFont(Context c, boolean large) {
         settings(c).edit().putBoolean(KEY_LARGE_CODE_FONT, large).apply();
     }
-
-    private static final String KEY_PREVIEW_PREFIX = "preview_used_";
 
     /** Each locked topic can be previewed for free once. */
     public static boolean isPreviewUsed(Context c, int categoryId) {
@@ -101,10 +104,6 @@ public final class Prefs {
         settings(c).edit().putBoolean(KEY_PREVIEW_PREFIX + categoryId, true).apply();
     }
 
-    private static final String KEY_DAILY_GOAL = "daily_goal";
-    /** Choices offered for the daily goal; 0 turns it off. */
-    public static final int[] DAILY_GOALS = {0, 5, 10, 20, 50};
-
     /** Questions to answer per day; 0 means no goal. */
     public static int getDailyGoal(Context c) {
         return settings(c).getInt(KEY_DAILY_GOAL, 10);
@@ -112,6 +111,15 @@ public final class Prefs {
 
     public static void setDailyGoal(Context c, int goal) {
         settings(c).edit().putInt(KEY_DAILY_GOAL, Math.max(0, goal)).apply();
+    }
+
+    /** App version whose bundled explanations were last copied into unlocked topics. */
+    public static int getExplanationsVersion(Context c) {
+        return settings(c).getInt(KEY_EXPLANATIONS_VERSION, 0);
+    }
+
+    public static void setExplanationsVersion(Context c, int versionCode) {
+        settings(c).edit().putInt(KEY_EXPLANATIONS_VERSION, versionCode).apply();
     }
 
     /** Preferred number of questions; 0 means the whole topic. */

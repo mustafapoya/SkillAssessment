@@ -24,6 +24,7 @@ import net.golbarg.skillassessment.databinding.ViewProgressBannerBinding;
 import net.golbarg.skillassessment.databinding.ViewStatTileBinding;
 import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.models.Achievement;
+import net.golbarg.skillassessment.models.AnswerResponseType;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.QuestionResult;
 import net.golbarg.skillassessment.models.ResultItem;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/** Score, rewards and an answer-by-answer review of one finished test. */
 public class QuestionResultActivity extends AppCompatActivity {
     private static final String EXTRA_RESULT_ID = "question_result_id";
     private static final String EXTRA_TEST_ARGS = "test_args";
@@ -47,6 +49,9 @@ public class QuestionResultActivity extends AppCompatActivity {
     private static final String EXTRA_BONUS = "bonus_coins";
     private static final String EXTRA_ACHIEVEMENTS = "achievements";
     private static final String EXTRA_GOAL_REACHED = "goal_reached";
+    private static final String EXTRA_SPRINT_SCORE = "sprint_score";
+    private static final String EXTRA_SPRINT_RECORD = "sprint_record";
+    private static final String EXTRA_LEVEL_UNLOCKED = "level_unlocked";
 
     private static final class Data {
         QuestionResult result;
@@ -78,6 +83,9 @@ public class QuestionResultActivity extends AppCompatActivity {
             intent.putExtra(EXTRA_DAY_STREAK, outcome.dayStreakIncreased ? outcome.dayStreak : 0);
             intent.putExtra(EXTRA_BONUS, outcome.bonusCoins);
             intent.putExtra(EXTRA_GOAL_REACHED, outcome.goalReached);
+            intent.putExtra(EXTRA_SPRINT_SCORE, outcome.sprintScore);
+            intent.putExtra(EXTRA_SPRINT_RECORD, outcome.sprintRecord);
+            intent.putExtra(EXTRA_LEVEL_UNLOCKED, outcome.levelUnlocked);
             String[] names = new String[outcome.newAchievements.size()];
             for (int i = 0; i < names.length; i++) names[i] = outcome.newAchievements.get(i).name();
             intent.putExtra(EXTRA_ACHIEVEMENTS, names);
@@ -212,7 +220,7 @@ public class QuestionResultActivity extends AppCompatActivity {
         List<Integer> positions = new ArrayList<>();
         for (int i = 0; i < data.items.size(); i++) {
             ResultItem item = data.items.get(i);
-            boolean isCorrect = item.getOutcome() == net.golbarg.skillassessment.models.AnswerResponseType.CORRECT;
+            boolean isCorrect = item.getOutcome() == AnswerResponseType.CORRECT;
             if (checked == R.id.chip_review_mistakes && isCorrect) continue;
             if (checked == R.id.chip_review_correct && !isCorrect) continue;
             filtered.add(item);
@@ -225,6 +233,16 @@ public class QuestionResultActivity extends AppCompatActivity {
     private void bindExtras(boolean animate) {
         Intent intent = getIntent();
         header.extras.removeAllViews();
+        int sprintScore = intent.getIntExtra(EXTRA_SPRINT_SCORE, -1);
+        if (sprintScore >= 0) {
+            boolean record = intent.getBooleanExtra(EXTRA_SPRINT_RECORD, false);
+            addBanner(R.drawable.ic_timer, getString(record ? R.string.sprint_new_record : R.string.speed_round),
+                    getResources().getQuantityString(R.plurals.sprint_correct, sprintScore, sprintScore));
+        }
+        int levelUnlocked = intent.getIntExtra(EXTRA_LEVEL_UNLOCKED, -1);
+        if (levelUnlocked >= 0) {
+            addBanner(R.drawable.ic_lock_open, getString(R.string.learning_path), getString(R.string.level_unlocked, levelUnlocked + 1));
+        }
         int bonus = intent.getIntExtra(EXTRA_BONUS, 0);
         if (bonus > 0) {
             addBanner(R.drawable.ic_today, getString(R.string.today_title), getString(R.string.daily_bonus_earned, bonus));

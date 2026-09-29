@@ -11,6 +11,7 @@ import net.golbarg.skillassessment.R;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Sound effects and haptics, both honouring the user's settings. */
 public final class Feedback {
@@ -38,7 +39,8 @@ public final class Feedback {
 
     private static SoundPool pool;
     private static final Map<Sound, Integer> ids = new EnumMap<>(Sound.class);
-    private static final Map<Integer, Boolean> ready = new java.util.concurrent.ConcurrentHashMap<>();
+    /** Sample id → loaded; filled in by SoundPool's loader thread. */
+    private static final Map<Integer, Boolean> ready = new ConcurrentHashMap<>();
     private static Context appContext;
 
     private Feedback() {

@@ -16,6 +16,8 @@ import net.golbarg.skillassessment.billing.BillingManager;
 import net.golbarg.skillassessment.models.AnswerResponseType;
 import net.golbarg.skillassessment.models.Bookmark;
 import net.golbarg.skillassessment.models.Category;
+import net.golbarg.skillassessment.models.InterviewPack;
+import net.golbarg.skillassessment.models.LearningPath;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionAnswer;
 import net.golbarg.skillassessment.models.QuestionResult;
@@ -37,6 +39,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -66,6 +69,26 @@ public final class QuizRepository {
         public int accuracyPercent() {
             int total = answered();
             return total == 0 ? 0 : Math.round(correct * 100f / total);
+        }
+    }
+
+    /** How well one topic is going, for the focus areas on the progress screen. */
+    public static final class TopicAccuracy {
+        public final Category category;
+        public final int answered;
+        public final int correct;
+        /** Questions of this topic waiting in the mistakes queue. */
+        public final int toFix;
+
+        TopicAccuracy(Category category, int answered, int correct, int toFix) {
+            this.category = category;
+            this.answered = answered;
+            this.correct = correct;
+            this.toFix = toFix;
+        }
+
+        public int accuracyPercent() {
+            return answered == 0 ? 0 : Math.round(correct * 100f / answered);
         }
     }
 
@@ -236,9 +259,14 @@ public final class QuizRepository {
         }
     }
 
-    /** Streams questions.json so only the requested topic is materialised in memory. */
     private List<Question> readQuestionsFromAsset(int categoryId) throws Exception {
-        List<Question> result = new ArrayList<>();
+        List<Question> questions = readQuestionsFromAsset(Collections.singleton(categoryId)).get(categoryId);
+        return questions == null ? new ArrayList<>() : questions;
+    }
+
+    /** Streams questions.json once, so only the requested topics are materialised in memory. */
+    private Map<Integer, List<Question>> readQuestionsFromAsset(Set<Integer> categoryIds) throws Exception {
+        Map<Integer, List<Question>> result = new HashMap<>();
         try (JsonReader reader = new JsonReader(new BufferedReader(new InputStreamReader(appContext.getAssets().open("questions.json"), StandardCharsets.UTF_8)))) {
             reader.beginObject();
             while (reader.hasNext()) {
@@ -247,29 +275,70 @@ public final class QuizRepository {
                     continue;
                 }
                 reader.beginArray();
-                while (reader.hasNext()) {
+                while (reader.hasNext() && result.size() < categoryIds.size()) {
                     int id = -1;
                     reader.beginObject();
                     while (reader.hasNext()) {
                         String name = reader.nextName();
                         if ("id".equals(name)) {
                             id = reader.nextInt();
-                        } else if ("questions".equals(name) && id == categoryId) {
+                        } else if ("questions".equals(name) && categoryIds.contains(id)) {
+                            // The topic id precedes its questions in the bundled file.
+                            List<Question> questions = new ArrayList<>();
                             reader.beginArray();
-                            while (reader.hasNext()) result.add(readQuestion(reader, categoryId));
+                            while (reader.hasNext()) questions.add(readQuestion(reader, id));
                             reader.endArray();
+                            result.put(id, questions);
                         } else {
                             reader.skipValue();
                         }
                     }
                     reader.endObject();
-                    if (id == categoryId) return result;
                 }
-                reader.endArray();
+                // Stop reading once every requested topic was found.
+                return result;
             }
             reader.endObject();
         }
         return result;
+    }
+
+    /**
+     * Copies explanations from the bundled content into topics that were unlocked before those
+     * explanations shipped. Downloaded corrections still take precedence. Returns the number of
+     * questions updated.
+     */
+    public int refreshBundledExplanations() {
+        Set<Integer> imported = new HashSet<>();
+        try (Cursor c = db().rawQuery("SELECT id FROM " + DatabaseHandler.T_CATEGORY, null)) {
+            while (c.moveToNext()) imported.add(c.getInt(0));
+        }
+        if (imported.isEmpty()) return 0;
+        Map<Integer, List<Question>> bundled;
+        try {
+            bundled = readQuestionsFromAsset(imported);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to read bundled explanations", e);
+            return 0;
+        }
+        int updated = 0;
+        SQLiteDatabase db = db();
+        db.beginTransaction();
+        try {
+            for (Map.Entry<Integer, List<Question>> entry : bundled.entrySet()) {
+                for (Question q : ContentUpdater.applyOverrides(appContext, entry.getKey(), entry.getValue())) {
+                    if (q.getExplanation() == null) continue;
+                    ContentValues cv = new ContentValues();
+                    cv.put("explanation", q.getExplanation());
+                    updated += db.update(DatabaseHandler.T_QUESTION, cv, "id = ? AND explanation IS NOT ?",
+                            new String[]{String.valueOf(q.getId()), q.getExplanation()});
+                }
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+        return updated;
     }
 
     static Question readQuestion(JsonReader reader, int categoryId) throws Exception {
@@ -407,12 +476,7 @@ public final class QuizRepository {
                 + "ORDER BY q.category_id, q.number LIMIT " + limit, new String[]{like, like})) {
             while (c.moveToNext()) ids.add(c.getInt(0));
         }
-        return ordered(ids);
-    }
-
-    /** Questions in the given order; ids without data are dropped. */
-    public List<Question> getQuestionsInOrder(List<Integer> ids) {
-        return ordered(ids);
+        return getQuestionsInOrder(ids);
     }
 
     // endregion
@@ -468,7 +532,7 @@ public final class QuizRepository {
         try (Cursor c = db().rawQuery("SELECT question_id FROM " + DatabaseHandler.T_BOOKMARK + " ORDER BY id DESC" + limitClause, null)) {
             while (c.moveToNext()) ids.add(c.getInt(0));
         }
-        return ordered(ids);
+        return getQuestionsInOrder(ids);
     }
 
     // endregion
@@ -644,7 +708,7 @@ public final class QuizRepository {
                 new String[]{String.valueOf(System.currentTimeMillis())})) {
             while (c.moveToNext()) ids.add(c.getInt(0));
         }
-        return ordered(ids);
+        return getQuestionsInOrder(ids);
     }
 
     /** Questions answered correctly at least once, per topic. */
@@ -657,12 +721,6 @@ public final class QuizRepository {
         return result;
     }
 
-    public boolean hasUnlockedTopics() {
-        try (Cursor c = db().rawQuery("SELECT 1 FROM " + DatabaseHandler.T_QUESTION + " LIMIT 1", null)) {
-            return c.moveToFirst();
-        }
-    }
-
     /**
      * Random questions across every unlocked topic. With a {@code seed} the selection is stable,
      * which gives everyone the same daily challenge for a given day and set of topics.
@@ -673,7 +731,7 @@ public final class QuizRepository {
             while (c.moveToNext()) ids.add(c.getInt(0));
         }
         if (seed == null) Collections.shuffle(ids);
-        else Collections.shuffle(ids, new java.util.Random(seed));
+        else Collections.shuffle(ids, new Random(seed));
         List<Integer> picked = new ArrayList<>();
         Map<Integer, Question> all = getQuestionsByIds(ids.subList(0, Math.min(ids.size(), count * 2)));
         for (Integer id : ids) {
@@ -681,7 +739,7 @@ public final class QuizRepository {
             if (q != null && q.getAnswers().size() >= 2) picked.add(id);
             if (picked.size() >= count) break;
         }
-        return ordered(picked);
+        return getQuestionsInOrder(picked);
     }
 
     /** Topic slug for every catalog id; used to resolve images and code highlighting in mixed tests. */
@@ -691,7 +749,8 @@ public final class QuizRepository {
         return slugs;
     }
 
-    private List<Question> ordered(List<Integer> ids) {
+    /** Questions in the given order; ids without data are dropped. */
+    public List<Question> getQuestionsInOrder(List<Integer> ids) {
         Map<Integer, Question> byId = getQuestionsByIds(ids);
         List<Question> result = new ArrayList<>();
         for (Integer id : ids) {
@@ -699,6 +758,101 @@ public final class QuizRepository {
             if (q != null) result.add(q);
         }
         return result;
+    }
+
+    // endregion
+
+    // region Learning paths, focus areas and interview packs
+
+    /** Questions of a topic answered correctly at least once. */
+    public Set<Integer> getMasteredQuestionIds(int categoryId) {
+        Set<Integer> ids = new HashSet<>();
+        try (Cursor c = db().rawQuery("SELECT DISTINCT ri.question_id FROM " + DatabaseHandler.T_RESULT_ITEM + " ri JOIN "
+                + DatabaseHandler.T_QUESTION + " q ON q.id = ri.question_id WHERE ri.outcome = 0 AND q.category_id = ?",
+                new String[]{String.valueOf(categoryId)})) {
+            while (c.moveToNext()) ids.add(c.getInt(0));
+        }
+        return ids;
+    }
+
+    /** The topic's levels with the user's progress; empty while the topic is locked. */
+    public List<LearningPath.Level> getLearningPath(int categoryId) {
+        List<Integer> ids = new ArrayList<>();
+        for (Question q : getQuestions(categoryId)) if (q.getAnswers().size() >= 2) ids.add(q.getId());
+        return LearningPath.build(ids, getMasteredQuestionIds(categoryId));
+    }
+
+    /** One level's questions, in order; empty if the level doesn't exist. */
+    public List<Question> getLevelQuestions(int categoryId, int levelIndex) {
+        List<LearningPath.Level> levels = getLearningPath(categoryId);
+        if (levelIndex < 0 || levelIndex >= levels.size()) return new ArrayList<>();
+        return getQuestionsInOrder(levels.get(levelIndex).questionIds);
+    }
+
+    /** Accuracy per unlocked topic across every answer ever given, weakest first. */
+    public List<TopicAccuracy> getTopicAccuracy(int minAnswered) {
+        Map<Integer, int[]> answers = new HashMap<>();
+        try (Cursor c = db().rawQuery("SELECT q.category_id, COUNT(*), SUM(CASE WHEN ri.outcome = 0 THEN 1 ELSE 0 END) FROM "
+                + DatabaseHandler.T_RESULT_ITEM + " ri JOIN " + DatabaseHandler.T_QUESTION + " q ON q.id = ri.question_id GROUP BY q.category_id", null)) {
+            while (c.moveToNext()) answers.put(c.getInt(0), new int[]{c.getInt(1), c.getInt(2)});
+        }
+        Map<Integer, Integer> toFix = new HashMap<>();
+        try (Cursor c = db().rawQuery("SELECT q.category_id, COUNT(*) FROM " + DatabaseHandler.T_REVIEW + " r JOIN "
+                + DatabaseHandler.T_QUESTION + " q ON q.id = r.question_id GROUP BY q.category_id", null)) {
+            while (c.moveToNext()) toFix.put(c.getInt(0), c.getInt(1));
+        }
+        List<TopicAccuracy> result = new ArrayList<>();
+        for (Category category : getCategories()) {
+            int[] a = answers.get(category.getId());
+            if (!category.isUnlocked() || a == null || a[0] < minAnswered) continue;
+            Integer fix = toFix.get(category.getId());
+            result.add(new TopicAccuracy(category, a[0], a[1], fix == null ? 0 : fix));
+        }
+        Collections.sort(result, (x, y) -> Integer.compare(x.accuracyPercent(), y.accuracyPercent()));
+        return result;
+    }
+
+    /** Questions of one topic still in the mistakes queue, due first, whether or not they're due yet. */
+    public List<Question> getMissedQuestions(int categoryId, int limit) {
+        List<Integer> ids = new ArrayList<>();
+        try (Cursor c = db().rawQuery("SELECT r.question_id FROM " + DatabaseHandler.T_REVIEW + " r JOIN " + DatabaseHandler.T_QUESTION
+                + " q ON q.id = r.question_id WHERE q.category_id = ? ORDER BY r.due_at, r.box LIMIT " + limit,
+                new String[]{String.valueOf(categoryId)})) {
+            while (c.moveToNext()) ids.add(c.getInt(0));
+        }
+        return getQuestionsInOrder(ids);
+    }
+
+    /** Slugs of the pack's topics that are unlocked. */
+    public List<String> getUnlockedPackTopics(InterviewPack pack) {
+        List<String> unlocked = new ArrayList<>();
+        for (Category c : getCategories()) {
+            if (c.isUnlocked() && pack.topics.contains(c.getSlug())) unlocked.add(c.getSlug());
+        }
+        return unlocked;
+    }
+
+    /** Random questions from the pack's unlocked topics. */
+    public List<Question> getPackQuestions(InterviewPack pack, int count) {
+        Set<Integer> topicIds = new HashSet<>();
+        for (Category c : getCatalog()) if (pack.topics.contains(c.getSlug())) topicIds.add(c.getId());
+        if (topicIds.isEmpty()) return new ArrayList<>();
+        List<Integer> ids = new ArrayList<>();
+        try (Cursor c = db().rawQuery("SELECT id FROM " + DatabaseHandler.T_QUESTION + " WHERE category_id IN ("
+                + TextUtils.join(",", topicIds) + ")", null)) {
+            while (c.moveToNext()) ids.add(c.getInt(0));
+        }
+        Collections.shuffle(ids);
+        return getQuestionsInOrder(ids.subList(0, Math.min(count, ids.size())));
+    }
+
+    /** Best score in percent for any topic id, including pseudo topics; -1 if never taken. */
+    public int getBestScore(int categoryId) {
+        try (Cursor c = db().rawQuery("SELECT MAX(ROUND(correct_answer * 100.0 / (correct_answer + wrong_answer + no_answer))) FROM "
+                + DatabaseHandler.T_RESULT + " WHERE category_id = ? AND correct_answer + wrong_answer + no_answer > 0",
+                new String[]{String.valueOf(categoryId)})) {
+            return c.moveToFirst() && !c.isNull(0) ? c.getInt(0) : -1;
+        }
     }
 
     // endregion

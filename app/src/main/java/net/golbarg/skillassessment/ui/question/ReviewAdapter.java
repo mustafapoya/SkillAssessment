@@ -1,14 +1,13 @@
 package net.golbarg.skillassessment.ui.question;
 
-import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import net.golbarg.skillassessment.databinding.ItemQuestionCardBinding;
 import net.golbarg.skillassessment.models.ResultItem;
 import net.golbarg.skillassessment.ui.widget.QuestionCardBinder;
+import net.golbarg.skillassessment.ui.widget.QuestionCardHolder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.Holder> {
+/** The answered questions of a finished test, each with the user's pick and the correct answer. */
+public class ReviewAdapter extends RecyclerView.Adapter<QuestionCardHolder> {
 
     public interface BookmarkListener {
         void onBookmarkToggled(int questionId, boolean bookmarked);
@@ -64,12 +64,12 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.Holder> {
 
     @NonNull
     @Override
-    public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new Holder(ItemQuestionCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+    public QuestionCardHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return QuestionCardHolder.create(parent);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull Holder holder, int position) {
+    public void onBindViewHolder(@NonNull QuestionCardHolder holder, int position) {
         ResultItem item = items.get(position);
         int originalPos = position < originalPositions.size() ? originalPositions.get(position) : position;
         String slug = slugs.get(item.getQuestion().getCategoryId());
@@ -85,14 +85,5 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.Holder> {
     @Override
     public int getItemCount() {
         return items.size();
-    }
-
-    static class Holder extends RecyclerView.ViewHolder {
-        final ItemQuestionCardBinding binding;
-
-        Holder(ItemQuestionCardBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-        }
     }
 }

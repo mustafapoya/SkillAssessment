@@ -2,7 +2,6 @@ package net.golbarg.skillassessment.ui.home;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +23,7 @@ import net.golbarg.skillassessment.util.UiUtils;
 import java.util.HashSet;
 import java.util.Set;
 
+/** Topic cards with mastery progress, or an unlock button while the topic is locked. */
 public class CategoryAdapter extends ListAdapter<Category, CategoryAdapter.Holder> {
 
     public interface Listener {
@@ -73,14 +73,7 @@ public class CategoryAdapter extends ListAdapter<Category, CategoryAdapter.Holde
 
         void bind(Category category) {
             Context context = b.getRoot().getContext();
-            boolean dark = UiUtils.isNightMode(context);
-
-            GradientDrawable badge = new GradientDrawable();
-            badge.setCornerRadius(UiUtils.dp(context, 14));
-            badge.setColor(CategoryNames.badgeBackground(category.getSlug(), dark));
-            b.txtBadge.setBackground(badge);
-            b.txtBadge.setTextColor(CategoryNames.badgeForeground(category.getSlug(), dark));
-            b.txtBadge.setText(CategoryNames.monogram(category.getSlug()));
+            CategoryNames.styleBadge(b.txtBadge, category.getSlug(), 14);
 
             b.txtTitle.setText(category.getDisplayName());
             String count = context.getResources().getQuantityString(R.plurals.question_count, category.getNumberOfQuestion(), category.getNumberOfQuestion());

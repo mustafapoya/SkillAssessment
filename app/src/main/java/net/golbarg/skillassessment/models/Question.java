@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+/** A multiple-choice question; answers are kept in display order. */
 public class Question {
     private final int id;
     private final int categoryId;

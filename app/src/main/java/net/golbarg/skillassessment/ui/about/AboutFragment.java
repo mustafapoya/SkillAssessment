@@ -34,26 +34,26 @@ import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.billing.BillingManager;
 import net.golbarg.skillassessment.databinding.FragmentAboutBinding;
-import net.golbarg.skillassessment.db.BackupManager;
-import net.golbarg.skillassessment.db.ContentUpdater;
 import net.golbarg.skillassessment.databinding.ViewSettingRowBinding;
 import net.golbarg.skillassessment.databinding.ViewSettingSwitchRowBinding;
+import net.golbarg.skillassessment.db.BackupManager;
+import net.golbarg.skillassessment.db.ContentUpdater;
 import net.golbarg.skillassessment.reminder.ReminderScheduler;
 import net.golbarg.skillassessment.util.Async;
 import net.golbarg.skillassessment.util.Feedback;
 import net.golbarg.skillassessment.util.GoalPicker;
-import net.golbarg.skillassessment.widget.DailyQuestionWidget;
 import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.UiUtils;
+import net.golbarg.skillassessment.widget.DailyQuestionWidget;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 
+/** The settings tab: preferences, reminders, backups, content updates and links. */
 public class AboutFragment extends Fragment {
     private static final String PACKAGE = "net.golbarg.skillassessment";
     public static final String EMAIL = "contact@golbarg.net";
     private static final String WEBSITE = "https://golbarg.net";
-    private static final String FACEBOOK = "https://www.facebook.com/golbargnet";
-    private static final String YOUTUBE = "https://www.youtube.com/channel/UCooKZ969-pMyYN0WAbOUaAg";
     private static final String PLAY_URL = "https://play.google.com/store/apps/details?id=" + PACKAGE;
 
     private static final int[] THEME_MODES = {
@@ -74,9 +74,10 @@ public class AboutFragment extends Fragment {
         });
         createBackup = registerForActivityResult(new ActivityResultContracts.CreateDocument("application/json"), uri -> {
             if (uri == null) return;
+            Context app = requireContext().getApplicationContext();
             Async.run(this, () -> {
                 try {
-                    BackupManager.export(requireContext(), uri);
+                    BackupManager.export(app, uri);
                     return true;
                 } catch (Exception e) {
                     Log.e("AboutFragment", "Backup failed", e);
@@ -152,18 +153,15 @@ public class AboutFragment extends Fragment {
         bindPrivacyRow();
 
         row(binding.rowBackup, R.drawable.ic_upload, getString(R.string.backup_export), getString(R.string.backup_export_desc),
-                v -> createBackup.launch("skill-assessment-backup-" + java.time.LocalDate.now() + ".json"));
+                v -> createBackup.launch("skill-assessment-backup-" + LocalDate.now() + ".json"));
         row(binding.rowRestoreBackup, R.drawable.ic_download, getString(R.string.backup_import), getString(R.string.backup_import_desc),
                 v -> openBackup.launch(new String[]{"application/json", "application/octet-stream", "text/plain"}));
         bindContentRow();
-        binding.rowContentUpdates.getRoot().setOnClickListener(v -> checkContent());
 
         row(binding.rowRate, R.drawable.ic_star, getString(R.string.rate_app), getString(R.string.rate_app_desc), v -> rate());
         row(binding.rowShare, R.drawable.ic_share, getString(R.string.share_app), null, v -> share());
         row(binding.rowFeedback, R.drawable.ic_mail, getString(R.string.contact_us), EMAIL, v -> email());
         row(binding.rowWebsite, R.drawable.ic_public, getString(R.string.website), "golbarg.net", v -> open(WEBSITE));
-        row(binding.rowFacebook, R.drawable.ic_group, getString(R.string.facebook), null, v -> open(FACEBOOK));
-        row(binding.rowYoutube, R.drawable.ic_play_circle, getString(R.string.youtube), null, v -> open(YOUTUBE));
     }
 
     private void row(ViewSettingRowBinding row, @DrawableRes int icon, String title, @Nullable String subtitle, View.OnClickListener click) {
@@ -186,7 +184,7 @@ public class AboutFragment extends Fragment {
                 if (success) {
                     Feedback.play(Feedback.Sound.UNLOCK);
                     UiUtils.snackbar(binding.getRoot(), R.string.premium_thanks, Snackbar.LENGTH_LONG).show();
-                } else if (!BillingManager.isPremium(requireContext()) && (binding != null)) {
+                } else if (!BillingManager.isPremium(requireContext())) {
                     BillingManager.State current = BillingManager.get(requireContext()).getState().getValue();
                     if (current == null || !current.available) {
                         UiUtils.snackbar(binding.getRoot(), R.string.premium_unavailable, Snackbar.LENGTH_LONG).show();

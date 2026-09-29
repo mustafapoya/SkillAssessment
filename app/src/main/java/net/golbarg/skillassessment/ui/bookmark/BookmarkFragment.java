@@ -1,6 +1,5 @@
 package net.golbarg.skillassessment.ui.bookmark;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,21 +18,20 @@ import com.google.android.material.snackbar.Snackbar;
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.databinding.FragmentBookmarkBinding;
-import net.golbarg.skillassessment.databinding.ItemQuestionCardBinding;
 import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.models.Bookmark;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.ui.home.TestSetupSheet;
-import net.golbarg.skillassessment.ui.question.QuestionActivity;
 import net.golbarg.skillassessment.ui.widget.QuestionCardBinder;
+import net.golbarg.skillassessment.ui.widget.QuestionCardHolder;
 import net.golbarg.skillassessment.util.Async;
-import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.UiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/** The saved-questions tab: search, removal with undo, and a practice test of every saved question. */
 public class BookmarkFragment extends Fragment {
     private FragmentBookmarkBinding binding;
     private QuizRepository repository;
@@ -143,6 +141,7 @@ public class BookmarkFragment extends Fragment {
     private void remove(int position) {
         if (position < 0 || position >= displayedBookmarks.size()) return;
         Bookmark removed = displayedBookmarks.remove(position);
+        int originalIndex = allBookmarks.indexOf(removed);
         allBookmarks.remove(removed);
         adapter.notifyItemRemoved(position);
         String query = binding.editSearch.getText() == null ? "" : binding.editSearch.getText().toString().trim();
@@ -151,7 +150,7 @@ public class BookmarkFragment extends Fragment {
         Async.io(() -> repository.setBookmarked(questionId, false));
         UiUtils.snackbar(binding.getRoot(), R.string.bookmark_deleted, Snackbar.LENGTH_LONG)
                 .setAction(R.string.undo, v -> {
-                    allBookmarks.add(removed);
+                    allBookmarks.add(Math.min(originalIndex, allBookmarks.size()), removed);
                     applySearch();
                     Async.io(() -> repository.setBookmarked(questionId, true));
                 })
@@ -164,15 +163,15 @@ public class BookmarkFragment extends Fragment {
         binding = null;
     }
 
-    private class Adapter extends RecyclerView.Adapter<Holder> {
+    private class Adapter extends RecyclerView.Adapter<QuestionCardHolder> {
         @NonNull
         @Override
-        public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new Holder(ItemQuestionCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        public QuestionCardHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return QuestionCardHolder.create(parent);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull Holder holder, int position) {
+        public void onBindViewHolder(@NonNull QuestionCardHolder holder, int position) {
             Bookmark bookmark = displayedBookmarks.get(position);
             QuestionCardBinder.bindSaved(holder.binding, bookmark.getQuestion(), bookmark.getCategory().getDisplayName(),
                     bookmark.getCategory().getSlug(), v -> remove(holder.getBindingAdapterPosition()));
@@ -181,15 +180,6 @@ public class BookmarkFragment extends Fragment {
         @Override
         public int getItemCount() {
             return displayedBookmarks.size();
-        }
-    }
-
-    private static class Holder extends RecyclerView.ViewHolder {
-        final ItemQuestionCardBinding binding;
-
-        Holder(ItemQuestionCardBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
         }
     }
 }

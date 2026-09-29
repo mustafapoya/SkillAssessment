@@ -9,7 +9,6 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -71,17 +70,9 @@ public class OptionView extends MaterialCardView {
         setState(State.NORMAL);
     }
 
-    public LinearLayout getContentContainer() {
-        return binding.content;
-    }
-
     public void setState(State state) {
         this.state = state;
         applyState();
-    }
-
-    public State getState() {
-        return state;
     }
 
     private void applyState() {
@@ -103,7 +94,7 @@ public class OptionView extends MaterialCardView {
                 badgeBg = stroke;
                 badgeFg = UiUtils.color(this, com.google.android.material.R.attr.colorOnPrimary);
                 strokeWidth = UiUtils.dp(c, 2);
-                stateDescription = "selected";
+                stateDescription = c.getString(R.string.answer_selected);
                 break;
             case MISSED:
                 // The right answer the user did not pick: outlined, not filled.

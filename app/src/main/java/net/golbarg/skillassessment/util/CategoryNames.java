@@ -1,15 +1,28 @@
 package net.golbarg.skillassessment.util;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.widget.TextView;
+
+import net.golbarg.skillassessment.R;
+import net.golbarg.skillassessment.models.InterviewPack;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/** Human readable names and a stable accent colour for topic slugs such as "node.js" or "t-sql". */
+/**
+ * Human readable names and a stable accent colour for topic slugs such as "node.js" or "t-sql".
+ * Technology names stay as they are; the app's own modes (mixed practice, interview packs, …) are
+ * translated once {@link #init} has run.
+ */
 public final class CategoryNames {
     private static final Map<String, String> OVERRIDES = new HashMap<>();
     private static final Map<String, String> MONOGRAMS = new HashMap<>();
+    /** Pseudo topics whose names come from string resources. */
+    private static final Map<String, Integer> LOCALIZED = new HashMap<>();
+    private static Context appContext;
 
     static {
         OVERRIDES.put("aws", "AWS");
@@ -48,6 +61,21 @@ public final class CategoryNames {
         OVERRIDES.put("daily-challenge", "Daily challenge");
         OVERRIDES.put("mistakes-review", "Mistakes review");
         OVERRIDES.put("bookmarked-questions", "Saved questions");
+        OVERRIDES.put("speed-round", "Speed round");
+        OVERRIDES.put("interview-android", "Android developer");
+        OVERRIDES.put("interview-ios", "iOS developer");
+        OVERRIDES.put("interview-frontend", "Frontend developer");
+        OVERRIDES.put("interview-backend", "Backend developer");
+        OVERRIDES.put("interview-dotnet", ".NET developer");
+        OVERRIDES.put("interview-data", "Data scientist");
+        OVERRIDES.put("interview-devops", "DevOps & cloud engineer");
+
+        LOCALIZED.put("mixed-practice", R.string.mixed_practice);
+        LOCALIZED.put("daily-challenge", R.string.daily_challenge);
+        LOCALIZED.put("mistakes-review", R.string.mistakes_review);
+        LOCALIZED.put("bookmarked-questions", R.string.saved_title);
+        LOCALIZED.put("speed-round", R.string.speed_round);
+        for (InterviewPack pack : InterviewPack.values()) LOCALIZED.put(pack.slug, pack.title);
 
         MONOGRAMS.put("c#", "C#");
         MONOGRAMS.put("c++", "C++");
@@ -64,18 +92,27 @@ public final class CategoryNames {
         MONOGRAMS.put("daily-challenge", "DC");
         MONOGRAMS.put("mistakes-review", "RV");
         MONOGRAMS.put("bookmarked-questions", "SV");
+        MONOGRAMS.put("speed-round", "SR");
+        MONOGRAMS.put("interview-android", "AN");
+        MONOGRAMS.put("interview-ios", "iOS");
+        MONOGRAMS.put("interview-frontend", "FE");
+        MONOGRAMS.put("interview-backend", "BE");
+        MONOGRAMS.put("interview-dotnet", ".NET");
+        MONOGRAMS.put("interview-data", "DS");
+        MONOGRAMS.put("interview-devops", "OPS");
     }
 
+    /** The groups offered as filter chips on the home screen. */
     public enum Domain {
-        ALL(net.golbarg.skillassessment.R.string.domain_all),
-        LANGUAGES(net.golbarg.skillassessment.R.string.domain_languages),
-        FRONTEND(net.golbarg.skillassessment.R.string.domain_frontend),
-        BACKEND(net.golbarg.skillassessment.R.string.domain_backend),
-        MOBILE(net.golbarg.skillassessment.R.string.domain_mobile),
-        DATABASES(net.golbarg.skillassessment.R.string.domain_databases),
-        CLOUD_DEVOPS(net.golbarg.skillassessment.R.string.domain_cloud_devops),
-        AI_DATA(net.golbarg.skillassessment.R.string.domain_ai_data),
-        TOOLS_OTHER(net.golbarg.skillassessment.R.string.domain_tools);
+        ALL(R.string.domain_all),
+        LANGUAGES(R.string.domain_languages),
+        FRONTEND(R.string.domain_frontend),
+        BACKEND(R.string.domain_backend),
+        MOBILE(R.string.domain_mobile),
+        DATABASES(R.string.domain_databases),
+        CLOUD_DEVOPS(R.string.domain_cloud_devops),
+        AI_DATA(R.string.domain_ai_data),
+        TOOLS_OTHER(R.string.domain_tools);
 
         public final int titleRes;
 
@@ -156,8 +193,15 @@ public final class CategoryNames {
     private CategoryNames() {
     }
 
+    /** Lets pseudo-topic names follow the app language; call once from the Application. */
+    public static void init(Context context) {
+        appContext = context.getApplicationContext();
+    }
+
     public static String displayName(String slug) {
         if (slug == null || slug.isEmpty()) return "";
+        Integer localized = LOCALIZED.get(slug);
+        if (localized != null && appContext != null) return appContext.getString(localized);
         String override = OVERRIDES.get(slug);
         if (override != null) return override;
         StringBuilder sb = new StringBuilder();
@@ -186,17 +230,29 @@ public final class CategoryNames {
         return name.substring(0, 1).toUpperCase(Locale.ROOT) + name.substring(1, 2).toLowerCase(Locale.ROOT);
     }
 
-    /** A pleasant hue derived from the slug so each topic keeps the same colour. */
-    public static int accentHue(String slug) {
+    /** Fills a topic badge with the topic's monogram on its own tinted background. */
+    public static void styleBadge(TextView badge, String slug, float cornerRadiusDp) {
+        Context context = badge.getContext();
+        boolean dark = UiUtils.isNightMode(context);
+        GradientDrawable background = new GradientDrawable();
+        background.setCornerRadius(UiUtils.dp(context, cornerRadiusDp));
+        background.setColor(badgeBackground(slug, dark));
+        badge.setBackground(background);
+        badge.setTextColor(badgeForeground(slug, dark));
+        badge.setText(monogram(slug));
+    }
+
+    /** A hue derived from the slug, so each topic keeps the same colour everywhere. */
+    private static int accentHue(String slug) {
         int hash = slug == null ? 0 : slug.hashCode();
         return Math.abs(hash % 360);
     }
 
-    public static int badgeBackground(String slug, boolean dark) {
+    private static int badgeBackground(String slug, boolean dark) {
         return Color.HSVToColor(new float[]{accentHue(slug), dark ? 0.45f : 0.22f, dark ? 0.32f : 0.96f});
     }
 
-    public static int badgeForeground(String slug, boolean dark) {
+    private static int badgeForeground(String slug, boolean dark) {
         return Color.HSVToColor(new float[]{accentHue(slug), dark ? 0.35f : 0.75f, dark ? 0.95f : 0.45f});
     }
 }

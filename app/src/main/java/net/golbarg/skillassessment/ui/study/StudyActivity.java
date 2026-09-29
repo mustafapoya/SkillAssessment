@@ -3,7 +3,6 @@ package net.golbarg.skillassessment.ui.study;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -15,11 +14,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.databinding.ActivityStudyBinding;
-import net.golbarg.skillassessment.databinding.ItemQuestionCardBinding;
 import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.ui.widget.QuestionCardBinder;
+import net.golbarg.skillassessment.ui.widget.QuestionCardHolder;
 import net.golbarg.skillassessment.util.Async;
 import net.golbarg.skillassessment.util.Feedback;
 import net.golbarg.skillassessment.util.UiUtils;
@@ -140,15 +139,15 @@ public class StudyActivity extends AppCompatActivity {
         outState.putIntArray(STATE_REVEALED, ids);
     }
 
-    private class Adapter extends RecyclerView.Adapter<Holder> {
+    private class Adapter extends RecyclerView.Adapter<QuestionCardHolder> {
         @NonNull
         @Override
-        public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new Holder(ItemQuestionCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        public QuestionCardHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return QuestionCardHolder.create(parent);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull Holder holder, int position) {
+        public void onBindViewHolder(@NonNull QuestionCardHolder holder, int position) {
             Question q = questions.get(position);
             QuestionCardBinder.bindStudy(holder.binding, q, getString(R.string.question_label, position + 1), slug, revealed.contains(q.getId()), bookmarks.contains(q.getId()),
                     v -> toggleReveal(holder.getBindingAdapterPosition()),
@@ -158,15 +157,6 @@ public class StudyActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return questions.size();
-        }
-    }
-
-    private static class Holder extends RecyclerView.ViewHolder {
-        final ItemQuestionCardBinding binding;
-
-        Holder(ItemQuestionCardBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
         }
     }
 }

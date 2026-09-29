@@ -138,185 +138,177 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Stats hero -->
+    <!-- Today: goal ring plus the three headline stats, in one hero. Tap to change the goal. -->
     <LinearLayout
+        android:id="@+id/card_goal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_hero"
         android:baselineAligned="false"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingTop="18dp"
-        android:paddingBottom="18dp">
+        android:padding="16dp">
+
+        <FrameLayout
+            android:layout_width="72dp"
+            android:layout_height="72dp">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress_goal"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:importantForAccessibility="no"
+                app:indicatorColor="@android:color/white"
+                app:indicatorInset="0dp"
+                app:indicatorSize="72dp"
+                app:trackColor="#33FFFFFF"
+                app:trackCornerRadius="3dp"
+                app:trackThickness="6dp"
+                tools:progress="40" />
+
+            <ImageView
+                android:id="@+id/img_goal"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_flag"
+                app:tint="@android:color/white" />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:layout_weight="1"
-            android:gravity="center"
             android:orientation="vertical">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:alpha="0.85"
+                    android:text="@string/daily_goal"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.App.Overline"
+                    android:textColor="@android:color/white" />
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:alpha="0.8"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_edit"
+                    app:tint="@android:color/white" />
+            </LinearLayout>
+
             <TextView
-                android:id="@+id/txt_stat_tests"
+                android:id="@+id/txt_goal_desc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.App.Stat"
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.App.Subtitle"
                 android:textColor="@android:color/white"
-                tools:text="12" />
+                tools:text="7 of 20 questions today" />
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Headline stats, compact: value over label. -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:alpha="0.85"
-                android:text="@string/stat_tests"
-                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                android:textColor="@android:color/white" />
-        </LinearLayout>
+                android:layout_marginTop="10dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:alpha="0.25"
-            android:background="@android:color/white" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/txt_stat_tests"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        tools:text="12" />
 
-            <TextView
-                android:id="@+id/txt_stat_accuracy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.App.Stat"
-                android:textColor="@android:color/white"
-                tools:text="76%" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.8"
+                        android:text="@string/stat_tests"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:alpha="0.85"
-                android:text="@string/stat_accuracy"
-                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                android:textColor="@android:color/white" />
-        </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:alpha="0.25"
-            android:background="@android:color/white" />
+                    <TextView
+                        android:id="@+id/txt_stat_accuracy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        tools:text="78%" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.8"
+                        android:text="@string/stat_accuracy"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
 
-            <TextView
-                android:id="@+id/txt_stat_topics"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.App.Stat"
-                android:textColor="@android:color/white"
-                tools:text="3/58" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:alpha="0.85"
-                android:text="@string/stat_topics"
-                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                android:textColor="@android:color/white" />
+                    <TextView
+                        android:id="@+id/txt_stat_topics"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        tools:text="3/58" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.8"
+                        android:text="@string/stat_topics"
+                        android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Daily goal: questions answered today against the chosen target. Tap to change it. -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_goal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/list_gap"
-        android:clickable="true"
-        android:focusable="true">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingTop="14dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="14dp">
-
-            <FrameLayout
-                android:layout_width="48dp"
-                android:layout_height="48dp">
-
-                <com.google.android.material.progressindicator.CircularProgressIndicator
-                    android:id="@+id/progress_goal"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:importantForAccessibility="no"
-                    app:indicatorInset="0dp"
-                    app:indicatorSize="48dp"
-                    app:trackCornerRadius="3dp"
-                    app:trackThickness="5dp" />
-
-                <ImageView
-                    android:id="@+id/img_goal"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_gravity="center"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_flag"
-                    app:tint="?attr/colorPrimary" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/daily_goal"
-                    android:textAppearance="@style/TextAppearance.App.Subtitle"
-                    android:textColor="?attr/colorOnSurface" />
-
-                <TextView
-                    android:id="@+id/txt_goal_desc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.App.Caption"
-                    tools:text="7 of 20 questions today" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:importantForAccessibility="no"
-                android:src="@drawable/ic_edit"
-                app:tint="?attr/colorOnSurfaceVariant" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Today: daily challenge, mistakes review and mixed practice -->
+    <!-- Daily challenge: one slim row. -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_daily"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="@dimen/list_gap"
         android:clickable="true"
         android:focusable="true"
         app:cardBackgroundColor="?attr/colorPrimaryContainer">
@@ -325,19 +317,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:minHeight="64dp"
             android:orientation="horizontal"
-            android:padding="14dp">
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp">
 
             <FrameLayout
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:background="@drawable/bg_circle"
                 android:backgroundTint="?attr/colorPrimary">
 
                 <ImageView
                     android:id="@+id/img_daily"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_today"
@@ -347,7 +343,7 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
+                android:layout_marginStart="12dp"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:orientation="vertical">
@@ -363,7 +359,9 @@
                     android:id="@+id/txt_daily_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:textColor="?attr/colorOnPrimaryContainer"
                     tools:text="5 mixed questions · +1 coin" />
             </LinearLayout>
@@ -376,12 +374,15 @@
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:minWidth="0dp"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
                 android:text="@string/start" />
 
             <ImageView
                 android:id="@+id/img_daily_done"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
+                android:layout_marginEnd="6dp"
                 android:importantForAccessibility="no"
                 android:src="@drawable/ic_check_circle"
                 android:visibility="gone"
@@ -389,104 +390,154 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Practice modes: compact two-column tiles. -->
+    <TextView
+        style="@style/Widget.App.HomeSection"
+        android:text="@string/section_practice" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:baselineAligned="false"
         android:orientation="horizontal">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_review"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="5dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true">
+            style="@style/Widget.App.HomeTile"
+            android:layout_marginEnd="5dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="14dp">
+            <LinearLayout style="@style/Widget.App.HomeTile.Content">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_replay"
-                    app:tint="?attr/colorTertiary" />
+                <FrameLayout style="@style/Widget.App.HomeTile.IconBox">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/mistakes_review"
-                    android:textAppearance="@style/TextAppearance.App.Subtitle"
-                    android:textColor="?attr/colorOnSurface" />
+                    <ImageView
+                        style="@style/Widget.App.HomeTile.Icon"
+                        android:src="@drawable/ic_replay" />
+                </FrameLayout>
 
-                <TextView
-                    android:id="@+id/txt_review_desc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.App.Caption"
-                    tools:text="4 to review" />
+                <LinearLayout style="@style/Widget.App.HomeTile.Texts">
+
+                    <TextView
+                        style="@style/Widget.App.HomeTile.Title"
+                        android:text="@string/mistakes_review" />
+
+                    <TextView
+                        android:id="@+id/txt_review_desc"
+                        style="@style/Widget.App.HomeTile.Desc"
+                        tools:text="9 to review" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_mixed"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="5dp"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true">
+            style="@style/Widget.App.HomeTile"
+            android:layout_marginStart="5dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="14dp">
+            <LinearLayout style="@style/Widget.App.HomeTile.Content">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_shuffle"
-                    app:tint="?attr/colorTertiary" />
+                <FrameLayout style="@style/Widget.App.HomeTile.IconBox">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/mixed_practice"
-                    android:textAppearance="@style/TextAppearance.App.Subtitle"
-                    android:textColor="?attr/colorOnSurface" />
+                    <ImageView
+                        style="@style/Widget.App.HomeTile.Icon"
+                        android:src="@drawable/ic_shuffle" />
+                </FrameLayout>
 
-                <TextView
-                    android:id="@+id/txt_mixed_desc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/mixed_practice_desc"
-                    android:textAppearance="@style/TextAppearance.App.Caption" />
+                <LinearLayout style="@style/Widget.App.HomeTile.Texts">
+
+                    <TextView
+                        style="@style/Widget.App.HomeTile.Title"
+                        android:text="@string/mixed_practice" />
+
+                    <TextView
+                        android:id="@+id/txt_mixed_desc"
+                        style="@style/Widget.App.HomeTile.Desc"
+                        android:text="@string/mixed_practice_desc" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/layout_search"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/list_gap"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_sprint"
+            style="@style/Widget.App.HomeTile"
+            android:layout_marginEnd="5dp">
+
+            <LinearLayout style="@style/Widget.App.HomeTile.Content">
+
+                <FrameLayout style="@style/Widget.App.HomeTile.IconBox">
+
+                    <ImageView
+                        style="@style/Widget.App.HomeTile.Icon"
+                        android:src="@drawable/ic_timer" />
+                </FrameLayout>
+
+                <LinearLayout style="@style/Widget.App.HomeTile.Texts">
+
+                    <TextView
+                        style="@style/Widget.App.HomeTile.Title"
+                        android:text="@string/speed_round" />
+
+                    <TextView
+                        android:id="@+id/txt_sprint_desc"
+                        style="@style/Widget.App.HomeTile.Desc"
+                        tools:text="60 seconds · best 12" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_interview"
+            style="@style/Widget.App.HomeTile"
+            android:layout_marginStart="5dp">
+
+            <LinearLayout style="@style/Widget.App.HomeTile.Content">
+
+                <FrameLayout style="@style/Widget.App.HomeTile.IconBox">
+
+                    <ImageView
+                        style="@style/Widget.App.HomeTile.Icon"
+                        android:src="@drawable/ic_school" />
+                </FrameLayout>
+
+                <LinearLayout style="@style/Widget.App.HomeTile.Texts">
+
+                    <TextView
+                        style="@style/Widget.App.HomeTile.Title"
+                        android:text="@string/interview_prep" />
+
+                    <TextView
+                        android:id="@+id/txt_interview_desc"
+                        style="@style/Widget.App.HomeTile.Desc"
+                        android:text="@string/interview_prep_desc" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+    <!-- Topics: dense search plus one scrollable row of filters. -->
+    <TextView
+        style="@style/Widget.App.HomeSection"
+        android:text="@string/section_topics" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layout_search"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:hint="@string/search_topics"
         app:boxBackgroundColor="?attr/colorSurfaceContainerLowest"
-        app:boxCornerRadiusBottomEnd="28dp"
-        app:boxCornerRadiusBottomStart="28dp"
-        app:boxCornerRadiusTopEnd="28dp"
-        app:boxCornerRadiusTopStart="28dp"
+        app:boxCornerRadiusBottomEnd="24dp"
+        app:boxCornerRadiusBottomStart="24dp"
+        app:boxCornerRadiusTopEnd="24dp"
+        app:boxCornerRadiusTopStart="24dp"
         app:boxStrokeColor="?attr/colorPrimary"
         app:endIconMode="clear_text"
         app:hintEnabled="false"
@@ -502,120 +553,115 @@
             android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Domain filter categories -->
     <HorizontalScrollView
         android:id="@+id/scroll_domains"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="6dp"
         android:fadingEdgeLength="32dp"
         android:requiresFadingEdge="horizontal"
         android:scrollbars="none">
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_domain"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:checkedChip="@id/chip_domain_all"
-            app:selectionRequired="true"
-            app:singleLine="true"
-            app:singleSelection="true">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
+            <!-- Status is a dropdown chip so it doesn't need a row of its own. -->
             <com.google.android.material.chip.Chip
-                android:id="@+id/chip_domain_all"
+                android:id="@+id/chip_status"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/domain_all" />
+                android:checkable="false"
+                android:text="@string/filter_any_status"
+                app:chipIcon="@drawable/ic_filter_list"
+                app:chipIconVisible="true"
+                app:closeIcon="@drawable/ic_arrow_drop_down"
+                app:closeIconVisible="true" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_domain_languages"
-                style="@style/Widget.Material3.Chip.Filter"
+            <View
+                android:layout_width="1dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/colorOutlineVariant" />
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group_domain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/domain_languages" />
+                app:checkedChip="@id/chip_domain_all"
+                app:selectionRequired="true"
+                app:singleLine="true"
+                app:singleSelection="true">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_domain_frontend"
-                style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/domain_frontend" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_domain_all"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/domain_all" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_domain_backend"
-                style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/domain_backend" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_domain_languages"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/domain_languages" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_domain_mobile"
-                style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/domain_mobile" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_domain_frontend"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/domain_frontend" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_domain_databases"
-                style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/domain_databases" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_domain_backend"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/domain_backend" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_domain_cloud_devops"
-                style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/domain_cloud_devops" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_domain_mobile"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/domain_mobile" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_domain_ai_data"
-                style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/domain_ai_data" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_domain_databases"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/domain_databases" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_domain_tools"
-                style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/domain_tools" />
-        </com.google.android.material.chip.ChipGroup>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_domain_cloud_devops"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/domain_cloud_devops" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_domain_ai_data"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/domain_ai_data" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_domain_tools"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/domain_tools" />
+            </com.google.android.material.chip.ChipGroup>
+        </LinearLayout>
     </HorizontalScrollView>
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chip_group_filter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        app:checkedChip="@id/chip_all"
-        app:selectionRequired="true"
-        app:singleSelection="true">
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_all"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_any_status" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_unlocked"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_unlocked" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_locked"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_locked" />
-    </com.google.android.material.chip.ChipGroup>
 
     <TextView
         android:id="@+id/txt_empty"

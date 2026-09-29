@@ -29,6 +29,10 @@ public final class QuizSession {
     public boolean timer;
     public boolean shuffle;
     public boolean exam;
+    /** Learning-path level, or -1 for a whole-topic test. */
+    public int level = -1;
+    /** Focused practice on the topic's mistakes. */
+    public boolean focus;
     public List<Integer> questionIds = new ArrayList<>();
     public List<ResultItem> answers = new ArrayList<>();
     public int streak;
@@ -55,6 +59,8 @@ public final class QuizSession {
             o.put("timer", timer);
             o.put("shuffle", shuffle);
             o.put("exam", exam);
+            o.put("level", level);
+            o.put("focus", focus);
             JSONArray ids = new JSONArray();
             for (int id : questionIds) ids.put(id);
             o.put("questionIds", ids);
@@ -95,6 +101,8 @@ public final class QuizSession {
             s.timer = o.optBoolean("timer", true);
             s.shuffle = o.optBoolean("shuffle", true);
             s.exam = o.optBoolean("exam");
+            s.level = o.optInt("level", -1);
+            s.focus = o.optBoolean("focus");
             JSONArray ids = o.getJSONArray("questionIds");
             for (int i = 0; i < ids.length(); i++) s.questionIds.add(ids.getInt(i));
             JSONArray items = o.getJSONArray("answers");

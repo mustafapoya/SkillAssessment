@@ -1,12 +1,13 @@
 package net.golbarg.skillassessment.models;
 
+/** The score of one finished test. */
 public class QuestionResult {
     private long id;
     private final int categoryId;
     private int correctAnswer;
     private int wrongAnswer;
     private int noAnswer;
-    private long createdAt;
+    private final long createdAt;
     private long durationMs;
     private boolean exam;
 
@@ -39,8 +40,6 @@ public class QuestionResult {
 
     /** 0 for results recorded before version 2 of the app. */
     public long getCreatedAt() { return createdAt; }
-
-    public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
 
     public long getDurationMs() { return durationMs; }
 

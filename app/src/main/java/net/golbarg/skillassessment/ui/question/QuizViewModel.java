@@ -14,6 +14,8 @@ import androidx.lifecycle.MutableLiveData;
 import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.models.AnswerResponseType;
 import net.golbarg.skillassessment.models.Category;
+import net.golbarg.skillassessment.models.InterviewPack;
+import net.golbarg.skillassessment.models.LearningPath;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.QuestionResult;
 import net.golbarg.skillassessment.models.ResultItem;
@@ -34,13 +36,17 @@ import java.util.Set;
  *
  * <p>Practice mode reveals the answer after every question and times each question separately.
  * Exam mode records answers silently, runs one timer for the whole test and reveals everything on
- * the result screen.
+ * the result screen. A speed round works like an exam against a fixed one-minute clock: when it
+ * runs out the round simply ends, and only the answered questions count.
  */
 public class QuizViewModel extends AndroidViewModel {
     public static final long TIME_PER_QUESTION_MS = 60_000L;
     private static final long TICK_MS = 250L;
     private static final int DEFAULT_MIXED_LENGTH = 15;
     private static final int MAX_REVIEW_LENGTH = 20;
+    public static final long SPRINT_MS = 60_000L;
+    /** More questions than anyone can answer in a minute. */
+    private static final int SPRINT_POOL = 150;
     /** Questions in the free preview of a locked topic. */
     public static final int PREVIEW_LENGTH = 5;
     /** Result id reported for a finished preview, which is never saved. */
@@ -77,7 +83,14 @@ public class QuizViewModel extends AndroidViewModel {
     private final List<ResultItem> answers = new ArrayList<>();
     private QuestionResult result;
     private boolean exam;
-    private boolean examTimedOut;
+    private boolean sprint;
+    /** The clock ended the test (exam or speed round). */
+    private boolean timedOut;
+    /** Learning-path level being practised, or -1. */
+    private int level = -1;
+    /** Only the topic's questions still in the mistakes queue. */
+    private boolean focus;
+    @Nullable private AnswerResponseType lastOutcome;
 
     private int index;
     private int streak;
@@ -115,6 +128,7 @@ public class QuizViewModel extends AndroidViewModel {
             if (remainingMs == 0) {
                 timerRunning = false;
                 if (exam) onExamTimeUp();
+                else if (sprint) onSprintTimeUp();
                 else revealWith(AnswerResponseType.NO_ANSWER, Reveal.TIMEOUT);
             } else {
                 handler.postDelayed(this, TICK_MS);
@@ -135,15 +149,23 @@ public class QuizViewModel extends AndroidViewModel {
     public LiveData<FinishInfo> getFinished() { return finished; }
 
     /**
-     * @param categoryId a topic id, or {@link Category#MIXED}, {@link Category#DAILY} or {@link Category#REVIEW}
+     * @param categoryId a topic id, or {@link Category#MIXED}, {@link Category#DAILY}, {@link Category#REVIEW}
+     *                   or {@link Category#BOOKMARKED}
+     *                   {@link Category#SPRINT} or an {@link InterviewPack} id
      * @param length     number of questions; 0 means all (or the mode's default)
+     * @param levelIndex a learning-path level of the topic, or -1 for the whole topic
+     * @param focusMode  only the topic's questions still waiting in the mistakes queue
      */
-    public void start(int categoryId, int length, boolean timer, boolean shuffle, boolean examMode, boolean previewMode) {
+    public void start(int categoryId, int length, boolean timer, boolean shuffle, boolean examMode, boolean previewMode,
+                      int levelIndex, boolean focusMode) {
         if (started) return;
         started = true;
-        timerEnabled = timer;
-        exam = examMode && !previewMode;
+        sprint = categoryId == Category.SPRINT && !previewMode;
+        timerEnabled = timer || sprint;
+        exam = examMode && !previewMode && !sprint;
         preview = previewMode;
+        level = categoryId >= 0 ? levelIndex : -1;
+        focus = categoryId >= 0 && focusMode;
         startLength = length;
         startShuffle = shuffle;
         Async.run(null, () -> {
@@ -154,7 +176,18 @@ public class QuizViewModel extends AndroidViewModel {
                 category = repository.getCategory(categoryId);
                 return loaded;
             }
-            switch (categoryId) {
+            InterviewPack pack = InterviewPack.fromId(categoryId);
+            if (level >= 0) {
+                loaded = repository.getLevelQuestions(categoryId, level);
+                if (shuffle) Collections.shuffle(loaded);
+            } else if (focus) {
+                loaded = repository.getMissedQuestions(categoryId, length > 0 ? length : MAX_REVIEW_LENGTH);
+            } else if (pack != null) {
+                loaded = repository.getPackQuestions(pack, length > 0 ? length : InterviewPack.LENGTH);
+            } else switch (categoryId) {
+                case Category.SPRINT:
+                    loaded = repository.getMixedQuestions(SPRINT_POOL, null);
+                    break;
                 case Category.DAILY:
                     loaded = repository.getMixedQuestions(ProgressTracker.DAILY_QUESTIONS, ProgressTracker.dailySeed());
                     break;
@@ -190,9 +223,9 @@ public class QuizViewModel extends AndroidViewModel {
             result = new QuestionResult(-1, category.getId(), 0, 0, 0, System.currentTimeMillis(), 0);
             index = 0;
             activeSince = SystemClock.elapsedRealtime();
-            timerTotalMs = exam ? TIME_PER_QUESTION_MS * questions.size() : TIME_PER_QUESTION_MS;
+            timerTotalMs = sprint ? SPRINT_MS : exam ? TIME_PER_QUESTION_MS * questions.size() : TIME_PER_QUESTION_MS;
             beginQuestion();
-            if (timerEnabled && exam) startTimer(timerTotalMs);
+            if (timerEnabled && isContinuous()) startTimer(timerTotalMs);
         });
     }
 
@@ -210,6 +243,8 @@ public class QuizViewModel extends AndroidViewModel {
         exam = session.exam;
         startLength = session.length;
         startShuffle = session.shuffle;
+        level = session.level;
+        focus = session.focus;
         hintUsed = session.hintUsed;
         Async.run(null, () -> {
             List<Question> loaded = repository.getQuestionsInOrder(session.questionIds);
@@ -244,7 +279,8 @@ public class QuizViewModel extends AndroidViewModel {
 
     /** Stores the test so it can be continued later. Previews and finished tests aren't kept. */
     private void saveSession() {
-        if (preview || abandoned || saving || result == null || questions.isEmpty()) return;
+        // A speed round is over in a minute; there is nothing worth continuing later.
+        if (preview || sprint || abandoned || saving || result == null || questions.isEmpty()) return;
         if (phase != Phase.ANSWERING && phase != Phase.REVEALED) return;
         if (answers.size() >= questions.size()) return;
         QuizSession s = new QuizSession();
@@ -253,6 +289,8 @@ public class QuizViewModel extends AndroidViewModel {
         s.timer = timerEnabled;
         s.shuffle = startShuffle;
         s.exam = exam;
+        s.level = level;
+        s.focus = focus;
         for (Question q : questions) s.questionIds.add(q.getId());
         s.answers.addAll(answers);
         s.streak = streak;
@@ -301,7 +339,20 @@ public class QuizViewModel extends AndroidViewModel {
 
     public boolean isExam() { return exam; }
 
-    public boolean isExamTimedOut() { return examTimedOut; }
+    public boolean isSprint() { return sprint; }
+
+    /** Exams and speed rounds move on without revealing answers, against one clock. */
+    public boolean isContinuous() { return exam || sprint; }
+
+    public boolean isTimedOut() { return timedOut; }
+
+    /** Learning-path level being practised, or -1. */
+    public int getLevel() { return level; }
+
+    public boolean isFocus() { return focus; }
+
+    /** How the most recent question was answered; null before the first answer. */
+    @Nullable public AnswerResponseType getLastOutcome() { return lastOutcome; }
 
     public boolean isLastQuestion() { return index >= questions.size() - 1; }
 
@@ -328,7 +379,7 @@ public class QuizViewModel extends AndroidViewModel {
     /** One hint per practice test, on a question with at least two wrong options. */
     public boolean canUseHint() {
         Question q = getCurrentQuestion();
-        if (q == null || exam || preview || hintUsed || phase != Phase.ANSWERING) return false;
+        if (q == null || isContinuous() || preview || hintUsed || phase != Phase.ANSWERING) return false;
         return q.getAnswers().size() - q.getCorrectPositions().size() >= 2;
     }
 
@@ -409,16 +460,31 @@ public class QuizViewModel extends AndroidViewModel {
             finished.setValue(new FinishInfo(PREVIEW_RESULT_ID, new ProgressTracker.Outcome()));
             return;
         }
+        if (answers.isEmpty()) {
+            finished.setValue(new FinishInfo(-1, new ProgressTracker.Outcome()));
+            return;
+        }
         result.setDurationMs(activeAccumulated);
         result.setExam(exam);
         List<ResultItem> items = new ArrayList<>(answers);
         int best = bestStreak;
         boolean isExam = exam;
+        int levelIndex = level;
+        int topicId = category.getId();
         Async.run(null, () -> {
+            boolean nextWasOpen = levelIndex >= 0 && isLevelOpen(topicId, levelIndex + 1);
             long id = repository.saveResult(result, items);
             ProgressTracker.Outcome outcome = ProgressTracker.onTestFinished(getApplication(), repository, result, isExam, best);
+            if (levelIndex >= 0 && !nextWasOpen && isLevelOpen(topicId, levelIndex + 1)) {
+                outcome.levelUnlocked = levelIndex + 1;
+            }
             return new FinishInfo(id, outcome);
         }, info -> finished.setValue(info != null ? info : new FinishInfo(-1, new ProgressTracker.Outcome())));
+    }
+
+    private boolean isLevelOpen(int categoryId, int levelIndex) {
+        List<LearningPath.Level> levels = repository.getLearningPath(categoryId);
+        return levelIndex < levels.size() && levels.get(levelIndex).open;
     }
 
     public void toggleBookmark() {
@@ -469,7 +535,7 @@ public class QuizViewModel extends AndroidViewModel {
         selected.clear();
         hidden.clear();
         publish();
-        if (timerEnabled && !exam) startTimer(TIME_PER_QUESTION_MS);
+        if (timerEnabled && !isContinuous()) startTimer(TIME_PER_QUESTION_MS);
     }
 
     private void advance() {
@@ -492,8 +558,9 @@ public class QuizViewModel extends AndroidViewModel {
             streak = 0;
         }
         answers.add(new ResultItem(q.getId(), new ArrayList<>(selected), type));
-        if (exam) {
-            // No feedback in exam mode: move straight on, the timer keeps running.
+        lastOutcome = type;
+        if (isContinuous()) {
+            // No reveal in exams and speed rounds: move straight on, the clock keeps running.
             advance();
             return;
         }
@@ -507,13 +574,20 @@ public class QuizViewModel extends AndroidViewModel {
     /** The exam clock ran out: every unanswered question counts as skipped. */
     private void onExamTimeUp() {
         if (saving) return;
-        examTimedOut = true;
+        timedOut = true;
         // A pick on the current question that was never confirmed still counts as no answer.
         for (int i = index; i < questions.size(); i++) {
             result.record(AnswerResponseType.NO_ANSWER);
             answers.add(new ResultItem(questions.get(i).getId(), Collections.emptyList(), AnswerResponseType.NO_ANSWER));
         }
         streak = 0;
+        finish();
+    }
+
+    /** The minute is over: the question on screen is dropped, not counted as skipped. */
+    private void onSprintTimeUp() {
+        if (saving) return;
+        timedOut = true;
         finish();
     }
 

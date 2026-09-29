@@ -4,6 +4,7 @@ import net.golbarg.skillassessment.models.ContentBlock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,7 +48,7 @@ public final class ContentParser {
             int codeEnd = close < 0 ? text.length() : close;
             if (codeEnd < codeStart) codeEnd = codeStart;
             String code = trimBlankLines(text.substring(codeStart, codeEnd));
-            if (!code.isEmpty()) blocks.add(new ContentBlock(ContentBlock.Type.CODE, code, language.toLowerCase()));
+            if (!code.isEmpty()) blocks.add(new ContentBlock(ContentBlock.Type.CODE, code, language.toLowerCase(Locale.ROOT)));
             cursor = close < 0 ? text.length() : close + FENCE.length();
         }
         return blocks;
@@ -79,18 +80,19 @@ public final class ContentParser {
 
     /** A plain one-line preview with code fences and images removed, for compact lists. */
     public static String preview(String raw) {
+        List<ContentBlock> blocks = parse(raw);
         StringBuilder sb = new StringBuilder();
-        for (ContentBlock block : parse(raw)) {
+        for (ContentBlock block : blocks) {
             if (block.getType() == ContentBlock.Type.TEXT) {
                 if (sb.length() > 0) sb.append(' ');
                 sb.append(block.getContent().replace("`", "").replace('\n', ' '));
             }
         }
-        if (sb.length() == 0) {
-            for (ContentBlock block : parse(raw)) {
-                if (block.getType() == ContentBlock.Type.CODE) return block.getContent().replace('\n', ' ');
-            }
+        if (sb.length() > 0) return sb.toString();
+        // A code-only question: show the start of the code instead.
+        for (ContentBlock block : blocks) {
+            if (block.getType() == ContentBlock.Type.CODE) return block.getContent().replace('\n', ' ');
         }
-        return sb.toString();
+        return "";
     }
 }

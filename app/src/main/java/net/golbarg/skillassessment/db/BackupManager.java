@@ -15,7 +15,6 @@ import net.golbarg.skillassessment.util.ProgressTracker;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -133,14 +132,7 @@ public final class BackupManager {
         String raw;
         try (InputStream in = app.getContentResolver().openInputStream(uri)) {
             if (in == null) throw new IllegalStateException("Cannot open " + uri);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buffer = new byte[16 * 1024];
-            int n;
-            while ((n = in.read(buffer)) != -1) {
-                out.write(buffer, 0, n);
-                if (out.size() > MAX_BYTES) throw new IllegalStateException("Backup too large");
-            }
-            raw = out.toString("UTF-8");
+            raw = new String(ContentUpdater.readFully(in, MAX_BYTES), StandardCharsets.UTF_8);
         }
         JSONObject file = new JSONObject(raw);
         if (!FORMAT.equals(file.optString("format"))) throw new IllegalArgumentException("Not a backup file");

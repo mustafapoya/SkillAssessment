@@ -2,7 +2,9 @@ package net.golbarg.skillassessment.ui.profile;
 
 import android.content.res.ColorStateList;
 import android.graphics.drawable.GradientDrawable;
+import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +33,7 @@ import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.models.QuestionResult;
 import net.golbarg.skillassessment.ui.home.TestSetupSheet;
+import net.golbarg.skillassessment.ui.question.QuestionActivity;
 import net.golbarg.skillassessment.ui.question.QuestionResultActivity;
 import net.golbarg.skillassessment.ui.widget.StaticViewAdapter;
 import net.golbarg.skillassessment.util.Async;
@@ -51,8 +54,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/** The progress tab: accuracy, weekly activity, achievements, topic mastery and test history. */
 public class ProfileFragment extends Fragment {
     private static final int TOPICS_COLLAPSED = 4;
+    /** Answers a topic needs before its accuracy says anything. */
+    private static final int FOCUS_MIN_ANSWERS = 8;
+    /** Topics at or above this accuracy aren't weak spots. */
+    private static final int FOCUS_MAX_ACCURACY = 80;
+    private static final int FOCUS_COUNT = 3;
 
     private static final class Data {
         QuizRepository.Stats stats;
@@ -60,6 +69,7 @@ public class ProfileFragment extends Fragment {
         Map<Integer, Category> categories = new HashMap<>();
         List<Category> unlockedTopics = new ArrayList<>();
         List<ProgressTracker.AchievementState> achievements;
+        List<QuizRepository.TopicAccuracy> focus = new ArrayList<>();
         int[] week = new int[7];
     }
 
@@ -107,6 +117,8 @@ public class ProfileFragment extends Fragment {
     }
 
     private void load() {
+        // Captured here: the fragment may be detached before the background work runs.
+        Context app = requireContext().getApplicationContext();
         Async.run(getViewLifecycleOwner(), () -> {
             Data d = new Data();
             d.stats = repository.getStats();
@@ -119,10 +131,18 @@ public class ProfileFragment extends Fragment {
             Collections.sort(d.unlockedTopics, (a, b) -> a.getMasteryPercent() != b.getMasteryPercent()
                     ? Integer.compare(a.getMasteryPercent(), b.getMasteryPercent())
                     : a.getDisplayName().compareToIgnoreCase(b.getDisplayName()));
-            for (int id : new int[]{Category.MIXED, Category.DAILY, Category.REVIEW, Category.BOOKMARKED}) d.categories.put(id, Category.pseudo(id, 0));
+            for (QuizRepository.TopicAccuracy t : repository.getTopicAccuracy(FOCUS_MIN_ANSWERS)) {
+                if (t.accuracyPercent() < FOCUS_MAX_ACCURACY && d.focus.size() < FOCUS_COUNT) d.focus.add(t);
+            }
+            // History rows of pseudo topics (mixed, speed round, interview packs, …) resolve by id.
+            for (QuestionResult r : d.results) {
+                if (r.getCategoryId() < 0 && !d.categories.containsKey(r.getCategoryId())) {
+                    d.categories.put(r.getCategoryId(), Category.pseudo(r.getCategoryId(), 0));
+                }
+            }
             // Catch up on achievements earned before they existed (e.g. after an update).
-            ProgressTracker.evaluate(requireContext().getApplicationContext(), repository);
-            d.achievements = ProgressTracker.getAchievements(requireContext().getApplicationContext());
+            ProgressTracker.evaluate(app, repository);
+            d.achievements = ProgressTracker.getAchievements(app);
             // Questions answered per day, oldest of the last seven days first.
             LocalDate today = LocalDate.now();
             ZoneId zone = ZoneId.systemDefault();
@@ -145,6 +165,7 @@ public class ProfileFragment extends Fragment {
             header.txtProfileMeta.setText(getResources().getQuantityString(R.plurals.tests_taken, s.tests, s.tests)
                     + " · " + s.unlockedTopics + " " + getString(R.string.filter_unlocked).toLowerCase(Locale.getDefault()));
             bindAchievements(d.achievements);
+            bindFocus(d.focus);
             bindTopics();
             bindWeek(d.week, firstWeekLoad);
             firstWeekLoad = false;
@@ -204,21 +225,43 @@ public class ProfileFragment extends Fragment {
                 + " · " + getResources().getQuantityString(R.plurals.active_days, activeDays, activeDays));
     }
 
+    private void bindFocus(List<QuizRepository.TopicAccuracy> focus) {
+        header.sectionFocus.setVisibility(focus.isEmpty() ? View.GONE : View.VISIBLE);
+        header.listFocus.removeAllViews();
+        for (QuizRepository.TopicAccuracy t : focus) {
+            Category c = t.category;
+            ItemTopicProgressBinding row = ItemTopicProgressBinding.inflate(getLayoutInflater(), header.listFocus, false);
+            CategoryNames.styleBadge(row.txtBadge, c.getSlug(), 12);
+            row.txtTitle.setText(c.getDisplayName());
+            int accuracy = t.accuracyPercent();
+            row.progress.setProgressCompat(accuracy, false);
+            row.progress.setIndicatorColor(ContextCompat.getColor(requireContext(), accuracy < 50 ? R.color.wrong : R.color.coin));
+            row.txtPercent.setText(accuracy + "%");
+            String answers = getResources().getQuantityString(R.plurals.focus_answers, t.answered, t.answered);
+            row.txtSubtitle.setText(t.toFix > 0 ? getResources().getQuantityString(R.plurals.focus_to_fix, t.toFix, t.toFix) + " · " + answers
+                    : answers);
+            row.getRoot().setContentDescription(c.getDisplayName() + ", " + getString(R.string.focus_accuracy_cd, accuracy)
+                    + ", " + row.txtSubtitle.getText());
+            row.getRoot().setOnClickListener(v -> {
+                if (t.toFix > 0) {
+                    startActivity(QuestionActivity.focusIntent(requireContext(), c.getId(), Prefs.isTimerEnabled(requireContext())));
+                } else if (getChildFragmentManager().findFragmentByTag(TestSetupSheet.TAG) == null) {
+                    TestSetupSheet.newInstance(c).show(getChildFragmentManager(), TestSetupSheet.TAG);
+                }
+            });
+            header.listFocus.addView(row.getRoot());
+        }
+    }
+
     private void bindTopics() {
         List<Category> topics = data.unlockedTopics;
         header.sectionTopics.setVisibility(topics.isEmpty() ? View.GONE : View.VISIBLE);
         header.listTopics.removeAllViews();
         int shown = topicsExpanded ? topics.size() : Math.min(TOPICS_COLLAPSED, topics.size());
-        boolean dark = UiUtils.isNightMode(requireContext());
         for (int i = 0; i < shown; i++) {
             Category c = topics.get(i);
             ItemTopicProgressBinding row = ItemTopicProgressBinding.inflate(getLayoutInflater(), header.listTopics, false);
-            GradientDrawable badge = new GradientDrawable();
-            badge.setCornerRadius(UiUtils.dp(requireContext(), 12));
-            badge.setColor(CategoryNames.badgeBackground(c.getSlug(), dark));
-            row.txtBadge.setBackground(badge);
-            row.txtBadge.setTextColor(CategoryNames.badgeForeground(c.getSlug(), dark));
-            row.txtBadge.setText(CategoryNames.monogram(c.getSlug()));
+            CategoryNames.styleBadge(row.txtBadge, c.getSlug(), 12);
             row.txtTitle.setText(c.getDisplayName());
             int percent = c.getMasteryPercent();
             row.progress.setProgressCompat(percent, false);
@@ -315,21 +358,14 @@ public class ProfileFragment extends Fragment {
             Category c = data.categories.get(r.getCategoryId());
             String slug = c == null ? "" : c.getSlug();
             ItemHistoryBinding b = holder.binding;
-            boolean dark = UiUtils.isNightMode(requireContext());
-
-            GradientDrawable badge = new GradientDrawable();
-            badge.setCornerRadius(UiUtils.dp(requireContext(), 14));
-            badge.setColor(CategoryNames.badgeBackground(slug, dark));
-            b.txtBadge.setBackground(badge);
-            b.txtBadge.setTextColor(CategoryNames.badgeForeground(slug, dark));
-            b.txtBadge.setText(CategoryNames.monogram(slug));
+            CategoryNames.styleBadge(b.txtBadge, slug, 14);
             b.txtTitle.setText(CategoryNames.displayName(slug));
 
             List<String> meta = new ArrayList<>();
             if (r.getCreatedAt() > 0) meta.add(UiUtils.formatDate(r.getCreatedAt()));
             meta.add(getString(R.string.history_score, r.getCorrectAnswer(), r.getTotal()));
             if (r.getDurationMs() > 0) meta.add(UiUtils.formatDuration(r.getDurationMs()));
-            b.txtSubtitle.setText(android.text.TextUtils.join(" · ", meta));
+            b.txtSubtitle.setText(TextUtils.join(" · ", meta));
 
             int percent = r.getScorePercent();
             int fg;

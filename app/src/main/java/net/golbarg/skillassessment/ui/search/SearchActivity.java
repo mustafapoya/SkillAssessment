@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -20,10 +19,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import net.golbarg.skillassessment.R;
 import net.golbarg.skillassessment.databinding.ActivitySearchBinding;
-import net.golbarg.skillassessment.databinding.ItemQuestionCardBinding;
 import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.ui.widget.QuestionCardBinder;
+import net.golbarg.skillassessment.ui.widget.QuestionCardHolder;
 import net.golbarg.skillassessment.util.Async;
 import net.golbarg.skillassessment.util.CategoryNames;
 import net.golbarg.skillassessment.util.Feedback;
@@ -172,15 +171,15 @@ public class SearchActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private class Adapter extends RecyclerView.Adapter<Holder> {
+    private class Adapter extends RecyclerView.Adapter<QuestionCardHolder> {
         @NonNull
         @Override
-        public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new Holder(ItemQuestionCardBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        public QuestionCardHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return QuestionCardHolder.create(parent);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull Holder holder, int position) {
+        public void onBindViewHolder(@NonNull QuestionCardHolder holder, int position) {
             Question q = results.get(position);
             String slug = slugOf(q);
             QuestionCardBinder.bindStudy(holder.binding, q, CategoryNames.displayName(slug), slug,
@@ -192,15 +191,6 @@ public class SearchActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return results.size();
-        }
-    }
-
-    private static class Holder extends RecyclerView.ViewHolder {
-        final ItemQuestionCardBinding binding;
-
-        Holder(ItemQuestionCardBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
         }
     }
 }
