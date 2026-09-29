@@ -162,7 +162,7 @@ public class SearchActivity extends AppCompatActivity {
         else bookmarks.remove(id);
         Feedback.haptic(v, Feedback.Haptic.LIGHT);
         adapter.notifyItemChanged(position);
-        Async.io(() -> repository.setBookmarked(id, now));
+        Async.write(() -> repository.setBookmarked(id, now));
     }
 
     @Override

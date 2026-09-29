@@ -89,15 +89,15 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     private static final int[] STATUS_LABELS = {R.string.filter_any_status, R.string.filter_unlocked, R.string.filter_locked};
     private int statusFilter = STATUS_ANY;
     private static final String STATE_STATUS = "status_filter";
+    private ColorStateList defaultStatusBackground;
+    /** Finished previews come back here when the user chose to unlock the topic. */
+    private ActivityResultLauncher<Intent> previewLauncher;
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_STATUS, statusFilter);
     }
-    private ColorStateList defaultStatusBackground;
-    /** Finished previews come back here when the user chose to unlock the topic. */
-    private ActivityResultLauncher<Intent> previewLauncher;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -213,7 +213,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             binding.txtCoins.setText(String.valueOf(credits));
             binding.cardCoins.setContentDescription(getString(R.string.coin_balance_cd, credits));
             header.txtStatTests.setText(String.valueOf(data.stats.tests));
-            header.txtStatAccuracy.setText(data.stats.answered() == 0 ? "—" : data.stats.accuracyPercent() + "%");
+            header.txtStatAccuracy.setText(data.stats.answered() == 0 ? "—" : getString(R.string.percent_value, data.stats.accuracyPercent()));
             header.txtStatTopics.setText(String.format(Locale.getDefault(), "%d/%d", data.stats.unlockedTopics, allCategories.size()));
             bindToday(data);
             bindNotices(data);
@@ -409,6 +409,8 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
 
     @Override
     public void onOpen(Category category) {
+        // A double tap would otherwise stack two sheets.
+        if (getChildFragmentManager().findFragmentByTag(TestSetupSheet.TAG) != null) return;
         TestSetupSheet.newInstance(category).show(getChildFragmentManager(), TestSetupSheet.TAG);
     }
 
@@ -425,7 +427,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
         String questions = getResources().getQuantityString(R.plurals.question_count, category.getNumberOfQuestion(), category.getNumberOfQuestion());
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
                 .setIcon(R.drawable.ic_lock)
-                .setTitle(getString(R.string.unlock) + " " + category.getDisplayName() + "?")
+                .setTitle(getString(R.string.unlock_topic_title, category.getDisplayName()))
                 .setMessage(premium ? questions : affordable
                         ? getString(R.string.unlock_confirm_message, QuizRepository.UNLOCK_COST, credits, questions)
                         : questions + "\n\n" + getString(R.string.not_enough_coins, QuizRepository.UNLOCK_COST))

@@ -20,6 +20,7 @@
         android:paddingBottom="18dp">
 
         <ImageView
+            android:importantForAccessibility="no"
             android:layout_width="44dp"
             android:layout_height="44dp"
             android:src="@drawable/ic_trophy"
@@ -96,6 +97,7 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:importantForAccessibility="no"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/app_logo" />

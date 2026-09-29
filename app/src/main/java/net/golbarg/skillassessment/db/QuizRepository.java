@@ -494,11 +494,17 @@ public final class QuizRepository {
     public void setBookmarked(int questionId, boolean bookmarked) {
         SQLiteDatabase db = db();
         String[] args = {String.valueOf(questionId)};
-        db.delete(DatabaseHandler.T_BOOKMARK, "question_id = ?", args);
-        if (bookmarked) {
-            ContentValues cv = new ContentValues();
-            cv.put("question_id", questionId);
-            db.insert(DatabaseHandler.T_BOOKMARK, null, cv);
+        db.beginTransaction();
+        try {
+            db.delete(DatabaseHandler.T_BOOKMARK, "question_id = ?", args);
+            if (bookmarked) {
+                ContentValues cv = new ContentValues();
+                cv.put("question_id", questionId);
+                db.insert(DatabaseHandler.T_BOOKMARK, null, cv);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
     }
 
@@ -732,14 +738,24 @@ public final class QuizRepository {
         }
         if (seed == null) Collections.shuffle(ids);
         else Collections.shuffle(ids, new Random(seed));
-        List<Integer> picked = new ArrayList<>();
-        Map<Integer, Question> all = getQuestionsByIds(ids.subList(0, Math.min(ids.size(), count * 2)));
-        for (Integer id : ids) {
-            Question q = all.get(id);
-            if (q != null && q.getAnswers().size() >= 2) picked.add(id);
-            if (picked.size() >= count) break;
+        return firstAskable(ids, count);
+    }
+
+    /**
+     * The first {@code count} questions of {@code ids}, in that order, skipping any with fewer than two
+     * answers. Loads in batches so a long candidate list isn't read in full.
+     */
+    private List<Question> firstAskable(List<Integer> ids, int count) {
+        List<Question> picked = new ArrayList<>();
+        int batch = Math.max(50, count * 2);
+        for (int from = 0; from < ids.size() && picked.size() < count; from += batch) {
+            for (Question q : getQuestionsInOrder(ids.subList(from, Math.min(ids.size(), from + batch)))) {
+                if (q.getAnswers().size() < 2) continue;
+                picked.add(q);
+                if (picked.size() >= count) break;
+            }
         }
-        return getQuestionsInOrder(picked);
+        return picked;
     }
 
     /** Topic slug for every catalog id; used to resolve images and code highlighting in mixed tests. */
@@ -843,7 +859,7 @@ public final class QuizRepository {
             while (c.moveToNext()) ids.add(c.getInt(0));
         }
         Collections.shuffle(ids);
-        return getQuestionsInOrder(ids.subList(0, Math.min(count, ids.size())));
+        return firstAskable(ids, count);
     }
 
     /** Best score in percent for any topic id, including pseudo topics; -1 if never taken. */

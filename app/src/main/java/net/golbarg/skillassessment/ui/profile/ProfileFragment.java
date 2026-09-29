@@ -158,12 +158,13 @@ public class ProfileFragment extends Fragment {
             QuizRepository.Stats s = d.stats;
             header.ring.setValues(s.correct, s.wrong, s.skipped, firstLoad);
             firstLoad = false;
-            header.txtAccuracy.setText(s.answered() == 0 ? "—" : s.accuracyPercent() + "%");
-            header.txtLegendCorrect.setText(getString(R.string.correct) + "  " + s.correct);
-            header.txtLegendWrong.setText(getString(R.string.wrong) + "  " + s.wrong);
-            header.txtLegendSkipped.setText(getString(R.string.skipped) + "  " + s.skipped);
-            header.txtProfileMeta.setText(getResources().getQuantityString(R.plurals.tests_taken, s.tests, s.tests)
-                    + " · " + s.unlockedTopics + " " + getString(R.string.filter_unlocked).toLowerCase(Locale.getDefault()));
+            header.txtAccuracy.setText(s.answered() == 0 ? "—" : getString(R.string.percent_value, s.accuracyPercent()));
+            header.txtLegendCorrect.setText(getString(R.string.label_count, getString(R.string.correct), s.correct));
+            header.txtLegendWrong.setText(getString(R.string.label_count, getString(R.string.wrong), s.wrong));
+            header.txtLegendSkipped.setText(getString(R.string.label_count, getString(R.string.skipped), s.skipped));
+            header.txtProfileMeta.setText(getString(R.string.joined_dot,
+                    getResources().getQuantityString(R.plurals.tests_taken, s.tests, s.tests),
+                    getResources().getQuantityString(R.plurals.topics_unlocked_count, s.unlockedTopics, s.unlockedTopics)));
             bindAchievements(d.achievements);
             bindFocus(d.focus);
             bindTopics();
@@ -221,8 +222,9 @@ public class ProfileFragment extends Fragment {
             if (week[i] > 0) activeDays++;
         }
         header.weekBars.setData(week, labels, animate);
-        header.txtWeekSummary.setText(getResources().getQuantityString(R.plurals.week_questions, total, total)
-                + " · " + getResources().getQuantityString(R.plurals.active_days, activeDays, activeDays));
+        header.txtWeekSummary.setText(getString(R.string.joined_dot,
+                getResources().getQuantityString(R.plurals.week_questions, total, total),
+                getResources().getQuantityString(R.plurals.active_days, activeDays, activeDays)));
     }
 
     private void bindFocus(List<QuizRepository.TopicAccuracy> focus) {
@@ -236,9 +238,10 @@ public class ProfileFragment extends Fragment {
             int accuracy = t.accuracyPercent();
             row.progress.setProgressCompat(accuracy, false);
             row.progress.setIndicatorColor(ContextCompat.getColor(requireContext(), accuracy < 50 ? R.color.wrong : R.color.coin));
-            row.txtPercent.setText(accuracy + "%");
+            row.txtPercent.setText(getString(R.string.percent_value, accuracy));
             String answers = getResources().getQuantityString(R.plurals.focus_answers, t.answered, t.answered);
-            row.txtSubtitle.setText(t.toFix > 0 ? getResources().getQuantityString(R.plurals.focus_to_fix, t.toFix, t.toFix) + " · " + answers
+            row.txtSubtitle.setText(t.toFix > 0
+                    ? getString(R.string.joined_dot, getResources().getQuantityString(R.plurals.focus_to_fix, t.toFix, t.toFix), answers)
                     : answers);
             row.getRoot().setContentDescription(c.getDisplayName() + ", " + getString(R.string.focus_accuracy_cd, accuracy)
                     + ", " + row.txtSubtitle.getText());
@@ -265,7 +268,7 @@ public class ProfileFragment extends Fragment {
             row.txtTitle.setText(c.getDisplayName());
             int percent = c.getMasteryPercent();
             row.progress.setProgressCompat(percent, false);
-            row.txtPercent.setText(percent + "%");
+            row.txtPercent.setText(getString(R.string.percent_value, percent));
             row.txtSubtitle.setText(c.getAttempts() > 0 && c.getBestScore() >= 0
                     ? getString(R.string.topic_progress_detail, c.getMastered(), c.getNumberOfQuestion(), c.getBestScore())
                     : getString(R.string.topic_progress_new, c.getMastered(), c.getNumberOfQuestion()));
@@ -385,7 +388,7 @@ public class ProfileFragment extends Fragment {
             pill.setColor(ColorStateList.valueOf(bg));
             b.txtScore.setBackground(pill);
             b.txtScore.setTextColor(fg);
-            b.txtScore.setText(percent + "%");
+            b.txtScore.setText(getString(R.string.percent_value, percent));
 
             b.card.setOnClickListener(v -> startActivity(QuestionResultActivity.intent(requireContext(), r.getId(), null)));
         }

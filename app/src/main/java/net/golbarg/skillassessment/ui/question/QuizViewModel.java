@@ -493,7 +493,7 @@ public class QuizViewModel extends AndroidViewModel {
         boolean nowBookmarked = !bookmarked.contains(q.getId());
         if (nowBookmarked) bookmarked.add(q.getId());
         else bookmarked.remove(q.getId());
-        Async.io(() -> repository.setBookmarked(q.getId(), nowBookmarked));
+        Async.write(() -> repository.setBookmarked(q.getId(), nowBookmarked));
         publish();
     }
 

@@ -24,9 +24,9 @@ import net.golbarg.skillassessment.databinding.ItemQuestionCardBinding;
 import net.golbarg.skillassessment.models.AnswerResponseType;
 import net.golbarg.skillassessment.models.Question;
 import net.golbarg.skillassessment.models.ResultItem;
-import net.golbarg.skillassessment.ui.about.AboutFragment;
 import net.golbarg.skillassessment.ui.question.OptionView;
 import net.golbarg.skillassessment.ui.question.QuestionActivity;
+import net.golbarg.skillassessment.util.AppLinks;
 import net.golbarg.skillassessment.util.CategoryNames;
 import net.golbarg.skillassessment.util.ContentRenderer;
 import net.golbarg.skillassessment.util.Feedback;
@@ -184,7 +184,7 @@ public final class QuestionCardBinder {
     /** Opens an email to support prefilled with the question, so content mistakes get fixed. */
     public static void reportQuestion(Context context, Question question, String slug) {
         String topic = CategoryNames.displayName(slug);
-        Intent mail = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + AboutFragment.EMAIL))
+        Intent mail = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + AppLinks.EMAIL))
                 .putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.report_question_subject, topic, question.getId()))
                 .putExtra(Intent.EXTRA_TEXT, context.getString(R.string.report_question_body, topic, question.getId(),
                         BuildConfig.VERSION_NAME, plainText(question)));

@@ -92,7 +92,16 @@ public class IntroActivity extends AppCompatActivity {
         @NonNull
         @Override
         public PageHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new PageHolder(ItemIntroPageBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            PageHolder holder = new PageHolder(ItemIntroPageBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            // Added once per holder: binding runs again whenever the page scrolls back into view.
+            holder.binding.editName.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+                @Override public void afterTextChanged(Editable s) {
+                    if (holder.getBindingAdapterPosition() == PAGES.length - 1) enteredName = s.toString();
+                }
+            });
+            return holder;
         }
 
         @Override
@@ -112,14 +121,7 @@ public class IntroActivity extends AppCompatActivity {
             }
             boolean last = position == PAGES.length - 1;
             b.layoutName.setVisibility(last ? View.VISIBLE : View.GONE);
-            if (last) {
-                b.editName.setText(enteredName);
-                b.editName.addTextChangedListener(new TextWatcher() {
-                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-                    @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
-                    @Override public void afterTextChanged(Editable s) { enteredName = s.toString(); }
-                });
-            }
+            if (last) b.editName.setText(enteredName);
         }
 
         @Override

@@ -30,7 +30,6 @@
     <string name="filter_any_status">Any status</string>
     <string name="filter_unlocked">Unlocked</string>
     <string name="filter_locked">Locked</string>
-    <string name="unlock">Unlock</string>
     <string name="unlock_cost">Unlock · %1$d</string>
     <string name="unlock_confirm_message">Spend %1$d of your %2$d coins to unlock %3$s. Unlocked topics stay unlocked forever.</string>
     <string name="unlocking">Unlocking…</string>
@@ -492,5 +491,17 @@
     <plurals name="reminder_review_text">
         <item quantity="one">%d question is due for review. A quick round keeps it fresh.</item>
         <item quantity="other">%d questions are due for review. A quick round keeps them fresh.</item>
+    </plurals>
+
+    <!-- Generic formats, so numbers and separators aren't glued together in code -->
+    <string name="percent_value">%1$d%%</string>
+    <string name="ratio_value">%1$d / %2$d</string>
+    <string name="counter_value">%1$d/%2$d</string>
+    <string name="label_count">%1$s  %2$d</string>
+    <string name="joined_dot">%1$s · %2$s</string>
+    <string name="unlock_topic_title">Unlock %1$s?</string>
+    <plurals name="topics_unlocked_count">
+        <item quantity="one">%d unlocked</item>
+        <item quantity="other">%d unlocked</item>
     </plurals>
 </resources>

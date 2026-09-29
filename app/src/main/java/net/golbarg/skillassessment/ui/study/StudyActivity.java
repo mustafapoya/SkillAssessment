@@ -91,7 +91,7 @@ public class StudyActivity extends AppCompatActivity {
                 return;
             }
             slug = d.category.getSlug();
-            binding.txtTitle.setText(getString(R.string.study_mode) + " · " + d.category.getDisplayName());
+            binding.txtTitle.setText(getString(R.string.joined_dot, getString(R.string.study_mode), d.category.getDisplayName()));
             binding.progressLoading.setVisibility(View.GONE);
             questions.addAll(d.questions);
             bookmarks.addAll(d.bookmarks);
@@ -127,7 +127,7 @@ public class StudyActivity extends AppCompatActivity {
         else bookmarks.remove(id);
         Feedback.haptic(v, Feedback.Haptic.LIGHT);
         adapter.notifyItemChanged(position);
-        Async.io(() -> repository.setBookmarked(id, now));
+        Async.write(() -> repository.setBookmarked(id, now));
     }
 
     @Override

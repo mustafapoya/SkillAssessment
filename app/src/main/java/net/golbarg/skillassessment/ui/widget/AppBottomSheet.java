@@ -14,6 +14,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
  */
 public abstract class AppBottomSheet extends BottomSheetDialogFragment {
 
+    // setNavigationBarColor is deprecated on API 35+, where the bar is always transparent; it is
+    // still needed below that.
+    @SuppressWarnings("deprecation")
     @Override
     public void onStart() {
         super.onStart();

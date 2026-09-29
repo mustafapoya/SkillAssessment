@@ -24,7 +24,7 @@ import java.io.FileOutputStream;
 
 /** Renders branded cards (a result, or an exam certificate) to an image and opens the share sheet. */
 public final class ShareCard {
-    private static final String PLAY_URL = "https://play.google.com/store/apps/details?id=net.golbarg.skillassessment";
+    private static final String TAG = "ShareCard";
 
     /** Exams need at least this many questions and this score to earn a certificate. */
     public static final int CERTIFICATE_MIN_QUESTIONS = 10;
@@ -43,12 +43,12 @@ public final class ShareCard {
     public static void share(Activity activity, QuestionResult result, String topic, int bestStreak) {
         ViewShareCardBinding card = ViewShareCardBinding.inflate(LayoutInflater.from(activity));
         card.txtTopic.setText(topic);
-        card.txtScore.setText(result.getScorePercent() + "%");
+        card.txtScore.setText(activity.getString(R.string.percent_value, result.getScorePercent()));
         card.txtDetail.setText(activity.getString(R.string.share_card_score_label, result.getCorrectAnswer(), result.getTotal()));
         card.txtStreak.setVisibility(bestStreak >= 2 ? View.VISIBLE : View.GONE);
         card.txtStreak.setText(activity.getString(R.string.best_streak, bestStreak));
         shareView(activity, card.getRoot(), 360, 450, "result.png",
-                activity.getString(R.string.share_result_message, result.getScorePercent(), topic, PLAY_URL),
+                activity.getString(R.string.share_result_message, result.getScorePercent(), topic, AppLinks.PLAY_URL),
                 activity.getString(R.string.share_result));
     }
 
@@ -60,7 +60,7 @@ public final class ShareCard {
         long when = result.getCreatedAt() > 0 ? result.getCreatedAt() : System.currentTimeMillis();
         card.txtDate.setText(activity.getString(R.string.certificate_date, UiUtils.formatDate(when)));
         shareView(activity, card.getRoot(), 520, 368, "certificate.png",
-                activity.getString(R.string.certificate_share_message, topic, result.getScorePercent(), PLAY_URL),
+                activity.getString(R.string.certificate_share_message, topic, result.getScorePercent(), AppLinks.PLAY_URL),
                 activity.getString(R.string.get_certificate));
     }
 
@@ -92,7 +92,7 @@ public final class ShareCard {
         } catch (ActivityNotFoundException e) {
             Toast.makeText(activity, R.string.no_app_to_open, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Log.e("ShareCard", "Unable to share " + fileName, e);
+            Log.e(TAG, "Unable to share " + fileName, e);
             Toast.makeText(activity, R.string.no_app_to_open, Toast.LENGTH_SHORT).show();
         }
     }

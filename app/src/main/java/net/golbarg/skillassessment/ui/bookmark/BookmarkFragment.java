@@ -68,7 +68,7 @@ public class BookmarkFragment extends Fragment {
     }
 
     private void startPractice() {
-        if (allBookmarks.isEmpty()) return;
+        if (allBookmarks.isEmpty() || getChildFragmentManager().findFragmentByTag(TestSetupSheet.TAG) != null) return;
         Category bookmarkedCategory = Category.pseudo(Category.BOOKMARKED, allBookmarks.size());
         TestSetupSheet.newInstance(bookmarkedCategory).show(getChildFragmentManager(), TestSetupSheet.TAG);
     }
@@ -147,12 +147,12 @@ public class BookmarkFragment extends Fragment {
         String query = binding.editSearch.getText() == null ? "" : binding.editSearch.getText().toString().trim();
         updateEmptyState(query);
         int questionId = removed.getQuestion().getId();
-        Async.io(() -> repository.setBookmarked(questionId, false));
+        Async.write(() -> repository.setBookmarked(questionId, false));
         UiUtils.snackbar(binding.getRoot(), R.string.bookmark_deleted, Snackbar.LENGTH_LONG)
                 .setAction(R.string.undo, v -> {
                     allBookmarks.add(Math.min(originalIndex, allBookmarks.size()), removed);
                     applySearch();
-                    Async.io(() -> repository.setBookmarked(questionId, true));
+                    Async.write(() -> repository.setBookmarked(questionId, true));
                 })
                 .show();
     }

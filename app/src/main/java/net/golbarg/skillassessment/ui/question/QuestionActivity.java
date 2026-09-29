@@ -262,7 +262,7 @@ public class QuestionActivity extends AppCompatActivity {
         int done = vm.getIndex() + (phase == QuizViewModel.Phase.REVEALED ? 1 : 0);
         binding.progressStep.setProgressCompat(done * 100 / Math.max(1, vm.getCount()), true);
         binding.txtCounter.setText(vm.isSprint() ? getString(R.string.sprint_score, vm.getCorrectCount())
-                : (vm.getIndex() + 1) + "/" + vm.getCount());
+                : getString(R.string.counter_value, vm.getIndex() + 1, vm.getCount()));
         renderStreak();
         if (vm.isSprint() && vm.getAnsweredCount() > lastAnsweredShown) {
             lastAnsweredShown = vm.getAnsweredCount();
@@ -310,7 +310,7 @@ public class QuestionActivity extends AppCompatActivity {
         CategoryNames.styleBadge(binding.txtBadge, slug, 10);
         // Mixed tests show each question's own topic, with the mode as context.
         String topic = CategoryNames.displayName(slug);
-        binding.txtTopic.setText(category.isPseudo() ? topic + " · " + category.getDisplayName() : topic);
+        binding.txtTopic.setText(category.isPseudo() ? getString(R.string.joined_dot, topic, category.getDisplayName()) : topic);
         String number = getString(R.string.question_label, vm.getIndex() + 1);
         if (vm.isExam()) number += " · " + getString(R.string.exam_badge);
         else if (vm.isPreview()) number += " · " + getString(R.string.preview_badge);

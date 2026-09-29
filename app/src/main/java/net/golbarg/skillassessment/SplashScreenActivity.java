@@ -66,8 +66,14 @@ public class SplashScreenActivity extends AppCompatActivity {
         Class<?> target = Prefs.isIntroSeen(this) ? MainActivity.class : IntroActivity.class;
         Intent intent = new Intent(this, target);
         startActivity(intent);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        fadeToNextScreen();
         finish();
+    }
+
+    /** Deprecated since API 34 in favour of overrideActivityTransition, but still honoured. */
+    @SuppressWarnings("deprecation")
+    private void fadeToNextScreen() {
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     @Override

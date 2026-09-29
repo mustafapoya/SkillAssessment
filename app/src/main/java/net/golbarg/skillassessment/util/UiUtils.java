@@ -33,8 +33,10 @@ public final class UiUtils {
     /**
      * Draws the app behind fully transparent status and navigation bars. Android would otherwise add
      * a translucent scrim behind 3-button navigation, making it a different colour from the app's
-     * own bottom surfaces (bottom navigation, action panels).
+     * own bottom surfaces (bottom navigation, action panels). setStatusBarContrastEnforced is
+     * deprecated on API 35+, where it has no effect, but still matters below that.
      */
+    @SuppressWarnings("deprecation")
     public static void enableEdgeToEdge(ComponentActivity activity) {
         SystemBarStyle transparent = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT);
         EdgeToEdge.enable(activity, transparent, transparent);

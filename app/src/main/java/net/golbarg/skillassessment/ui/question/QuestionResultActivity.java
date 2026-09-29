@@ -112,7 +112,7 @@ public class QuestionResultActivity extends AppCompatActivity {
 
         long resultId = getIntent().getLongExtra(EXTRA_RESULT_ID, -1);
         QuizRepository repository = QuizRepository.get(this);
-        reviewAdapter.setBookmarkListener((qId, bookmarked) -> Async.io(() -> repository.setBookmarked(qId, bookmarked)));
+        reviewAdapter.setBookmarkListener((qId, bookmarked) -> Async.write(() -> repository.setBookmarked(qId, bookmarked)));
 
         Async.run(this, () -> {
             Data data = new Data();
@@ -146,12 +146,12 @@ public class QuestionResultActivity extends AppCompatActivity {
             ValueAnimator countUp = ValueAnimator.ofInt(0, percent);
             countUp.setDuration(900);
             countUp.setInterpolator(new DecelerateInterpolator());
-            countUp.addUpdateListener(a -> header.txtPercent.setText(a.getAnimatedValue() + "%"));
+            countUp.addUpdateListener(a -> header.txtPercent.setText(getString(R.string.percent_value, (int) a.getAnimatedValue())));
             countUp.start();
         } else {
-            header.txtPercent.setText(percent + "%");
+            header.txtPercent.setText(getString(R.string.percent_value, percent));
         }
-        header.txtRatio.setText(r.getCorrectAnswer() + " / " + r.getTotal());
+        header.txtRatio.setText(getString(R.string.ratio_value, r.getCorrectAnswer(), r.getTotal()));
         header.txtHeadline.setText(percent >= 90 ? R.string.result_excellent : percent >= 70 ? R.string.result_good
                 : percent >= 50 ? R.string.result_ok : R.string.result_low);
         header.txtSummary.setText(getString(R.string.result_summary, r.getCorrectAnswer(), r.getTotal()));

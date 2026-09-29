@@ -79,17 +79,17 @@ public class TestSetupSheet extends AppBottomSheet {
                     : categoryId == Category.DAILY ? getString(R.string.daily_challenge)
                     : categoryId == Category.REVIEW ? getString(R.string.mistakes_review)
                     : getString(R.string.mixed_practice_desc);
-            binding.txtSubtitle.setText(questions + " · " + desc);
+            binding.txtSubtitle.setText(getString(R.string.joined_dot, questions, desc));
             binding.layoutMastery.setVisibility(View.GONE);
         } else if (attempts > 0 && best >= 0) {
             String tests = getResources().getQuantityString(R.plurals.tests_taken, attempts, attempts);
-            binding.txtSubtitle.setText(questions + " · " + getString(R.string.attempts_best, tests, best));
+            binding.txtSubtitle.setText(getString(R.string.joined_dot, questions, getString(R.string.attempts_best, tests, best)));
             int percent = count > 0 ? Math.round(mastered * 100f / count) : 0;
             binding.layoutMastery.setVisibility(View.VISIBLE);
             binding.txtMastery.setText(getString(R.string.mastery_level, mastered, count, percent));
             binding.progressMastery.setProgressCompat(percent, false);
         } else {
-            binding.txtSubtitle.setText(questions + " · " + getString(R.string.not_attempted));
+            binding.txtSubtitle.setText(getString(R.string.joined_dot, questions, getString(R.string.not_attempted)));
             binding.layoutMastery.setVisibility(View.GONE);
         }
 
@@ -125,8 +125,11 @@ public class TestSetupSheet extends AppBottomSheet {
             boolean shuffle = binding.switchShuffle.isChecked();
             boolean exam = binding.toggleMode.getCheckedButtonId() == R.id.btn_mode_exam;
             Prefs.saveTestSetup(requireContext(), length, timer, shuffle);
+            // "Full" means every question shown on the button. A pseudo topic would read 0 as its
+            // own default length (15 for mixed practice), so it gets the count explicitly.
+            int requested = length == 0 && categoryId < 0 ? count : length;
             // The switch is hidden for pseudo topics; saved questions are always drawn at random.
-            startActivity(QuestionActivity.intent(requireContext(), categoryId, length, timer, shuffle || categoryId < 0, exam));
+            startActivity(QuestionActivity.intent(requireContext(), categoryId, requested, timer, shuffle || categoryId < 0, exam));
             dismissAllowingStateLoss();
         });
 

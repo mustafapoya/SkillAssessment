@@ -411,6 +411,7 @@
                 <FrameLayout style="@style/Widget.App.HomeTile.IconBox">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         style="@style/Widget.App.HomeTile.Icon"
                         android:src="@drawable/ic_replay" />
                 </FrameLayout>
@@ -439,6 +440,7 @@
                 <FrameLayout style="@style/Widget.App.HomeTile.IconBox">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         style="@style/Widget.App.HomeTile.Icon"
                         android:src="@drawable/ic_shuffle" />
                 </FrameLayout>
@@ -475,6 +477,7 @@
                 <FrameLayout style="@style/Widget.App.HomeTile.IconBox">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         style="@style/Widget.App.HomeTile.Icon"
                         android:src="@drawable/ic_timer" />
                 </FrameLayout>
@@ -503,6 +506,7 @@
                 <FrameLayout style="@style/Widget.App.HomeTile.IconBox">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         style="@style/Widget.App.HomeTile.Icon"
                         android:src="@drawable/ic_school" />
                 </FrameLayout>

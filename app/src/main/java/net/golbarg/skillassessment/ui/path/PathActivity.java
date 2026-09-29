@@ -107,7 +107,7 @@ public class PathActivity extends AppCompatActivity {
             row.getRoot().setAlpha(0.6f);
         } else {
             subtitle = getString(level.isComplete() ? R.string.level_complete : R.string.level_progress, level.mastered, level.size());
-            row.txtPercent.setText(level.masteryPercent() + "%");
+            row.txtPercent.setText(getString(R.string.percent_value, level.masteryPercent()));
         }
         row.txtSubtitle.setText(subtitle);
         row.getRoot().setContentDescription(row.txtTitle.getText() + ", " + subtitle);

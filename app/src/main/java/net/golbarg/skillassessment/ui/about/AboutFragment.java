@@ -39,6 +39,7 @@ import net.golbarg.skillassessment.databinding.ViewSettingSwitchRowBinding;
 import net.golbarg.skillassessment.db.BackupManager;
 import net.golbarg.skillassessment.db.ContentUpdater;
 import net.golbarg.skillassessment.reminder.ReminderScheduler;
+import net.golbarg.skillassessment.util.AppLinks;
 import net.golbarg.skillassessment.util.Async;
 import net.golbarg.skillassessment.util.Feedback;
 import net.golbarg.skillassessment.util.GoalPicker;
@@ -51,10 +52,7 @@ import java.util.Calendar;
 
 /** The settings tab: preferences, reminders, backups, content updates and links. */
 public class AboutFragment extends Fragment {
-    private static final String PACKAGE = "net.golbarg.skillassessment";
-    public static final String EMAIL = "contact@golbarg.net";
-    private static final String WEBSITE = "https://golbarg.net";
-    private static final String PLAY_URL = "https://play.google.com/store/apps/details?id=" + PACKAGE;
+    private static final String TAG = "AboutFragment";
 
     private static final int[] THEME_MODES = {
             AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM, AppCompatDelegate.MODE_NIGHT_NO, AppCompatDelegate.MODE_NIGHT_YES};
@@ -80,7 +78,7 @@ public class AboutFragment extends Fragment {
                     BackupManager.export(app, uri);
                     return true;
                 } catch (Exception e) {
-                    Log.e("AboutFragment", "Backup failed", e);
+                    Log.e(TAG, "Backup failed", e);
                     return false;
                 }
             }, ok -> {
@@ -105,7 +103,7 @@ public class AboutFragment extends Fragment {
                 BackupManager.restore(app, uri);
                 return true;
             } catch (Exception e) {
-                Log.e("AboutFragment", "Restore failed", e);
+                Log.e(TAG, "Restore failed", e);
                 return false;
             }
         }, ok -> {
@@ -160,8 +158,8 @@ public class AboutFragment extends Fragment {
 
         row(binding.rowRate, R.drawable.ic_star, getString(R.string.rate_app), getString(R.string.rate_app_desc), v -> rate());
         row(binding.rowShare, R.drawable.ic_share, getString(R.string.share_app), null, v -> share());
-        row(binding.rowFeedback, R.drawable.ic_mail, getString(R.string.contact_us), EMAIL, v -> email());
-        row(binding.rowWebsite, R.drawable.ic_public, getString(R.string.website), "golbarg.net", v -> open(WEBSITE));
+        row(binding.rowFeedback, R.drawable.ic_mail, getString(R.string.contact_us), AppLinks.EMAIL, v -> email());
+        row(binding.rowWebsite, R.drawable.ic_public, getString(R.string.website), "golbarg.net", v -> open(AppLinks.WEBSITE));
     }
 
     private void row(ViewSettingRowBinding row, @DrawableRes int icon, String title, @Nullable String subtitle, View.OnClickListener click) {
@@ -331,9 +329,9 @@ public class AboutFragment extends Fragment {
 
     private void rate() {
         try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + PACKAGE)));
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.MARKET_URI)));
         } catch (ActivityNotFoundException e) {
-            open(PLAY_URL);
+            open(AppLinks.PLAY_URL);
         }
     }
 
@@ -341,12 +339,12 @@ public class AboutFragment extends Fragment {
         Intent send = new Intent(Intent.ACTION_SEND)
                 .setType("text/plain")
                 .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name))
-                .putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_message, PLAY_URL));
+                .putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_message, AppLinks.PLAY_URL));
         startSafely(Intent.createChooser(send, getString(R.string.share_app)));
     }
 
     private void email() {
-        Intent mail = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + EMAIL))
+        Intent mail = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + AppLinks.EMAIL))
                 .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
         startSafely(mail);
     }

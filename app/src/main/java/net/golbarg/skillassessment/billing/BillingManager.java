@@ -62,7 +62,7 @@ public final class BillingManager {
 
     private final Context appContext;
     private final BillingClient client;
-    private final MutableLiveData<State> state = new MutableLiveData<>();
+    private final MutableLiveData<State> state;
     private ProductDetails product;
     @Nullable private Callback pendingPurchaseCallback;
 
@@ -87,7 +87,8 @@ public final class BillingManager {
                 .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
                 .enableAutoServiceReconnection()
                 .build();
-        state.setValue(new State(isPremium(context), false, null));
+        // Seeded through the constructor: setValue() would throw if the first get() ran off the main thread.
+        state = new MutableLiveData<>(new State(isPremium(context), false, null));
     }
 
     public LiveData<State> getState() {

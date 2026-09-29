@@ -16,6 +16,8 @@ import java.util.concurrent.Executors;
 public final class Async {
     private static final String TAG = "Async";
     private static final ExecutorService IO = Executors.newFixedThreadPool(2);
+    /** One thread, so quick successive writes (e.g. bookmark, then undo) apply in order. */
+    private static final ExecutorService WRITES = Executors.newSingleThreadExecutor();
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
 
     public interface Callback<T> {
@@ -45,12 +47,19 @@ public final class Async {
     }
 
     public static void io(Runnable runnable) {
-        IO.execute(() -> {
-            try {
-                runnable.run();
-            } catch (Exception e) {
-                Log.e(TAG, "Background task failed", e);
-            }
-        });
+        IO.execute(() -> runSafely(runnable));
+    }
+
+    /** Fire-and-forget writes that must not overtake each other; they run in submission order. */
+    public static void write(Runnable runnable) {
+        WRITES.execute(() -> runSafely(runnable));
+    }
+
+    private static void runSafely(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            Log.e(TAG, "Background task failed", e);
+        }
     }
 }

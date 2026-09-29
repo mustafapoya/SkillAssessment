@@ -17,6 +17,7 @@
 
         <!-- Plain ImageView: shape clipping isn't applied when the card is drawn off-screen. -->
         <ImageView
+            android:importantForAccessibility="no"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/app_logo" />
@@ -74,7 +75,7 @@
         android:layout_marginTop="12dp"
         android:background="@drawable/bg_pill"
         android:backgroundTint="#33FFFFFF"
-        android:drawableStart="@drawable/ic_flame"
+        app:drawableStartCompat="@drawable/ic_flame"
         android:drawablePadding="6dp"
         android:gravity="center_vertical"
         android:paddingStart="10dp"
