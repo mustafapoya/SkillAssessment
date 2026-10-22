@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.billing.BillingManager;
-import net.golbarg.skillassessment.db.ContentUpdater;
 import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.reminder.ReminderScheduler;
 import net.golbarg.skillassessment.util.Async;
@@ -35,7 +34,5 @@ public class SkillAssessmentApp extends Application {
                 Prefs.setExplanationsVersion(this, BuildConfig.VERSION_CODE);
             }
         });
-        // Picks up corrected or new questions from the website, at most once a day.
-        ContentUpdater.checkInBackground(this);
     }
 }

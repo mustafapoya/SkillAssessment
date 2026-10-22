@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import net.golbarg.skillassessment.models.Category;
@@ -15,6 +16,7 @@ import net.golbarg.skillassessment.util.ProgressTracker;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -132,7 +134,7 @@ public final class BackupManager {
         String raw;
         try (InputStream in = app.getContentResolver().openInputStream(uri)) {
             if (in == null) throw new IllegalStateException("Cannot open " + uri);
-            raw = new String(ContentUpdater.readFully(in, MAX_BYTES), StandardCharsets.UTF_8);
+            raw = new String(readFully(in, MAX_BYTES), StandardCharsets.UTF_8);
         }
         JSONObject file = new JSONObject(raw);
         if (!FORMAT.equals(file.optString("format"))) throw new IllegalArgumentException("Not a backup file");
@@ -236,5 +238,18 @@ public final class BackupManager {
         StringBuilder sb = new StringBuilder();
         for (byte b : hash) sb.append(String.format(Locale.ROOT, "%02x", b));
         return sb.toString();
+    }
+
+    /** Reads the whole stream, failing once it grows past {@code maxBytes}. */
+    @NonNull
+    private static byte[] readFully(InputStream in, int maxBytes) throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[16 * 1024];
+        int n;
+        while ((n = in.read(buffer)) != -1) {
+            out.write(buffer, 0, n);
+            if (out.size() > maxBytes) throw new IllegalStateException("File too large");
+        }
+        return out.toByteArray();
     }
 }

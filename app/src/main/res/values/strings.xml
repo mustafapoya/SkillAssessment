@@ -430,13 +430,6 @@
     <string name="backup_export_failed">Couldn\'t save the backup.</string>
 
     <!-- Content updates -->
-    <string name="content_updates">Question updates</string>
-    <string name="content_updates_desc">Last checked %1$s</string>
-    <string name="content_updates_never">Tap to check for corrected questions</string>
-    <string name="content_checking">Checking for updates…</string>
-    <string name="content_updated">Questions updated</string>
-    <string name="content_up_to_date">Questions are up to date</string>
-    <string name="content_failed">Couldn\'t check for updates. Check your connection.</string>
     <!-- Speed round -->
     <string name="speed_round">Speed round</string>
     <string name="sprint_desc">Beat the 60s clock</string>

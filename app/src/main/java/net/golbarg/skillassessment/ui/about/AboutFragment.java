@@ -37,7 +37,6 @@ import net.golbarg.skillassessment.databinding.FragmentAboutBinding;
 import net.golbarg.skillassessment.databinding.ViewSettingRowBinding;
 import net.golbarg.skillassessment.databinding.ViewSettingSwitchRowBinding;
 import net.golbarg.skillassessment.db.BackupManager;
-import net.golbarg.skillassessment.db.ContentUpdater;
 import net.golbarg.skillassessment.reminder.ReminderScheduler;
 import net.golbarg.skillassessment.util.AppLinks;
 import net.golbarg.skillassessment.util.Async;
@@ -154,7 +153,6 @@ public class AboutFragment extends Fragment {
                 v -> createBackup.launch("skill-assessment-backup-" + LocalDate.now() + ".json"));
         row(binding.rowRestoreBackup, R.drawable.ic_download, getString(R.string.backup_import), getString(R.string.backup_import_desc),
                 v -> openBackup.launch(new String[]{"application/json", "application/octet-stream", "text/plain"}));
-        bindContentRow();
 
         row(binding.rowRate, R.drawable.ic_star, getString(R.string.rate_app), getString(R.string.rate_app_desc), v -> rate());
         row(binding.rowShare, R.drawable.ic_share, getString(R.string.share_app), null, v -> share());
@@ -203,27 +201,6 @@ public class AboutFragment extends Fragment {
                 v -> GoalPicker.show(requireContext(), () -> {
                     if (binding != null) bindGoalRow();
                 }));
-    }
-
-    private void bindContentRow() {
-        long last = ContentUpdater.getLastCheck(requireContext());
-        String subtitle = last > 0 ? getString(R.string.content_updates_desc, UiUtils.formatDate(last)) : getString(R.string.content_updates_never);
-        row(binding.rowContentUpdates, R.drawable.ic_sync, getString(R.string.content_updates), subtitle, v -> checkContent());
-    }
-
-    private void checkContent() {
-        binding.rowContentUpdates.txtSubtitle.setVisibility(View.VISIBLE);
-        binding.rowContentUpdates.txtSubtitle.setText(R.string.content_checking);
-        binding.rowContentUpdates.getRoot().setEnabled(false);
-        Context app = requireContext().getApplicationContext();
-        Async.run(this, () -> ContentUpdater.check(app), status -> {
-            if (binding == null) return;
-            binding.rowContentUpdates.getRoot().setEnabled(true);
-            bindContentRow();
-            int message = status == ContentUpdater.Status.UPDATED ? R.string.content_updated
-                    : status == ContentUpdater.Status.UP_TO_DATE ? R.string.content_up_to_date : R.string.content_failed;
-            UiUtils.snackbar(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
-        });
     }
 
     private void bindPrivacyRow() {

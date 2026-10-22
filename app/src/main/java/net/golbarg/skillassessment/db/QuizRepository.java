@@ -197,7 +197,7 @@ public final class QuizRepository {
 
         List<Question> questions;
         try {
-            questions = ContentUpdater.applyOverrides(appContext, categoryId, readQuestionsFromAsset(categoryId));
+            questions = readQuestionsFromAsset(categoryId);
         } catch (Exception e) {
             Log.e(TAG, "Unable to read questions for category " + categoryId, e);
             return UnlockResult.FAILED;
@@ -233,7 +233,7 @@ public final class QuizRepository {
     }
 
     /** Inserts or replaces a question together with its answers. Caller owns the transaction. */
-    static void writeQuestion(SQLiteDatabase db, Question q) {
+    private static void writeQuestion(SQLiteDatabase db, Question q) {
         ContentValues qv = new ContentValues();
         qv.put("id", q.getId());
         qv.put("category_id", q.getCategoryId());
@@ -326,7 +326,7 @@ public final class QuizRepository {
         db.beginTransaction();
         try {
             for (Map.Entry<Integer, List<Question>> entry : bundled.entrySet()) {
-                for (Question q : ContentUpdater.applyOverrides(appContext, entry.getKey(), entry.getValue())) {
+                for (Question q : entry.getValue()) {
                     if (q.getExplanation() == null) continue;
                     ContentValues cv = new ContentValues();
                     cv.put("explanation", q.getExplanation());
@@ -341,7 +341,7 @@ public final class QuizRepository {
         return updated;
     }
 
-    static Question readQuestion(JsonReader reader, int categoryId) throws Exception {
+    private static Question readQuestion(JsonReader reader, int categoryId) throws Exception {
         int id = 0, number = 0, numberOfCorrect = 1;
         String title = "";
         String explanation = null;
@@ -455,7 +455,7 @@ public final class QuizRepository {
      */
     public List<Question> getPreviewQuestions(int categoryId, int count) {
         try {
-            List<Question> all = ContentUpdater.applyOverrides(appContext, categoryId, readQuestionsFromAsset(categoryId));
+            List<Question> all = readQuestionsFromAsset(categoryId);
             List<Question> usable = new ArrayList<>();
             for (Question q : all) if (q.getAnswers().size() >= 2) usable.add(q);
             Collections.shuffle(usable);

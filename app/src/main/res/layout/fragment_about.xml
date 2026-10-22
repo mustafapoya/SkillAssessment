@@ -161,10 +161,6 @@
                 <include
                     android:id="@+id/row_restore_backup"
                     layout="@layout/view_setting_row" />
-
-                <include
-                    android:id="@+id/row_content_updates"
-                    layout="@layout/view_setting_row" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
