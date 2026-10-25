@@ -187,6 +187,10 @@
                 <include
                     android:id="@+id/row_website"
                     layout="@layout/view_setting_row" />
+
+                <include
+                    android:id="@+id/row_privacy_policy"
+                    layout="@layout/view_setting_row" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

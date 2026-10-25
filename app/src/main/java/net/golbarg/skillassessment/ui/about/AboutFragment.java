@@ -159,6 +159,8 @@ public class AboutFragment extends Fragment {
         row(binding.rowShare, R.drawable.ic_share, getString(R.string.share_app), null, v -> share());
         row(binding.rowFeedback, R.drawable.ic_mail, getString(R.string.contact_us), AppLinks.EMAIL, v -> email());
         row(binding.rowWebsite, R.drawable.ic_public, getString(R.string.website), "golbarg.net", v -> open(AppLinks.WEBSITE));
+        row(binding.rowPrivacyPolicy, R.drawable.ic_privacy, getString(R.string.privacy_policy), getString(R.string.privacy_policy_desc),
+                v -> open(AppLinks.PRIVACY_POLICY));
     }
 
     private void row(ViewSettingRowBinding row, @DrawableRes int icon, String title, @Nullable String subtitle, View.OnClickListener click) {

@@ -153,6 +153,8 @@
     <string name="share_app_message">I\'m practicing programming assessments with this app: %1$s</string>
     <string name="contact_us">Send feedback</string>
     <string name="website">Website</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="privacy_policy_desc">What stays on your phone and what ads use</string>
     <string name="copyright">© %1$d Golbarg. All rights reserved.</string>
     <string name="no_app_to_open">No app found to open this</string>
 
