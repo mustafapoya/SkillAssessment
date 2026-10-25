@@ -148,7 +148,7 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="rate_app">Rate the app</string>
-    <string name="rate_app_desc">Enjoying it? A review helps a lot</string>
+    <string name="rate_app_desc">Reviews help a lot</string>
     <string name="share_app">Share with a friend</string>
     <string name="share_app_message">I\'m practicing programming assessments with this app: %1$s</string>
     <string name="contact_us">Send feedback</string>

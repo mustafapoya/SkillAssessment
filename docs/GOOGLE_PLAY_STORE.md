@@ -1,181 +1,171 @@
-# Google Play Store Listing & Store Preferences
+# Google Play Store Listing & Console Answers
 
-This document contains complete store listing metadata, store settings, categorization, content rating, data safety declarations, and store optimization guidelines for **CodeQuiz** on the Google Play Console.
+Everything to enter in Google Play Console for **CodeQuiz** (`net.golbarg.skillassessment`): the store listing, the App content declarations (privacy policy, ads, Data safety, content rating, target audience) and the release notes. Every statement here matches what version 2.0 actually does; keep it that way when features change, because Google reviews the listing and the declarations against the app.
+
+> **Open items before submitting**
+> - ⚠️ **Privacy policy URL**: publish [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md) (or [`privacy_policy.json`](privacy_policy.json) on the website) and enter its address below. The address used before, `https://golbarg.net/privacy/skillassessment`, returns 404, and Play rejects apps with ads whose policy link is broken.
+> - ⚠️ **Ads switch**: `AdManager.ADS_ENABLED` is `false` in the working copy. The answers below assume ads are on (`true`). If you release with ads off, answer **No** to "Contains ads", and in Data safety declare only what Google Play itself needs (nothing from the app).
+> - ⚠️ **GDPR consent message**: publish one in AdMob → Privacy & messaging. Without it the app can't ask users in the EEA, UK and Switzerland for consent, and they get few or no ads.
 
 ---
 
-## 1. App Store Metadata
+## 1. Store listing
 
-### App Details
-| Field | Limit | Production Content |
+| Field | Limit | Content |
 | :--- | :--- | :--- |
-| **App Name** | Max 30 chars | `CodeQuiz: Programming Tests` *(alt: `CodeQuiz - Coding Assessment`)* |
-| **Short Description** | Max 80 chars | `Master 58+ programming skills with assessment tests, quizzes, and certificates.` |
-| **Default Language** | — | `English (United States) – en-US` |
-| **Package Name** | — | `net.golbarg.skillassessment` |
-| **Version Name / Code**| — | `2.0` (Version Code `6`) |
+| **App name** | 30 chars | `CodeQuiz: Programming Tests` (27) |
+| **Short description** | 80 chars | `Practice 3,800+ coding quiz questions on 58 topics. Offline, no sign-up.` (72) |
+| **Default language** | — | English (United States) – en-US |
+| **Package name** | — | `net.golbarg.skillassessment` |
+| **Version** | — | `2.0` (version code `6`) |
 
----
-
-### Full Description (Play Store Compliant & SEO Optimized)
+### Full description (4000 chars max, about 2,600 used)
 
 ```text
-Prepare for technical interviews and assess your coding skills with CodeQuiz! Practice thousands of real-world assessment questions across 58 programming languages, frameworks, cloud platforms, databases, and developer tools.
+Get ready for coding interviews, exams and skill tests with CodeQuiz. Practice more than 3,800 multiple-choice questions across 58 programming languages, frameworks, cloud platforms, databases and developer tools, and see exactly where you stand.
 
-Whether you are preparing for job interviews, LinkedIn skill assessments, university exams, or want to sharpen your technical edge, CodeQuiz provides structured quizzes and instant feedback to accelerate your learning.
+No account, no sign-up: open the app and start practicing. Everything works offline, and your progress stays on your phone.
 
-🚀 WHY CODEQUIZ?
-• 58 Technical Topics: From Python and JavaScript to AWS, Docker, Git, and Machine Learning.
-• Real-World Assessment Style: Multiple-choice questions crafted around practical scenarios, edge cases, and industry standards.
-• Instant Explanations & Answers: Reveal answers and learn the logic immediately or simulate real exam conditions.
-• Offline Ready: Practice anywhere without internet connectivity.
-• Track Your Mastery: Visual progress charts, streak tracking, accuracy breakdowns, and topic mastery levels.
-• Earn Certificates: Pass comprehensive exams and unlock verified shareable achievement certificates.
+WAYS TO PRACTICE
+• Practice mode: see right away whether you were right, and use a 50/50 hint when you are stuck.
+• Exam mode: a timed test that shows your answers at the end, like the real thing.
+• Study mode: go through a topic at your own pace and tap to reveal each answer.
+• Daily challenge: a short mixed quiz every day to keep your skills sharp.
+• Speed round: answer as many questions as you can against the clock.
+• Interview prep: exams that mix the topics a job interview for your role tends to cover, such as Android, iOS or frontend developer.
+• Learning paths: work through a topic level by level.
+• Mistakes review: the questions you got wrong come back until you master them.
 
-📚 58 TOPICS ACROSS 8 MAJOR DOMAINS:
-1. Programming Languages:
-   Python, Java, JavaScript, C, C++, C#, Kotlin, Swift, Go, Rust, Ruby, PHP, Scala, Objective-C, Bash, VBA, MATLAB
+TRACK YOUR PROGRESS
+• Accuracy, weekly activity and mastery for every topic
+• Streaks, a daily goal and 16 achievements
+• Earn a certificate when you score 80% or more on a test of 10+ questions, and share it
+• Save tricky questions and search across all of them
 
-2. Frontend Development:
-   HTML5, CSS3, React, Angular, jQuery, Front-End Development Best Practices
+58 TOPICS
+Languages: Python, Java, JavaScript, Kotlin, Swift, C, C++, C#, Go, Rust, PHP, Scala, Objective-C, R, MATLAB, VBA, Bash
+Web: HTML, CSS, React, Angular, jQuery, WordPress, Front-End Development
+Backend and APIs: Node.js, Django, Spring Framework, Ruby on Rails, .NET Framework, REST API, JSON, XML
+Databases and big data: MySQL, MongoDB, NoSQL, T-SQL, Microsoft Access, Hadoop
+Cloud and operations: AWS, AWS Lambda, Google Cloud Platform, Microsoft Azure, Linux, IT Operations, Cybersecurity
+Data, AI and marketing: Machine Learning, Microsoft Power BI, Google Analytics, Google Ads, SEO
+Tools and practices: Git, Agile Methodologies, Object-Oriented Programming, Eclipse, SharePoint, QuickBooks
+Mobile and games: Android, Unity
 
-3. Backend & Frameworks:
-   Node.js, Django, Spring Framework, Ruby on Rails, .NET Framework, REST APIs, JSON, XML
+MADE FOR DAILY PRACTICE
+• Code shown with syntax highlighting, and adjustable code text size
+• Dark mode, and layouts for tablets and landscape
+• A daily reminder and a "Question of the day" home-screen widget
+• Back up your progress to a file and restore it on a new phone
 
-4. Databases & Data Storage:
-   MySQL, MongoDB, NoSQL, T-SQL, Microsoft Access
+You start with coins to unlock topics of your choice, and you can earn more by watching a short optional video. CodeQuiz is free and supported by ads.
 
-5. Cloud & DevOps:
-   Amazon Web Services (AWS), AWS Lambda, Google Cloud Platform (GCP), Microsoft Azure, Linux, IT Operations
+Download CodeQuiz and find out how well you really know your stack.
+```
 
-6. AI, Machine Learning & Analytics:
-   Machine Learning, R, Google Analytics, Google Ads, Microsoft Power BI
+### Contact details
+- **Email:** `contact@golbarg.net`
+- **Website:** `https://golbarg.net`
+- **Privacy policy:** ⚠️ the published address of [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md)
 
-7. Developer Tools & Methodologies:
-   Git, Agile Methodologies, Eclipse, SharePoint, QuickBooks, SEO, OOP (Object-Oriented Programming)
+### Category and tags
+- **App or game:** App
+- **Category:** Education
+- **Tags** (pick up to 5 in Play Console → Store settings): Education, Programming, Quiz, Exam prep, Career
 
-8. Mobile & Game Development:
-   Android Development, Unity Game Engine
+Don't name other companies' certifications or products as endorsements (for example "LinkedIn skill assessment"): Play's metadata policy rejects listings that imply an affiliation. Naming the technologies a topic covers, as above, is fine.
 
-🎯 POWERFUL LEARNING MODES:
-• Practice Mode: Instant answer validation, detailed explanations, and 50/50 hints.
-• Exam Mode: Timed full-length assessments simulating actual industry skill certification exams.
-• Study Mode: Self-paced browsing with interactive tap-to-reveal answers.
-• Daily Challenge & Goal: Daily questions to keep your knowledge sharp and build long-lasting habits.
-• Bookmark & Mistake Review: Save tricky questions and retake questions you missed to achieve 100% mastery.
+---
 
-🔒 PRIVACY & NO FORCED LOGINS:
-• No mandatory account creation or intrusive permissions.
-• All stats, bookmarks, and quiz progress are stored securely on your device with local backup & restore options.
-• Transparent ad experience with optional Premium upgrade to remove ads completely.
+## 2. Graphics
 
-Level up your developer career today. Download CodeQuiz and test your knowledge now!
+| Asset | Size / format | What to show |
+| :--- | :--- | :--- |
+| **App icon** | 512 × 512 PNG, 32-bit, max 1 MB | The app's icon: the white "101" on the lime-green square (`brand_lime_dark` `#57CC02`), exported at 512 px. It must match the launcher icon. |
+| **Feature graphic** | 1024 × 500 JPEG or 24-bit PNG | Dark background (`#0A0C0B`), the icon on the left, "CodeQuiz" and "3,800+ questions · 58 topics" on the right, and a few topic badges (Python, Java, React, AWS). Keep text out of the outer edges, which some layouts crop. |
+| **Phone screenshots** | 2–8, 1080 × 1920 or larger, 9:16 | 1. Explore: daily goal, practice tiles and topics.<br>2. A question with a code snippet.<br>3. Right/wrong feedback after Check.<br>4. Result screen with the score.<br>5. Progress: accuracy ring, week chart, achievements.<br>6. Interview prep or a learning path.<br>7. Certificate.<br>8. The same Explore screen in dark mode. |
+| **Tablet screenshots** | 7" and 10", e.g. 1200 × 1920 or 2560 × 1600 | Explore with the multi-column topic grid, and a test screen in landscape. |
+
+Take screenshots with a real-looking name and some progress, not an empty first-run state, and keep test ads out of them.
+
+---
+
+## 3. App content declarations (Policy → App content)
+
+### Privacy policy
+⚠️ The published address of [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md).
+
+### App access
+**All functionality is available without special access.** There is no login.
+
+### Ads
+**Yes, my app contains ads.** Banners, interstitials before and after some tests, and optional rewarded videos, all from Google AdMob. See [`ADS_CONFIGURATION.md`](ADS_CONFIGURATION.md).
+
+### Advertising ID
+**Yes**, the app uses the advertising ID (through the Google Mobile Ads SDK, which adds `com.google.android.gms.permission.AD_ID`).
+Purposes: **Advertising or marketing**, **Analytics**, **Fraud prevention, security and compliance**.
+
+### Content rating (IARC questionnaire)
+- **Category:** Reference, News, or Educational
+- Violence, sexuality, language, controlled substances, gambling: **No** to all
+- Users can interact or exchange content: **No** (sharing a result through Android's share sheet doesn't count; the app has no chat or user content)
+- Shares the user's location: **No**
+- Allows purchases of digital goods: **No** (`BillingManager.FOR_SALE` is `false`; change this answer if Premium goes on sale)
+- Expected rating: **Everyone / PEGI 3 / USK 0**
+
+### Target audience and content
+- **Target age groups:** 13–15, 16–17, 18 and over. Don't select an under-13 group: that puts the app under the Families policy, which needs a different ad setup.
+- **Appeals to children:** No. The app is for students, job seekers and software professionals.
+
+### Other declarations
+- News app: **No**
+- Health, financial features, government app: **No**
+- Uses the `FOREGROUND_SERVICE` permission only through Google libraries (added by the ads SDK). If Play Console asks for a foreground service declaration, the app itself starts none.
+
+---
+
+## 4. Data safety form
+
+The app itself collects nothing: names, answers, history, bookmarks and settings stay on the device, and data that never leaves the device is not "collected" in Play's terms. Backups go only to a file the user picks. The only collection comes from the **Google Mobile Ads SDK**; Google lists what it collects in [Data disclosure for the Google Mobile Ads SDK](https://developers.google.com/admob/android/privacy/play-data-disclosure). Check that page when updating the SDK.
+
+### Overview questions
+| Question | Answer |
+| :--- | :--- |
+| Does your app collect or share any of the required user data types? | **Yes** (through the AdMob SDK) |
+| Is all of the user data collected by your app encrypted in transit? | **Yes** |
+| Do you provide a way for users to request that their data is deleted? | **No**. There is no account; data on the phone is deleted by clearing the app's data or uninstalling. Ad data is held by Google and managed through the user's Google account. |
+
+### Data types
+| Data type | Collected | Shared | Ephemeral | Required / optional | Purposes |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Location → Approximate location** (from IP address) | Yes | Yes | No | Required | Advertising or marketing, Analytics, Fraud prevention, security and compliance |
+| **App activity → App interactions** (ad views and taps) | Yes | Yes | No | Required | Advertising or marketing, Analytics, Fraud prevention, security and compliance |
+| **App info and performance → Crash logs, Diagnostics** (ad diagnostics) | Yes | Yes | No | Required | Advertising or marketing, Analytics, Fraud prevention, security and compliance |
+| **Device or other IDs** (advertising ID, app set ID) | Yes | Yes | No | Required | Advertising or marketing, Analytics, Fraud prevention, security and compliance |
+
+Everything else (personal info, financial info, health, messages, photos and videos, audio, files and docs, calendar, contacts, web browsing, search history) is **not collected**. The name the user types and their quiz history never leave the phone.
+
+---
+
+## 5. Release notes for version 2.0 (500 chars max, about 460 used)
+
+```text
+CodeQuiz 2.0 is a whole new app:
+• New name and design, with dark mode and tablet layouts
+• Practice and timed exam modes, 50/50 hints and Study mode
+• Daily challenge, speed round, interview prep and learning paths
+• Mistakes review brings back the questions you missed
+• Progress charts, streaks, achievements and shareable certificates
+• Daily reminder, home-screen widget, and backup & restore
+• Unlock any topic with one coin, earned from a short video
 ```
 
 ---
 
-## 2. Store Settings & Categorization
+## 6. Store search (ASO)
 
-### Category & Tags
-- **Application Type**: `App`
-- **Primary Category**: `Education`
-- **Secondary Category**: `Trivia` / `Productivity` *(optional where supported)*
-- **Store Tags**:
-  - `Education`
-  - `Programming`
-  - `Developer Tools`
-  - `Quiz`
-  - `Trivia`
-  - `Brain Games`
-  - `Job Search / Career Prep`
+Put the most important words in the app name and short description, then use them naturally in the full description. Play ignores keyword lists and penalises keyword stuffing.
 
-### Store Listing Contact Details
-- **Email Address**: `contact@golbarg.net` *(or official developer email)*
-- **Website**: `https://golbarg.net`
-- **Privacy Policy URL**: `https://golbarg.net/privacy/skillassessment`
-
----
-
-## 3. Content Rating (IARC Questionnaire Guidelines)
-
-| Question Category | Selection | Rationale |
-| :--- | :--- | :--- |
-| **Violence** | No | Educational technical quiz content only. |
-| **Sexuality / Nudity** | No | None. |
-| **Language / Profanity** | No | Professional technical content. |
-| **Controlled Substances** | No | None. |
-| **User Interaction & Location Sharing** | No | App does not share location or host user chat. |
-| **Purchases** | Yes | Optional in-app purchase for "Premium" lifetime unlock. |
-| **Resulting Rating** | **Everyone (PEGI 3, USK 0, ESRB Everyone)** | Safe for all developer audiences. |
-
----
-
-## 4. Target Audience & Content Declaration
-
-- **Target Age Group**: `13 and older` (13–15, 16–17, 18+)
-- **Families Policy Requirement**: `No` (App is aimed at students, job seekers, and software professionals).
-- **Ads Declaration**: `Yes, this app contains ads` (AdMob banners, non-intrusive post-test interstitials, rewarded videos).
-- **Financial Features**: `None` (Does not provide financial/loan services).
-- **Health / Medical Features**: `None`.
-- **Government Apps**: `No`.
-
----
-
-## 5. Data Safety Declaration (Play Console)
-
-### Summary
-The app stores quiz progress, bookmarks, and statistics **locally on the device**. Network communication is strictly utilized for:
-1. Google Mobile Ads (AdMob) & Consent (Google UMP)
-2. Google Play In-App Billing (Google Play Core)
-3. Remote Question update checks (if online)
-
-### Detailed Data Safety Form Mapping
-
-| Data Type | Collected | Shared | Purpose | Ephemeral / Optional |
-| :--- | :--- | :--- | :--- | :--- |
-| **App info and performance** (Crash logs, diagnostics) | Yes (via Google Play Services) | Yes (Google) | Analytics, App performance | Handled automatically by Google Play / AdMob |
-| **Device or other IDs** (Advertising ID) | Yes (AdMob) | Yes (Google Ads) | Advertising, Fraud prevention, Personalization (with consent) | Optional based on UMP user consent (can be reset by user) |
-| **Personal Info** (Name, email, phone) | No | No | N/A | User name in profile is stored 100% locally on device |
-| **Financial Info** | No | No | N/A | In-app purchases handled directly by Google Play Billing |
-| **Location** | No | No | N/A | Not collected |
-| **Photos / Media / Files** | No | No | N/A | Local backups are created through Android Storage Access Framework (user-picked location) |
-
-- **Security Practices**:
-  - Data encrypted in transit: `Yes` (All network calls use HTTPS/TLS).
-  - Request data deletion: `Yes` (User can clear all history/data locally inside settings anytime).
-
----
-
-## 6. Graphic Assets Specifications
-
-| Asset | Size / Format | Description / Design Recommendation |
-| :--- | :--- | :--- |
-| **App Icon** | 512 × 512 px (PNG 32-bit, max 1MB) | High-contrast modern icon featuring a clean code terminal symbol `</>` with a subtle checkmark / achievement accent in indigo & teal gradient. |
-| **Feature Graphic** | 1024 × 500 px (JPEG or PNG, max 15MB) | Sleek modern dark backdrop with floating code cards (Python, React, AWS, Java) and title *"58+ Technologies • Master Coding Assessments"*. |
-| **Phone Screenshots** (Min 4, Max 8) | Min 1080 × 1920 px (16:9 or 9:16) | 1. **Explore 58+ Topics**: Showing language grid & domain filters.<br>2. **Interactive Quiz**: Code question view with syntax highlight & 50/50 hint.<br>3. **Instant Answers & Explanations**: Detailed feedback screen.<br>4. **Exam & Study Modes**: Timed certification test mode.<br>5. **Track Mastery & Streaks**: Analytics, graphs, daily goals, accuracy.<br>6. **Earn Certificates**: Verified Certificate of Achievement preview. |
-| **Tablet Screenshots** (7" & 10") | 1200 × 1920 px or 2048 × 1536 px | Tablet layout showing the responsive grid and study mode. |
-
----
-
-## 7. Release Notes (What's New in v2.0)
-
-```text
-What's new in version 2.0:
-• Added Study Mode: Browse questions at your own pace with tap-to-reveal answers.
-• 50/50 Hints: Use hints during practice tests to eliminate wrong answers.
-• Certificates of Achievement: Complete exams with 70%+ score to earn shareable certificates.
-• Daily Goals & Streak Recovery: Set daily question goals and protect your hard-earned streak.
-• Question Search: Instantly search across all unlocked questions.
-• Enhanced Explanations & Content: Updated questions and fixes across 58 topics.
-• Performance & UI Improvements: Smoother navigation, dark mode refinement, and code font sizing.
-```
-
----
-
-## 8. App Store Optimization (ASO) Strategy & Keywords
-
-### Primary Keywords:
-`programming quiz`, `coding interview preparation`, `python assessment`, `javascript test`, `developer quiz`, `skill assessment`, `aws certification practice`, `coding test`, `tech interview questions`, `learn programming`.
-
-### Secondary Keywords:
-`java quiz`, `sql test`, `react practice questions`, `git commands quiz`, `docker devops quiz`, `machine learning test`, `c++ practice`, `html css test`, `daily coding challenges`.
+- **Primary:** programming quiz, coding quiz, coding interview, programming test, developer quiz, learn programming
+- **Topic searches:** python quiz, java quiz, javascript test, sql quiz, react questions, aws practice, kotlin quiz, c++ quiz, git quiz, machine learning quiz
+- **Intent:** interview prep, tech interview questions, skill assessment, exam practice
