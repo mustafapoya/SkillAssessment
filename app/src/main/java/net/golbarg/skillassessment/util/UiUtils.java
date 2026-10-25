@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.SystemBarStyle;
 import androidx.annotation.AttrRes;
+import androidx.annotation.DimenRes;
 import androidx.annotation.StringRes;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -86,10 +87,50 @@ public final class UiUtils {
         final int bottomPadding = view.getPaddingBottom();
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, windowInsets) -> {
             Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
-            v.setPadding(left + bars.left, topPadding + (top ? bars.top : 0), right + bars.right, bottomPadding + (bottom ? bars.bottom : 0));
+            int side = sideExtra(v);
+            v.setPadding(left + bars.left + side, topPadding + (top ? bars.top : 0), right + bars.right + side,
+                    bottomPadding + (bottom ? bars.bottom : 0));
             return windowInsets;
         });
         ViewCompat.requestApplyInsets(view);
+    }
+
+    /** {@link #limitContentWidth(View, int)} with the standard reading width. */
+    public static void limitContentWidth(View view) {
+        limitContentWidth(view, R.dimen.content_max_width);
+    }
+
+    /**
+     * Keeps a screen readable on tablets and in landscape: once {@code view} is wider than
+     * {@code maxWidth}, its side padding grows so the content stays that wide and centred. Because
+     * it is padding, a scrolling view still scrolls across its full width. Works together with
+     * {@link #applySystemBarPadding}.
+     */
+    public static void limitContentWidth(View view, @DimenRes int maxWidth) {
+        int max = view.getResources().getDimensionPixelSize(maxWidth);
+        view.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            // Padding changed during a layout pass isn't always laid out again (the children keep
+            // their old places and get clipped), so it is applied right after this pass instead.
+            if (sideExtraFor(v, max) != sideExtra(v)) v.post(() -> applySideExtra(v, max));
+        });
+    }
+
+    private static int sideExtraFor(View view, int maxWidth) {
+        return Math.max(0, (view.getWidth() - maxWidth) / 2);
+    }
+
+    private static void applySideExtra(View view, int maxWidth) {
+        int extra = sideExtraFor(view, maxWidth);
+        int applied = sideExtra(view);
+        if (extra == applied) return;
+        view.setTag(R.id.tag_content_side_extra, extra);
+        view.setPadding(view.getPaddingLeft() - applied + extra, view.getPaddingTop(),
+                view.getPaddingRight() - applied + extra, view.getPaddingBottom());
+    }
+
+    private static int sideExtra(View view) {
+        Object extra = view.getTag(R.id.tag_content_side_extra);
+        return extra instanceof Integer ? (Integer) extra : 0;
     }
 
     /** "1:05" below an hour, "1h 05m" above. */
@@ -99,6 +140,11 @@ public final class UiUtils {
         long seconds = totalSeconds % 60;
         if (minutes >= 60) return String.format(Locale.getDefault(), "%dh %02dm", minutes / 60, minutes % 60);
         return String.format(Locale.getDefault(), "%d:%02d", minutes, seconds);
+    }
+
+    /** "1 coin", "5 coins". */
+    public static String coins(Context context, int count) {
+        return context.getResources().getQuantityString(R.plurals.coin_count, count, count);
     }
 
     public static String formatDate(long epochMillis) {

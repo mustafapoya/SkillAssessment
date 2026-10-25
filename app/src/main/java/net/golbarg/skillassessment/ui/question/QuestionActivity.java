@@ -138,6 +138,10 @@ public class QuestionActivity extends AppCompatActivity {
         // continues behind the navigation bar.
         UiUtils.applySystemBarPadding(binding.root, true, false);
         UiUtils.applySystemBarPadding(binding.panel, false, true);
+        // The banner keeps the full width; everything else stays at a readable width.
+        UiUtils.limitContentWidth(binding.topBar);
+        UiUtils.limitContentWidth(binding.scroll);
+        UiUtils.limitContentWidth(binding.panel);
         setUpPanelBackground();
         defaultButtonTint = binding.btnPrimary.getBackgroundTintList();
         defaultButtonText = binding.btnPrimary.getTextColors();
@@ -189,12 +193,13 @@ public class QuestionActivity extends AppCompatActivity {
         vm.getTimeLeft().observe(this, this::renderTimer);
         vm.getFinished().observe(this, this::openResult);
 
-        // No banner here: an ad beside the answer buttons invites accidental taps.
-        AdManager.preloadInterstitial(this);
+        // The banner sits under the top bar, away from the answers and the Check button.
+        AdManager.loadBanner(this, binding.adContainer, AdManager.Banner.QUESTION);
+        AdManager.preloadInterstitial(this, AdManager.Interstitial.TEST_FINISH);
         // The optional 50/50 hint is paid for with a rewarded video; load one early.
         if (!preview && categoryId != Category.SPRINT && !intent.getBooleanExtra(EXTRA_EXAM, false)
                 && !BillingManager.isPremium(this)) {
-            AdManager.loadRewarded(this, null);
+            AdManager.loadRewarded(this, AdManager.Rewarded.LIFE, null);
         }
     }
 
@@ -565,7 +570,7 @@ public class QuestionActivity extends AppCompatActivity {
         }
         dialogShowing = true;
         vm.onScreenHidden();
-        boolean ready = AdManager.isRewardedReady();
+        boolean ready = AdManager.isRewardedReady(AdManager.Rewarded.LIFE);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_lightbulb)
                 .setTitle(R.string.hint_title)
@@ -580,7 +585,7 @@ public class QuestionActivity extends AppCompatActivity {
         if (ready) {
             builder.setPositiveButton(R.string.hint_watch, (d, w) -> {
                 rewardedShowing = true;
-                AdManager.showRewarded(this, () -> {
+                AdManager.showRewarded(this, AdManager.Rewarded.LIFE, () -> {
                     vm.useHint();
                     Feedback.play(Feedback.Sound.UNLOCK);
                 }, () -> {
@@ -590,7 +595,7 @@ public class QuestionActivity extends AppCompatActivity {
                 });
             });
         } else {
-            AdManager.loadRewarded(this, null);
+            AdManager.loadRewarded(this, AdManager.Rewarded.LIFE, null);
         }
         builder.show();
     }

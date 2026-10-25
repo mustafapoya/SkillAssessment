@@ -50,7 +50,7 @@ public final class QuizRepository {
     private static final String TAG = "QuizRepository";
 
     public static final int DEFAULT_CREDIT = 5;
-    public static final int UNLOCK_COST = 2;
+    public static final int UNLOCK_COST = 1;
     public static final int REWARD_CREDIT = 1;
     private static final String KEY_CREDIT = "KEY_CREDIT";
 

@@ -81,6 +81,9 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     /** The last loaded snapshot; null until the first load finishes. */
     @Nullable private HomeData homeData;
     private int credits;
+    /** Pending "watch a video to unlock" load, so it can be dropped with the view. */
+    @Nullable
+    private AdManager.RewardedListener unlockAdListener;
     private boolean loadedOnce;
 
     private static final int STATUS_ANY = 0;
@@ -121,8 +124,12 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         repository = QuizRepository.get(requireContext());
         UiUtils.applySystemBarPadding(binding.root, true, false);
+        UiUtils.limitContentWidth(binding.topBar, R.dimen.content_max_width_wide);
+        UiUtils.limitContentWidth(binding.listCategories, R.dimen.content_max_width_wide);
 
-        int widthDp = getResources().getConfiguration().screenWidthDp;
+        // Columns are counted within the width the grid is limited to.
+        int maxWidthDp = Math.round(getResources().getDimension(R.dimen.content_max_width_wide) / getResources().getDisplayMetrics().density);
+        int widthDp = Math.min(getResources().getConfiguration().screenWidthDp, maxWidthDp);
         int spans = Math.max(1, widthDp / CARD_MIN_WIDTH_DP);
         GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), spans);
         layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -170,6 +177,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
         getChildFragmentManager().setFragmentResultListener(CreditsSheet.RESULT_KEY, getViewLifecycleOwner(), (key, bundle) -> load());
 
         AdManager.loadBanner(getViewLifecycleOwner(), binding.adContainer, AdManager.Banner.HOME);
+        AdManager.preloadInterstitial(requireContext(), AdManager.Interstitial.TEST_START);
     }
 
     @Override
@@ -211,7 +219,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             allCategories = data.categories;
             credits = data.credits;
             binding.txtCoins.setText(String.valueOf(credits));
-            binding.cardCoins.setContentDescription(getString(R.string.coin_balance_cd, credits));
+            binding.cardCoins.setContentDescription(getString(R.string.coin_balance_cd, UiUtils.coins(requireContext(), credits)));
             header.txtStatTests.setText(String.valueOf(data.stats.tests));
             header.txtStatAccuracy.setText(data.stats.answered() == 0 ? "—" : getString(R.string.percent_value, data.stats.accuracyPercent()));
             header.txtStatTopics.setText(String.format(Locale.getDefault(), "%d/%d", data.stats.unlockedTopics, allCategories.size()));
@@ -270,7 +278,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             boolean premium = BillingManager.isPremium(requireContext());
             header.txtStreakRestoreTitle.setText(getString(R.string.streak_restore_title, data.restorableStreak));
             header.txtStreakRestoreDesc.setText(premium ? R.string.streak_restore_desc_premium : R.string.streak_restore_desc);
-            if (!premium) AdManager.loadRewarded(requireContext(), null);
+            if (!premium) AdManager.loadRewarded(requireContext(), AdManager.Rewarded.LIFE, null);
         }
     }
 
@@ -295,13 +303,13 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             onStreakRestored(ProgressTracker.restoreStreak(requireContext()));
             return;
         }
-        if (!AdManager.isRewardedReady()) {
-            AdManager.loadRewarded(requireContext(), null);
+        if (!AdManager.isRewardedReady(AdManager.Rewarded.LIFE)) {
+            AdManager.loadRewarded(requireContext(), AdManager.Rewarded.LIFE, null);
             UiUtils.snackbar(binding.getRoot(), R.string.hint_unavailable, Snackbar.LENGTH_LONG).show();
             return;
         }
         Context app = requireContext().getApplicationContext();
-        AdManager.showRewarded(requireActivity(), () -> {
+        AdManager.showRewarded(requireActivity(), AdManager.Rewarded.LIFE, () -> {
             int restored = ProgressTracker.restoreStreak(app);
             if (binding != null) onStreakRestored(restored);
         }, () -> {
@@ -324,7 +332,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
 
     private void startDaily() {
         if (!requireTopics() || homeData.dailyDone) return;
-        startActivity(QuestionActivity.intent(requireContext(), Category.DAILY, ProgressTracker.DAILY_QUESTIONS,
+        AdManager.startTest(requireActivity(), QuestionActivity.intent(requireContext(), Category.DAILY, ProgressTracker.DAILY_QUESTIONS,
                 Prefs.isTimerEnabled(requireContext()), false, false));
     }
 
@@ -333,7 +341,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
             UiUtils.snackbar(binding.getRoot(), R.string.no_review_questions, Snackbar.LENGTH_SHORT).show();
             return;
         }
-        startActivity(QuestionActivity.intent(requireContext(), Category.REVIEW, 0, Prefs.isTimerEnabled(requireContext()), false, false));
+        AdManager.startTest(requireActivity(), QuestionActivity.intent(requireContext(), Category.REVIEW, 0, Prefs.isTimerEnabled(requireContext()), false, false));
     }
 
     private void startMixed() {
@@ -343,7 +351,7 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
 
     private void startSprint() {
         if (!requireTopics()) return;
-        startActivity(QuestionActivity.sprintIntent(requireContext()));
+        AdManager.startTest(requireActivity(), QuestionActivity.sprintIntent(requireContext()));
     }
 
     private void openInterviewPacks() {
@@ -429,14 +437,17 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
                 .setIcon(R.drawable.ic_lock)
                 .setTitle(getString(R.string.unlock_topic_title, category.getDisplayName()))
                 .setMessage(premium ? questions : affordable
-                        ? getString(R.string.unlock_confirm_message, QuizRepository.UNLOCK_COST, credits, questions)
-                        : questions + "\n\n" + getString(R.string.not_enough_coins, QuizRepository.UNLOCK_COST))
+                        ? getString(R.string.unlock_confirm_message, UiUtils.coins(requireContext(), QuizRepository.UNLOCK_COST),
+                                UiUtils.coins(requireContext(), credits), questions)
+                        : questions + "\n\n" + getString(R.string.unlock_with_video))
                 .setNegativeButton(R.string.cancel, null);
         if (affordable) {
             builder.setPositiveButton(premium ? getString(R.string.unlock_free) : getString(R.string.unlock_cost, QuizRepository.UNLOCK_COST),
                     (d, w) -> startUnlock(category));
         } else {
-            builder.setPositiveButton(R.string.get_coins, (d, w) -> openCredits());
+            // One video pays for one topic, straight from this dialog.
+            AdManager.loadRewarded(requireContext(), AdManager.Rewarded.COINS, null);
+            builder.setPositiveButton(R.string.watch_to_unlock, (d, w) -> watchToUnlock(category));
         }
         if (canPreview) {
             builder.setNeutralButton(getString(R.string.preview_try, QuizViewModel.PREVIEW_LENGTH), (d, w) -> startPreview(category));
@@ -454,8 +465,9 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
         if (BillingManager.isPremium(requireContext()) || credits >= QuizRepository.UNLOCK_COST) {
             startUnlock(category);
         } else {
-            UiUtils.snackbar(binding.getRoot(), getString(R.string.not_enough_coins, QuizRepository.UNLOCK_COST), Snackbar.LENGTH_LONG)
-                    .setAction(R.string.get_coins, v -> openCredits())
+            UiUtils.snackbar(binding.getRoot(), getString(R.string.not_enough_coins,
+                            UiUtils.coins(requireContext(), QuizRepository.UNLOCK_COST)), Snackbar.LENGTH_LONG)
+                    .setAction(R.string.watch_to_unlock, v -> watchToUnlock(category))
                     .show();
         }
     }
@@ -481,6 +493,34 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
         });
     }
 
+    /** Not enough coins: a rewarded video earns the coin and the topic is unlocked right after. */
+    private void watchToUnlock(Category category) {
+        if (unlockAdListener != null || adapter.isBusy()) return;
+        adapter.setUnlocking(category.getId(), true);
+        unlockAdListener = available -> {
+            unlockAdListener = null;
+            if (binding == null) return;
+            if (!available) {
+                adapter.setUnlocking(category.getId(), false);
+                UiUtils.snackbar(binding.getRoot(), R.string.ad_not_available, Snackbar.LENGTH_LONG).show();
+                return;
+            }
+            boolean[] earned = {false};
+            AdManager.showRewarded(requireActivity(), AdManager.Rewarded.COINS, () -> {
+                earned[0] = true;
+                // The coin is kept even if the screen is gone by the time it is stored.
+                Async.run(null, () -> repository.addCredits(QuizRepository.REWARD_CREDIT), total -> {
+                    if (binding == null || total == null) return;
+                    credits = total;
+                    startUnlock(category);
+                });
+            }, () -> {
+                if (!earned[0] && binding != null) adapter.setUnlocking(category.getId(), false);
+            });
+        };
+        AdManager.loadRewarded(requireContext(), AdManager.Rewarded.COINS, unlockAdListener);
+    }
+
     private void openCredits() {
         if (getChildFragmentManager().findFragmentByTag(CreditsSheet.TAG) == null) {
             new CreditsSheet().show(getChildFragmentManager(), CreditsSheet.TAG);
@@ -490,6 +530,10 @@ public class HomeFragment extends Fragment implements CategoryAdapter.Listener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (unlockAdListener != null) {
+            AdManager.cancelRewardedListener(unlockAdListener);
+            unlockAdListener = null;
+        }
         binding = null;
         header = null;
     }

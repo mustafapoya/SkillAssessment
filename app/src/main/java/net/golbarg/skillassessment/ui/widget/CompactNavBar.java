@@ -89,6 +89,7 @@ public class CompactNavBar extends LinearLayout {
         unselectedContent = UiUtils.color(context, com.google.android.material.R.attr.colorOnSurfaceVariant);
         // Content stays clear of the gesture/button navigation bar, whose colour continues ours.
         UiUtils.applySystemBarPadding(this, false, true);
+        UiUtils.limitContentWidth(this, R.dimen.nav_bar_max_width);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CompactNavBar);
         int menuRes = a.getResourceId(R.styleable.CompactNavBar_menu, 0);

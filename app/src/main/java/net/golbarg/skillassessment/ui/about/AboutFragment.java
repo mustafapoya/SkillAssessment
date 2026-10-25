@@ -120,6 +120,7 @@ public class AboutFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         UiUtils.applySystemBarPadding(binding.root, true, false);
+        UiUtils.limitContentWidth(binding.root);
         binding.txtVersion.setText(getString(R.string.version_format, BuildConfig.VERSION_NAME));
         binding.txtCopyright.setText(getString(R.string.copyright, Calendar.getInstance().get(Calendar.YEAR)));
 

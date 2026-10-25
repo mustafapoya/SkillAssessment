@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.widget.TextViewCompat;
 
 import net.golbarg.skillassessment.R;
+import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.databinding.ActivityPathBinding;
 import net.golbarg.skillassessment.databinding.ItemTopicProgressBinding;
 import net.golbarg.skillassessment.db.QuizRepository;
@@ -49,10 +50,12 @@ public class PathActivity extends AppCompatActivity {
         binding = ActivityPathBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         UiUtils.applySystemBarPadding(binding.root, true, false);
+        UiUtils.limitContentWidth(binding.root);
         UiUtils.applySystemBarPadding(binding.scroll, false, true);
         binding.btnClose.setOnClickListener(v -> finish());
         binding.txtIntro.setText(getString(R.string.path_intro, LearningPath.LEVEL_SIZE, LearningPath.UNLOCK_PERCENT));
         categoryId = getIntent().getIntExtra(EXTRA_CATEGORY, -1);
+        AdManager.preloadInterstitial(this, AdManager.Interstitial.TEST_START);
     }
 
     @Override
@@ -116,7 +119,7 @@ public class PathActivity extends AppCompatActivity {
                 Toast.makeText(this, subtitle, Toast.LENGTH_SHORT).show();
                 return;
             }
-            startActivity(QuestionActivity.levelIntent(this, category.getId(), level.index, Prefs.isTimerEnabled(this)));
+            AdManager.startTest(this, QuestionActivity.levelIntent(this, category.getId(), level.index, Prefs.isTimerEnabled(this)));
         });
         binding.listLevels.addView(row.getRoot());
     }

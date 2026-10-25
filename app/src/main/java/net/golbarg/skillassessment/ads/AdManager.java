@@ -2,6 +2,7 @@ package net.golbarg.skillassessment.ads;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,7 +37,6 @@ import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.ConsentRequestParameters;
 import com.google.android.ump.UserMessagingPlatform;
 
-import net.golbarg.skillassessment.BuildConfig;
 import net.golbarg.skillassessment.billing.BillingManager;
 
 import java.util.ArrayList;
@@ -48,24 +48,38 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <ul>
  *     <li>No ad is requested until Google's consent flow (UMP) says ads may be requested.</li>
- *     <li>Banners only appear on browsing screens, never next to quiz controls.</li>
- *     <li>Interstitials only appear at the natural break after a finished test, never before
- *     content, and are frequency capped (see {@link #showInterstitialAfterTest}).</li>
+ *     <li>Banners never sit next to quiz controls: on the test screen the banner goes under the top
+ *     bar, away from the answers and the Check button.</li>
+ *     <li>Interstitials only appear at natural breaks, before a test starts or after it finishes,
+ *     and both placements share one frequency budget (see {@link #frequencyAllows}).</li>
  *     <li>Rewarded videos are always opt-in and name their reward up front.</li>
  *     <li>Premium users never see or load ads.</li>
  * </ul>
- * Debug builds always use Google's test units so development traffic never reaches the production account.
+ * {@link #ADS_ENABLED} and {@link #USE_TEST_ADS} below switch ads as a whole.
  */
 public final class AdManager {
     private static final String TAG = "AdManager";
 
-    private static final boolean USE_TEST_ADS = BuildConfig.DEBUG;
+    // false = no ad is loaded or shown anywhere, and rewards (coins, 50/50 hint, streak restore) are given without a video
+    public static final boolean ADS_ENABLED = true;
+    // true = Google's test ad units (use while developing), false = the real units of the AdMob account
+    public static final boolean USE_TEST_ADS = false;
+
+    // real ad units
+    private static final String REAL_BANNER_HOME = "ca-app-pub-8976959600358837/8503467396";
+    private static final String REAL_BANNER_BOOKMARK = "ca-app-pub-8976959600358837/8078632423";
+    private static final String REAL_BANNER_PROFILE = "ca-app-pub-8976959600358837/7190385727";
+    private static final String REAL_BANNER_QUESTION_RESULT = "ca-app-pub-8976959600358837/6765550752";
+    private static final String REAL_BANNER_QUESTION = "ca-app-pub-8976959600358837/9485430471";
+    private static final String REAL_INTERSTITIAL_QUESTION = "ca-app-pub-8976959600358837/8499651861";
+    private static final String REAL_INTERSTITIAL_QUESTION_RESULT = "ca-app-pub-8976959600358837/7186570198";
+    private static final String REAL_REWARD_CREDIT = "ca-app-pub-8976959600358837/5452469083";
+    private static final String REAL_REWARD_LIFE = "ca-app-pub-8976959600358837/1966033109";
+
+    // Google's test ad units: https://developers.google.com/admob/android/test-ads
     private static final String TEST_BANNER = "ca-app-pub-3940256099942544/9214589741";
     private static final String TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712";
     private static final String TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917";
-
-    private static final String INTERSTITIAL_TEST_FINISH = "ca-app-pub-8976959600358837/7186570198";
-    private static final String REWARDED_COINS = "ca-app-pub-8976959600358837/5452469083";
 
     /** The first few tests a new user takes are always ad-free. */
     private static final int GRACE_TESTS = 2;
@@ -79,15 +93,63 @@ public final class AdManager {
     private static final long AD_EXPIRY_MS = 60 * 60 * 1000L;
 
     public enum Banner {
-        HOME("ca-app-pub-8976959600358837/8503467396"),
-        BOOKMARK("ca-app-pub-8976959600358837/8078632423"),
-        PROFILE("ca-app-pub-8976959600358837/7190385727"),
-        RESULT("ca-app-pub-8976959600358837/6765550752");
+        HOME(REAL_BANNER_HOME),
+        BOOKMARK(REAL_BANNER_BOOKMARK),
+        PROFILE(REAL_BANNER_PROFILE),
+        RESULT(REAL_BANNER_QUESTION_RESULT),
+        QUESTION(REAL_BANNER_QUESTION);
 
-        final String unitId;
+        private final String realUnitId;
 
-        Banner(String unitId) {
-            this.unitId = unitId;
+        Banner(String realUnitId) {
+            this.realUnitId = realUnitId;
+        }
+
+        String unitId() {
+            return USE_TEST_ADS ? TEST_BANNER : realUnitId;
+        }
+    }
+
+    /** Interstitial placements, each with its own preloaded ad. Fields are main thread only. */
+    public enum Interstitial {
+        /** Before a test the user has just chosen. */
+        TEST_START(REAL_INTERSTITIAL_QUESTION),
+        /** After a finished test, before its result. */
+        TEST_FINISH(REAL_INTERSTITIAL_QUESTION_RESULT);
+
+        private final String realUnitId;
+        private InterstitialAd ad;
+        private long loadedAt;
+        private boolean loading;
+
+        Interstitial(String realUnitId) {
+            this.realUnitId = realUnitId;
+        }
+
+        String unitId() {
+            return USE_TEST_ADS ? TEST_INTERSTITIAL : realUnitId;
+        }
+    }
+
+    /** Rewarded placements, split so AdMob reports each kind of reward separately. Fields are main thread only. */
+    public enum Rewarded {
+        /** Coins for unlocking topics. */
+        COINS(REAL_REWARD_CREDIT),
+        /** Second chances: the 50/50 hint in a test and restoring a lost streak. */
+        LIFE(REAL_REWARD_LIFE);
+
+        private final String realUnitId;
+        private RewardedAd ad;
+        private long loadedAt;
+        private boolean loading;
+        private final List<RewardedListener> listeners = new ArrayList<>();
+
+        Rewarded(String realUnitId) {
+            this.realUnitId = realUnitId;
+        }
+
+        String unitId() {
+            return USE_TEST_ADS ? TEST_REWARDED : realUnitId;
         }
     }
 
@@ -106,15 +168,6 @@ public final class AdManager {
     /** Ad work queued until consent allows requesting ads. Main thread only. */
     private static final List<Runnable> pendingUntilReady = new ArrayList<>();
 
-    private static InterstitialAd interstitial;
-    private static long interstitialLoadedAt;
-    private static boolean interstitialLoading;
-
-    private static RewardedAd rewardedAd;
-    private static long rewardedLoadedAt;
-    private static boolean rewardedLoading;
-    private static final List<RewardedListener> rewardedListeners = new ArrayList<>();
-
     private AdManager() {
     }
 
@@ -122,7 +175,7 @@ public final class AdManager {
 
     /** Called from Application: starts the SDK straight away when consent from a previous session allows it. */
     public static void init(Context context) {
-        if (canRequestAds(context)) initializeSdk(context);
+        if (ADS_ENABLED && canRequestAds(context)) initializeSdk(context);
     }
 
     /**
@@ -131,7 +184,8 @@ public final class AdManager {
      */
     @MainThread
     public static void gatherConsent(@NonNull Activity activity) {
-        if (!consentRequested.compareAndSet(false, true)) return;
+        // With ads off there is nothing to ask consent for.
+        if (!ADS_ENABLED || !consentRequested.compareAndSet(false, true)) return;
         ConsentInformation info = UserMessagingPlatform.getConsentInformation(activity);
         info.requestConsentInfoUpdate(activity, new ConsentRequestParameters.Builder().build(),
                 () -> UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity, formError -> {
@@ -210,10 +264,10 @@ public final class AdManager {
         Context context = container.getContext();
         container.setVisibility(View.GONE);
         container.removeAllViews();
-        if (BillingManager.isPremium(context)) return;
+        if (!ADS_ENABLED || BillingManager.isPremium(context)) return;
 
         AdView adView = new AdView(context);
-        adView.setAdUnitId(USE_TEST_ADS ? TEST_BANNER : banner.unitId);
+        adView.setAdUnitId(banner.unitId());
         adView.setAdSize(adaptiveSize(context));
         adView.setAdListener(new AdListener() {
             @Override
@@ -229,7 +283,9 @@ public final class AdManager {
         });
         container.addView(adView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         whenReady(context, () -> {
-            if (owner.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.CREATED)) {
+            // Called from onCreate/onViewCreated, where the owner is still INITIALIZED: only skip
+            // the request once the screen is gone (consent can arrive after that).
+            if (owner.getLifecycle().getCurrentState() != Lifecycle.State.DESTROYED) {
                 adView.loadAd(new AdRequest.Builder().build());
             }
         });
@@ -269,27 +325,27 @@ public final class AdManager {
 
     // region Interstitial
 
-    /** Loads the post-test interstitial ahead of time, but only if the next finished test could show it. */
+    /** Loads an interstitial ahead of time, but only if the test counters could let it show next. */
     @MainThread
-    public static void preloadInterstitial(Context context) {
-        if (BillingManager.isPremium(context) || testsFinished(context) + 1 <= GRACE_TESTS) return;
-        if (isFresh(interstitial, interstitialLoadedAt) || interstitialLoading) return;
+    public static void preloadInterstitial(Context context, Interstitial placement) {
+        if (!ADS_ENABLED || BillingManager.isPremium(context) || !frequencyAllows(context, placement)) return;
+        if (isFresh(placement.ad, placement.loadedAt) || placement.loading) return;
         Context app = context.getApplicationContext();
         whenReady(app, () -> {
-            if (interstitialLoading) return;
-            interstitialLoading = true;
-            InterstitialAd.load(app, USE_TEST_ADS ? TEST_INTERSTITIAL : INTERSTITIAL_TEST_FINISH,
+            if (placement.loading) return;
+            placement.loading = true;
+            InterstitialAd.load(app, placement.unitId(),
                     new AdRequest.Builder().build(), new InterstitialAdLoadCallback() {
                         @Override
                         public void onAdLoaded(@NonNull InterstitialAd ad) {
-                            interstitial = ad;
-                            interstitialLoadedAt = SystemClock.elapsedRealtime();
-                            interstitialLoading = false;
+                            placement.ad = ad;
+                            placement.loadedAt = SystemClock.elapsedRealtime();
+                            placement.loading = false;
                         }
 
                         @Override
                         public void onAdFailedToLoad(@NonNull LoadAdError error) {
-                            interstitialLoading = false;
+                            placement.loading = false;
                             Log.d(TAG, "Interstitial failed: " + error.getMessage());
                         }
                     });
@@ -297,33 +353,62 @@ public final class AdManager {
     }
 
     /**
+     * Shows the pre-test interstitial if the rules allow it, then runs {@code onDone} (which starts
+     * the test) exactly once.
+     */
+    @MainThread
+    public static void showInterstitialBeforeTest(Activity activity, Runnable onDone) {
+        if (!frequencyAllows(activity, Interstitial.TEST_START) || !showInterstitial(activity, Interstitial.TEST_START, onDone)) {
+            onDone.run();
+        }
+    }
+
+    /** Starts a test, after the pre-test interstitial when one is due. */
+    @MainThread
+    public static void startTest(Activity activity, Intent test) {
+        showInterstitialBeforeTest(activity, () -> activity.startActivity(test));
+    }
+
+    /**
      * Records a finished test and shows the interstitial if every rule allows it, then runs
-     * {@code onDone} exactly once. The rules: no ads for the first {@value #GRACE_TESTS} tests, at
-     * least {@value #TESTS_BETWEEN_INTERSTITIALS} tests between ads, a minimum time gap after any
-     * full-screen ad, and never after a test with fewer than {@value #MIN_ANSWERED_FOR_INTERSTITIAL}
-     * answers.
+     * {@code onDone} exactly once. On top of {@link #frequencyAllows}, it never follows a test with
+     * fewer than {@value #MIN_ANSWERED_FOR_INTERSTITIAL} answers.
      */
     @MainThread
     public static void showInterstitialAfterTest(Activity activity, int answered, Runnable onDone) {
+        boolean allowed = answered >= MIN_ANSWERED_FOR_INTERSTITIAL && frequencyAllows(activity, Interstitial.TEST_FINISH);
         SharedPreferences prefs = prefs(activity);
-        int finished = prefs.getInt(KEY_TESTS_FINISHED, 0) + 1;
-        int since = prefs.getInt(KEY_TESTS_SINCE_INTERSTITIAL, 0) + 1;
-        prefs.edit().putInt(KEY_TESTS_FINISHED, finished).putInt(KEY_TESTS_SINCE_INTERSTITIAL, since).apply();
+        prefs.edit()
+                .putInt(KEY_TESTS_FINISHED, prefs.getInt(KEY_TESTS_FINISHED, 0) + 1)
+                .putInt(KEY_TESTS_SINCE_INTERSTITIAL, prefs.getInt(KEY_TESTS_SINCE_INTERSTITIAL, 0) + 1)
+                .apply();
+        if (!allowed || !showInterstitial(activity, Interstitial.TEST_FINISH, onDone)) onDone.run();
+    }
 
-        InterstitialAd ad = interstitial;
-        boolean allowed = !BillingManager.isPremium(activity)
-                && canRequestAds(activity)
-                && isFresh(ad, interstitialLoadedAt)
-                && finished > GRACE_TESTS
-                && since >= TESTS_BETWEEN_INTERSTITIALS
-                && answered >= MIN_ANSWERED_FOR_INTERSTITIAL
-                && !recentlyShowedFullscreen(activity)
-                && !activity.isFinishing();
-        if (!allowed) {
-            onDone.run();
-            return;
+    /**
+     * The test counters, read before the current test is counted: no ads in the first
+     * {@value #GRACE_TESTS} tests and at least {@value #TESTS_BETWEEN_INTERSTITIALS} finished tests
+     * between two interstitials, whichever placement showed them.
+     */
+    private static boolean frequencyAllows(Context context, Interstitial placement) {
+        SharedPreferences prefs = prefs(context);
+        int test = prefs.getInt(KEY_TESTS_FINISHED, 0) + 1;
+        // At the end of a test, that test already counts towards the gap.
+        int since = prefs.getInt(KEY_TESTS_SINCE_INTERSTITIAL, 0) + (placement == Interstitial.TEST_FINISH ? 1 : 0);
+        return test > GRACE_TESTS && since >= TESTS_BETWEEN_INTERSTITIALS;
+    }
+
+    /**
+     * Shows the preloaded ad unless Premium, consent, freshness or the time gap after the last
+     * full-screen ad rules it out. Returns false, without running {@code onDone}, when nothing was shown.
+     */
+    private static boolean showInterstitial(Activity activity, Interstitial placement, Runnable onDone) {
+        InterstitialAd ad = placement.ad;
+        if (!ADS_ENABLED || BillingManager.isPremium(activity) || !canRequestAds(activity) || !isFresh(ad, placement.loadedAt)
+                || recentlyShowedFullscreen(activity) || activity.isFinishing()) {
+            return false;
         }
-        interstitial = null;
+        placement.ad = null;
         AtomicBoolean done = new AtomicBoolean(false);
         Runnable finish = () -> {
             if (done.compareAndSet(false, true)) onDone.run();
@@ -339,68 +424,70 @@ public final class AdManager {
                 finish.run();
             }
         });
-        prefs.edit().putInt(KEY_TESTS_SINCE_INTERSTITIAL, 0).apply();
+        prefs(activity).edit().putInt(KEY_TESTS_SINCE_INTERSTITIAL, 0).apply();
         markFullscreenShown(activity);
         ad.show(activity);
+        return true;
     }
 
     // endregion
 
     // region Rewarded
 
-    public static boolean isRewardedReady() {
-        return isFresh(rewardedAd, rewardedLoadedAt);
+    public static boolean isRewardedReady(Rewarded placement) {
+        return !ADS_ENABLED || isFresh(placement.ad, placement.loadedAt);
     }
 
     /** Loads a rewarded video. Every listener hears back exactly once, even if a load is already running. */
     @MainThread
-    public static void loadRewarded(Context context, @Nullable RewardedListener listener) {
-        if (isRewardedReady()) {
+    public static void loadRewarded(Context context, Rewarded placement, @Nullable RewardedListener listener) {
+        // With ads off, isRewardedReady is always true and showRewarded gives the reward directly.
+        if (isRewardedReady(placement)) {
             if (listener != null) listener.onLoaded(true);
             return;
         }
-        if (listener != null) rewardedListeners.add(listener);
-        if (rewardedLoading) return;
-        rewardedLoading = true;
-        rewardedAd = null;
+        if (listener != null) placement.listeners.add(listener);
+        if (placement.loading) return;
+        placement.loading = true;
+        placement.ad = null;
         Context app = context.getApplicationContext();
         if (!canRequestAds(app)) {
             // Without consent there is nothing to load; report it rather than waiting forever.
-            rewardedLoading = false;
-            notifyRewarded(false);
+            placement.loading = false;
+            notifyRewarded(placement, false);
             return;
         }
         initializeSdk(app);
-        RewardedAd.load(app, USE_TEST_ADS ? TEST_REWARDED : REWARDED_COINS,
+        RewardedAd.load(app, placement.unitId(),
                 new AdRequest.Builder().build(), new RewardedAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull RewardedAd ad) {
-                        rewardedLoading = false;
-                        rewardedAd = ad;
-                        rewardedLoadedAt = SystemClock.elapsedRealtime();
-                        notifyRewarded(true);
+                        placement.loading = false;
+                        placement.ad = ad;
+                        placement.loadedAt = SystemClock.elapsedRealtime();
+                        notifyRewarded(placement, true);
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError error) {
-                        rewardedLoading = false;
-                        rewardedAd = null;
+                        placement.loading = false;
+                        placement.ad = null;
                         Log.d(TAG, "Rewarded failed: " + error.getMessage());
-                        notifyRewarded(false);
+                        notifyRewarded(placement, false);
                     }
                 });
     }
 
-    private static void notifyRewarded(boolean available) {
-        List<RewardedListener> listeners = new ArrayList<>(rewardedListeners);
-        rewardedListeners.clear();
+    private static void notifyRewarded(Rewarded placement, boolean available) {
+        List<RewardedListener> listeners = new ArrayList<>(placement.listeners);
+        placement.listeners.clear();
         for (RewardedListener l : listeners) l.onLoaded(available);
     }
 
     /** Forgets a listener whose screen went away before the load finished. */
     @MainThread
     public static void cancelRewardedListener(RewardedListener listener) {
-        rewardedListeners.remove(listener);
+        for (Rewarded placement : Rewarded.values()) placement.listeners.remove(listener);
     }
 
     /**
@@ -408,14 +495,18 @@ public final class AdManager {
      * @param onClosed runs when the ad is dismissed (whether or not it was rewarded).
      */
     @MainThread
-    public static void showRewarded(Activity activity, Runnable onReward, Runnable onClosed) {
-        RewardedAd ad = rewardedAd;
-        if (!isFresh(ad, rewardedLoadedAt)) {
-            rewardedAd = null;
+    public static void showRewarded(Activity activity, Rewarded placement, Runnable onReward, Runnable onClosed) {
+        if (!ADS_ENABLED) {
+            onReward.run();
             onClosed.run();
             return;
         }
-        rewardedAd = null;
+        RewardedAd ad = placement.ad;
+        placement.ad = null;
+        if (!isFresh(ad, placement.loadedAt)) {
+            onClosed.run();
+            return;
+        }
         ad.setFullScreenContentCallback(new FullScreenContentCallback() {
             @Override
             public void onAdDismissedFullScreenContent() {
@@ -436,10 +527,6 @@ public final class AdManager {
 
     private static SharedPreferences prefs(Context context) {
         return context.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-    }
-
-    private static int testsFinished(Context context) {
-        return prefs(context).getInt(KEY_TESTS_FINISHED, 0);
     }
 
     private static boolean isFresh(@Nullable Object ad, long loadedAt) {

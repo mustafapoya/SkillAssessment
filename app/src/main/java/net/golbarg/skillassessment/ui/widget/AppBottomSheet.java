@@ -6,11 +6,16 @@ import android.view.Window;
 
 import androidx.core.view.WindowCompat;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 /**
  * Bottom sheet whose surface runs behind the navigation bar. A dialog has its own window, and
  * Android would otherwise draw a darker contrast scrim behind 3-button navigation.
+ *
+ * <p>It opens fully expanded: on short screens (landscape, tablets) the default half-open state
+ * would show only the title, hiding the sheet's buttons.
  */
 public abstract class AppBottomSheet extends BottomSheetDialogFragment {
 
@@ -27,6 +32,11 @@ public abstract class AppBottomSheet extends BottomSheetDialogFragment {
         window.setNavigationBarColor(Color.TRANSPARENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.setNavigationBarContrastEnforced(false);
+        }
+        if (getDialog() instanceof BottomSheetDialog) {
+            BottomSheetBehavior<?> behavior = ((BottomSheetDialog) getDialog()).getBehavior();
+            behavior.setSkipCollapsed(true);
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
     }
 }

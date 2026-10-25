@@ -109,6 +109,14 @@
             app:iconTint="?attr/colorOnSurfaceVariant" />
     </LinearLayout>
 
+    <!-- Banner under the top bar, kept away from the answers and the Check button. -->
+    <FrameLayout
+        android:id="@+id/ad_container"
+        style="@style/Widget.App.AdSlot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

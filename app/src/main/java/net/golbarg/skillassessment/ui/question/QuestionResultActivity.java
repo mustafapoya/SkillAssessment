@@ -33,6 +33,7 @@ import net.golbarg.skillassessment.util.Async;
 import net.golbarg.skillassessment.util.Feedback;
 import net.golbarg.skillassessment.util.Prefs;
 import net.golbarg.skillassessment.util.ProgressTracker;
+import net.golbarg.skillassessment.util.ReviewPrompt;
 import net.golbarg.skillassessment.util.ShareCard;
 import net.golbarg.skillassessment.util.UiUtils;
 
@@ -101,6 +102,8 @@ public class QuestionResultActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         UiUtils.applySystemBarPadding(binding.root, true, false);
         UiUtils.applySystemBarPadding(binding.bottomBar, false, true);
+        UiUtils.limitContentWidth(binding.toolbar);
+        UiUtils.limitContentWidth(binding.list);
 
         binding.list.setLayoutManager(new LinearLayoutManager(this));
         header = ItemResultHeaderBinding.inflate(getLayoutInflater(), binding.list, false);
@@ -134,6 +137,7 @@ public class QuestionResultActivity extends AppCompatActivity {
         });
 
         AdManager.loadBanner(this, binding.adContainer, AdManager.Banner.RESULT);
+        AdManager.preloadInterstitial(this, AdManager.Interstitial.TEST_START);
     }
 
     private void bind(Data data, boolean animate) {
@@ -164,6 +168,10 @@ public class QuestionResultActivity extends AppCompatActivity {
         if (animate && bestStreak >= 0) {
             Feedback.play(Feedback.Sound.COMPLETE);
             if (percent >= 70) binding.confetti.burst(percent >= 90 ? 160 : 90);
+            // Once the score has counted up, a strong result is a good moment to ask for a rating.
+            binding.getRoot().postDelayed(() -> {
+                if (!isFinishing()) ReviewPrompt.onTestFinished(this, percent, r.getTotal());
+            }, 1500);
         }
         bindExtras(animate);
 
@@ -175,10 +183,10 @@ public class QuestionResultActivity extends AppCompatActivity {
 
         boolean hasMistakes = r.getWrongAnswer() + r.getNoAnswer() > 0;
         header.btnPracticeMistakes.setVisibility(hasMistakes ? View.VISIBLE : View.GONE);
-        header.btnPracticeMistakes.setOnClickListener(v -> {
+        header.btnPracticeMistakes.setOnClickListener(v -> AdManager.showInterstitialBeforeTest(this, () -> {
             startActivity(QuestionActivity.intent(this, Category.REVIEW, 0, Prefs.isTimerEnabled(this), false));
             finish();
-        });
+        }));
 
         tile(header.statCorrect, String.valueOf(r.getCorrectAnswer()), R.string.correct, ContextCompat.getColor(this, R.color.correct));
         tile(header.statWrong, String.valueOf(r.getWrongAnswer()), R.string.wrong, ContextCompat.getColor(this, R.color.wrong));
@@ -195,8 +203,10 @@ public class QuestionResultActivity extends AppCompatActivity {
                 retry = QuestionActivity.intent(this, data.category.getId(), Prefs.getTestLength(this),
                         Prefs.isTimerEnabled(this), Prefs.isShuffleEnabled(this));
             }
-            startActivity(retry);
-            finish();
+            AdManager.showInterstitialBeforeTest(this, () -> {
+                startActivity(retry);
+                finish();
+            });
         });
 
         int totalCount = data.items.size();

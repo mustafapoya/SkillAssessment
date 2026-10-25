@@ -4,4 +4,10 @@
     <dimen name="card_radius_small">14dp</dimen>
     <dimen name="list_gap">10dp</dimen>
     <dimen name="icon_badge">44dp</dimen>
+    <!-- On tablets and in landscape, content stays this wide and centred. -->
+    <dimen name="content_max_width">720dp</dimen>
+    <!-- Wider for the topic grid, which fills the space with more columns. -->
+    <dimen name="content_max_width_wide">1080dp</dimen>
+    <!-- Tabs stay together on wide screens instead of spreading to the edges. -->
+    <dimen name="nav_bar_max_width">560dp</dimen>
 </resources>

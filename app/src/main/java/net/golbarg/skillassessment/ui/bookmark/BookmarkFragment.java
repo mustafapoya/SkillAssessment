@@ -49,6 +49,8 @@ public class BookmarkFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         repository = QuizRepository.get(requireContext());
         UiUtils.applySystemBarPadding(binding.root, true, false);
+        UiUtils.limitContentWidth(binding.header);
+        UiUtils.limitContentWidth(binding.list);
         binding.list.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.list.setAdapter(adapter);
         binding.empty.imgIcon.setImageResource(R.drawable.ic_bookmark_border);

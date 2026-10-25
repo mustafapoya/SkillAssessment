@@ -92,6 +92,7 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         repository = QuizRepository.get(requireContext());
         UiUtils.applySystemBarPadding(binding.root, true, false);
+        UiUtils.limitContentWidth(binding.list);
 
         binding.list.setLayoutManager(new LinearLayoutManager(requireContext()));
         header = ItemProfileHeaderBinding.inflate(getLayoutInflater(), binding.list, false);
@@ -107,6 +108,7 @@ public class ProfileFragment extends Fragment {
         legendDot(header.txtLegendSkipped, ContextCompat.getColor(requireContext(), R.color.skipped));
 
         AdManager.loadBanner(getViewLifecycleOwner(), binding.adContainer, AdManager.Banner.PROFILE);
+        AdManager.preloadInterstitial(requireContext(), AdManager.Interstitial.TEST_START);
     }
 
     @Override
@@ -247,7 +249,7 @@ public class ProfileFragment extends Fragment {
                     + ", " + row.txtSubtitle.getText());
             row.getRoot().setOnClickListener(v -> {
                 if (t.toFix > 0) {
-                    startActivity(QuestionActivity.focusIntent(requireContext(), c.getId(), Prefs.isTimerEnabled(requireContext())));
+                    AdManager.startTest(requireActivity(), QuestionActivity.focusIntent(requireContext(), c.getId(), Prefs.isTimerEnabled(requireContext())));
                 } else if (getChildFragmentManager().findFragmentByTag(TestSetupSheet.TAG) == null) {
                     TestSetupSheet.newInstance(c).show(getChildFragmentManager(), TestSetupSheet.TAG);
                 }

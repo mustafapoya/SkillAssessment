@@ -58,6 +58,7 @@ public class StudyActivity extends AppCompatActivity {
         binding = ActivityStudyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         UiUtils.applySystemBarPadding(binding.root, true, false);
+        UiUtils.limitContentWidth(binding.root);
         UiUtils.applySystemBarPadding(binding.list, false, true);
         repository = QuizRepository.get(this);
 

@@ -31,12 +31,18 @@
     <string name="filter_unlocked">Unlocked</string>
     <string name="filter_locked">Locked</string>
     <string name="unlock_cost">Unlock · %1$d</string>
-    <string name="unlock_confirm_message">Spend %1$d of your %2$d coins to unlock %3$s. Unlocked topics stay unlocked forever.</string>
+    <string name="unlock_confirm_message">Spend %1$s to unlock %3$s (you have %2$s). Unlocked topics stay unlocked forever.</string>
     <string name="unlocking">Unlocking…</string>
     <string name="unlocked_successfully">%1$s unlocked</string>
     <string name="unlock_failed">Couldn\'t unlock this topic. Please try again.</string>
-    <string name="not_enough_coins">You need %1$d coins to unlock a topic</string>
+    <string name="not_enough_coins">You need %1$s to unlock a topic</string>
+    <string name="unlock_with_video">You don\'t have enough coins. Watch a short video to unlock this topic.</string>
+    <string name="watch_to_unlock">Watch &amp; unlock</string>
     <string name="get_coins">Get coins</string>
+    <plurals name="coin_count">
+        <item quantity="one">%d coin</item>
+        <item quantity="other">%d coins</item>
+    </plurals>
     <string name="best_score">Best %1$d%%</string>
     <string name="not_attempted">Not attempted yet</string>
     <string name="no_topics_found">No topics match \"%1$s\"</string>
@@ -44,7 +50,7 @@
     <string name="stat_tests">Tests</string>
     <string name="stat_accuracy">Accuracy</string>
     <string name="stat_topics">Topics</string>
-    <string name="coin_balance_cd">%1$d coins. Tap to get more</string>
+    <string name="coin_balance_cd">%1$s. Tap to get more</string>
 
     <!-- Test setup -->
     <string name="test_setup_questions">How many questions?</string>
@@ -60,11 +66,11 @@
 
     <!-- Coins -->
     <string name="coins_title">Your coins</string>
-    <string name="coins_desc">Each topic costs %1$d coins to unlock and stays unlocked forever. Watch a short video to earn %2$d coin.</string>
+    <string name="coins_desc">Each topic costs %1$s to unlock and stays unlocked forever. Watch a short video to earn %2$s.</string>
     <string name="watch_ad">Watch a video · +%1$d</string>
     <string name="loading_ad">Loading video…</string>
     <string name="ad_not_available">No video is available right now. Please try again in a moment.</string>
-    <string name="coins_earned">You earned %1$d coin</string>
+    <string name="coins_earned">You earned %1$s</string>
 
     <!-- Question -->
     <string name="question_label">Question %1$d</string>

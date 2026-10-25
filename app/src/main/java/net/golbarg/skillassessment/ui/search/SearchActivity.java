@@ -66,6 +66,7 @@ public class SearchActivity extends AppCompatActivity {
         binding = ActivitySearchBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         UiUtils.applySystemBarPadding(binding.root, true, false);
+        UiUtils.limitContentWidth(binding.root);
         UiUtils.applySystemBarPadding(binding.list, false, true);
         repository = QuizRepository.get(this);
 

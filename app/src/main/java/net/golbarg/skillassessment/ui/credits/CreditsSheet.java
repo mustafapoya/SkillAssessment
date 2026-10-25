@@ -19,6 +19,7 @@ import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.ui.widget.AppBottomSheet;
 import net.golbarg.skillassessment.util.Async;
 import net.golbarg.skillassessment.util.Feedback;
+import net.golbarg.skillassessment.util.UiUtils;
 
 /** Shows the coin balance and lets the user earn coins with a rewarded video. */
 public class CreditsSheet extends AppBottomSheet {
@@ -41,7 +42,8 @@ public class CreditsSheet extends AppBottomSheet {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         repository = QuizRepository.get(requireContext());
-        binding.txtDescription.setText(getString(R.string.coins_desc, QuizRepository.UNLOCK_COST, QuizRepository.REWARD_CREDIT));
+        binding.txtDescription.setText(getString(R.string.coins_desc, UiUtils.coins(requireContext(), QuizRepository.UNLOCK_COST),
+                UiUtils.coins(requireContext(), QuizRepository.REWARD_CREDIT)));
         binding.btnWatch.setOnClickListener(v -> watch());
         refreshBalance();
         BillingManager billing = BillingManager.get(requireContext());
@@ -85,14 +87,14 @@ public class CreditsSheet extends AppBottomSheet {
     }
 
     private void requestAd() {
-        if (AdManager.isRewardedReady()) {
+        if (AdManager.isRewardedReady(AdManager.Rewarded.COINS)) {
             showReady();
             return;
         }
         binding.btnWatch.setEnabled(false);
         binding.btnWatch.setText(R.string.loading_ad);
         if (!earnedThisSession) binding.txtStatus.setVisibility(View.GONE);
-        AdManager.loadRewarded(requireContext(), rewardedListener);
+        AdManager.loadRewarded(requireContext(), AdManager.Rewarded.COINS, rewardedListener);
     }
 
     private void onRewardedLoaded(boolean available) {
@@ -114,14 +116,14 @@ public class CreditsSheet extends AppBottomSheet {
     }
 
     private void watch() {
-        if (!AdManager.isRewardedReady()) {
+        if (!AdManager.isRewardedReady(AdManager.Rewarded.COINS)) {
             requestAd();
             return;
         }
         binding.btnWatch.setEnabled(false);
         // Captured now: the reward can arrive after the sheet has been dismissed.
         FragmentManager parent = getParentFragmentManager();
-        AdManager.showRewarded(requireActivity(), () -> Async.run(null, () -> repository.addCredits(QuizRepository.REWARD_CREDIT), credits -> {
+        AdManager.showRewarded(requireActivity(), AdManager.Rewarded.COINS, () -> Async.run(null, () -> repository.addCredits(QuizRepository.REWARD_CREDIT), credits -> {
             if (!parent.isDestroyed()) parent.setFragmentResult(RESULT_KEY, new Bundle());
             Feedback.play(Feedback.Sound.COIN);
             if (binding == null || credits == null) return;
@@ -132,7 +134,7 @@ public class CreditsSheet extends AppBottomSheet {
             binding.txtBalance.animate().scaleX(1f).scaleY(1f).setDuration(400)
                     .setInterpolator(new OvershootInterpolator(3f)).start();
             binding.txtStatus.setVisibility(View.VISIBLE);
-            binding.txtStatus.setText(getString(R.string.coins_earned, QuizRepository.REWARD_CREDIT));
+            binding.txtStatus.setText(getString(R.string.coins_earned, UiUtils.coins(requireContext(), QuizRepository.REWARD_CREDIT)));
         }), () -> {
             if (binding != null) requestAd();
         });

@@ -50,6 +50,7 @@ dependencies {
     implementation libs.play.services.ads
     implementation libs.ump
     implementation libs.billing
+    implementation libs.play.review
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
