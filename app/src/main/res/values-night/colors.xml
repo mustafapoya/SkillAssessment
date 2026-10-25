@@ -1,49 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="md_primary">#A6D475</color>
-    <color name="md_on_primary">#1C3700</color>
-    <color name="md_primary_container">#2A5000</color>
-    <color name="md_on_primary_container">#C2F08E</color>
-    <color name="md_secondary">#BECBAE</color>
-    <color name="md_on_secondary">#29341F</color>
-    <color name="md_secondary_container">#3F4A34</color>
-    <color name="md_on_secondary_container">#DAE7C9</color>
-    <color name="md_tertiary">#A0CFCF</color>
-    <color name="md_on_tertiary">#003737</color>
-    <color name="md_tertiary_container">#1E4E4E</color>
-    <color name="md_on_tertiary_container">#BBEBEB</color>
+    <!-- Dark scheme. Surfaces are a near-black charcoal with a faint green cast (not olive), with
+         clear steps between levels so cards read against the background. Accents are the brand lime,
+         lifted for dark backgrounds instead of the washed-out pastel Material would generate. -->
+    <color name="md_primary">#97DB5F</color>
+    <color name="md_on_primary">#112B00</color>
+    <color name="md_primary_container">#1F4F10</color>
+    <color name="md_on_primary_container">#C5F59D</color>
+    <color name="md_secondary">#BDCDB4</color>
+    <color name="md_on_secondary">#263422</color>
+    <color name="md_secondary_container">#34432E</color>
+    <color name="md_on_secondary_container">#D8EACB</color>
+    <color name="md_tertiary">#8FD3D0</color>
+    <color name="md_on_tertiary">#003735</color>
+    <color name="md_tertiary_container">#17504D</color>
+    <color name="md_on_tertiary_container">#B5F0EC</color>
     <color name="md_error">#FFB4AB</color>
     <color name="md_on_error">#690005</color>
-    <color name="md_error_container">#93000A</color>
+    <color name="md_error_container">#5C1D19</color>
     <color name="md_on_error_container">#FFDAD6</color>
-    <color name="md_surface">#11140E</color>
-    <color name="md_on_surface">#E2E3DA</color>
-    <color name="md_surface_variant">#44483D</color>
-    <color name="md_on_surface_variant">#C4C8BA</color>
-    <color name="md_outline">#8E9285</color>
-    <color name="md_outline_variant">#44483D</color>
-    <color name="md_surface_container_lowest">#0C0F09</color>
-    <color name="md_surface_container_low">#1A1C16</color>
-    <color name="md_surface_container">#1E201A</color>
-    <color name="md_surface_container_high">#282B24</color>
-    <color name="md_surface_container_highest">#33362E</color>
-    <color name="md_inverse_surface">#E2E3DA</color>
-    <color name="md_inverse_on_surface">#2F312A</color>
+    <color name="md_surface">#0A0C0B</color>
+    <color name="md_on_surface">#E3E6E1</color>
+    <color name="md_surface_variant">#3F4540</color>
+    <color name="md_on_surface_variant">#C0C7BF</color>
+    <color name="md_outline">#89918A</color>
+    <color name="md_outline_variant">#3B423C</color>
+    <!-- Kept a hair below the background so answer options and search fields don't look like holes. -->
+    <color name="md_surface_container_lowest">#080A09</color>
+    <color name="md_surface_container_low">#151816</color>
+    <color name="md_surface_container">#1A1D1B</color>
+    <color name="md_surface_container_high">#232724</color>
+    <color name="md_surface_container_highest">#2E322F</color>
+    <color name="md_inverse_surface">#E3E6E1</color>
+    <color name="md_inverse_on_surface">#2E322F</color>
     <color name="md_inverse_primary">#3F6F0E</color>
 
+    <!-- Home hero card: deep greens so white text stays readable and the card doesn't glare. -->
+    <color name="hero_start">#173F08</color>
+    <color name="hero_end">#2C7311</color>
+
+    <!-- Answer feedback: muted containers, bright marks. -->
     <color name="correct">#7FDB98</color>
-    <color name="correct_container">#00522A</color>
-    <color name="on_correct_container">#9CF7B2</color>
+    <color name="correct_container">#123D23</color>
+    <color name="on_correct_container">#A8F5BD</color>
     <color name="on_correct">#00391A</color>
     <color name="wrong">#FFB4AB</color>
     <color name="on_wrong">#690005</color>
-    <color name="wrong_container">#93000A</color>
+    <color name="wrong_container">#552019</color>
     <color name="on_wrong_container">#FFDAD6</color>
-    <color name="skipped">#8E9285</color>
-    <color name="coin">#FFC940</color>
-    <color name="coin_container">#5C4200</color>
-    <color name="on_coin_container">#FFE7B3</color>
-    <color name="splash_background">#11140E</color>
-    <color name="code_background">#161A22</color>
-    <color name="inline_code_background">#33A6D475</color>
+    <color name="skipped">#89918A</color>
+    <color name="coin">#FFCF4D</color>
+    <color name="coin_container">#45360F</color>
+    <color name="on_coin_container">#FFE3A3</color>
+    <color name="splash_background">#0A0C0B</color>
+    <color name="code_background">#060807</color>
+    <color name="inline_code_background">#3397DB5F</color>
 </resources>

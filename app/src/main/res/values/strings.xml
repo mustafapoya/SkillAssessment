@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">CodeQuiz</string>
-    <string name="app_desc">Practice real-world skill assessment questions across 58 technologies and track how you improve.</string>
 
     <!-- Navigation -->
     <string name="title_home">Explore</string>

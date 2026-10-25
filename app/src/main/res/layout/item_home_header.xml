@@ -542,7 +542,7 @@
         app:boxCornerRadiusBottomStart="24dp"
         app:boxCornerRadiusTopEnd="24dp"
         app:boxCornerRadiusTopStart="24dp"
-        app:boxStrokeColor="?attr/colorPrimary"
+        app:boxStrokeColor="@color/search_box_stroke"
         app:endIconMode="clear_text"
         app:hintEnabled="false"
         app:startIconDrawable="@drawable/ic_search">

@@ -35,6 +35,10 @@
     <color name="md_inverse_on_surface">#F1F2E8</color>
     <color name="md_inverse_primary">#A6D475</color>
 
+    <!-- Home hero card gradient -->
+    <color name="hero_start">#3F6F0E</color>
+    <color name="hero_end">@color/brand_lime_dark</color>
+
     <!-- Semantic -->
     <color name="correct">#1B7F3B</color>
     <color name="correct_container">#C8F2D0</color>
