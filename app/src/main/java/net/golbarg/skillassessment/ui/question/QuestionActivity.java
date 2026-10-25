@@ -24,7 +24,9 @@ import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.snackbar.Snackbar;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.ads.AdConfig;
+import net.golbarg.skillassessment.ads.BannerAds;
+import net.golbarg.skillassessment.ads.RewardedAds;
 import net.golbarg.skillassessment.billing.BillingManager;
 import net.golbarg.skillassessment.databinding.ActivityQuestionBinding;
 import net.golbarg.skillassessment.models.AnswerResponseType;
@@ -194,12 +196,12 @@ public class QuestionActivity extends AppCompatActivity {
         vm.getFinished().observe(this, this::openResult);
 
         // The banner sits under the top bar, away from the answers and the Check button.
-        AdManager.loadBanner(this, binding.adContainer, AdManager.Banner.QUESTION);
-        AdManager.preloadInterstitial(this, AdManager.Interstitial.TEST_FINISH);
+        BannerAds.attach(binding.adContainer, this, AdConfig.Placement.QUESTION_BANNER);
+        TestAds.preloadAfterTest(this);
         // The optional 50/50 hint is paid for with a rewarded video; load one early.
         if (!preview && categoryId != Category.SPRINT && !intent.getBooleanExtra(EXTRA_EXAM, false)
                 && !BillingManager.isPremium(this)) {
-            AdManager.loadRewarded(this, AdManager.Rewarded.LIFE, null);
+            RewardedAds.load(this, AdConfig.Placement.LIFE_REWARDED, null);
         }
     }
 
@@ -570,7 +572,7 @@ public class QuestionActivity extends AppCompatActivity {
         }
         dialogShowing = true;
         vm.onScreenHidden();
-        boolean ready = AdManager.isRewardedReady(AdManager.Rewarded.LIFE);
+        boolean ready = RewardedAds.isReady(this, AdConfig.Placement.LIFE_REWARDED);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
                 .setIcon(R.drawable.ic_lightbulb)
                 .setTitle(R.string.hint_title)
@@ -585,7 +587,7 @@ public class QuestionActivity extends AppCompatActivity {
         if (ready) {
             builder.setPositiveButton(R.string.hint_watch, (d, w) -> {
                 rewardedShowing = true;
-                AdManager.showRewarded(this, AdManager.Rewarded.LIFE, () -> {
+                RewardedAds.show(this, AdConfig.Placement.LIFE_REWARDED, () -> {
                     vm.useHint();
                     Feedback.play(Feedback.Sound.UNLOCK);
                 }, () -> {
@@ -595,7 +597,7 @@ public class QuestionActivity extends AppCompatActivity {
                 });
             });
         } else {
-            AdManager.loadRewarded(this, AdManager.Rewarded.LIFE, null);
+            RewardedAds.load(this, AdConfig.Placement.LIFE_REWARDED, null);
         }
         builder.show();
     }
@@ -643,7 +645,7 @@ public class QuestionActivity extends AppCompatActivity {
                 .putExtra(EXTRA_FOCUS, vm.isFocus())
                 .getExtras();
         Intent resultIntent = QuestionResultActivity.intent(this, info.resultId, testArgs, vm.getBestStreak(), info.outcome);
-        AdManager.showInterstitialAfterTest(this, vm.getAnsweredCount(), () -> {
+        TestAds.showAfterTest(this, vm.getAnsweredCount(), () -> {
             startActivity(resultIntent);
             finish();
         });

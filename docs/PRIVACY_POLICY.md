@@ -2,7 +2,7 @@
 
 > **Before publishing**, confirm the two items marked ⚠️ (the publisher name and the policy's web address), then delete this note. Publish the policy at the address entered in Play Console (App content → Privacy policy) and in the store listing; the same text is in [`privacy_policy.json`](privacy_policy.json) for the website. The address the old docs used, `https://golbarg.net/privacy/skillassessment`, currently returns 404.
 >
-> This policy describes the app with ads on. If you release a version with `AdManager.ADS_ENABLED = false`, section 3 does not apply to that version; keep it in the policy anyway if ads may be turned on in a later update.
+> This policy describes the app with ads on. If you release a version with `AdConfig.ADS_ENABLED = false`, section 3 does not apply to that version; keep it in the policy anyway if ads may be turned on in a later update.
 
 **App:** CodeQuiz (formerly Programming Skill Assessment) — `net.golbarg.skillassessment`, version 2.0
 **Publisher:** ⚠️ Golbarg (`golbarg.net`)

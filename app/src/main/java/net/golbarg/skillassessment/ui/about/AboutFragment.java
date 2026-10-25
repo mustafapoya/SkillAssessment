@@ -31,7 +31,7 @@ import com.google.android.material.timepicker.TimeFormat;
 
 import net.golbarg.skillassessment.BuildConfig;
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.ads.AdConsent;
 import net.golbarg.skillassessment.billing.BillingManager;
 import net.golbarg.skillassessment.databinding.FragmentAboutBinding;
 import net.golbarg.skillassessment.databinding.ViewSettingRowBinding;
@@ -205,10 +205,10 @@ public class AboutFragment extends Fragment {
     }
 
     private void bindPrivacyRow() {
-        boolean required = AdManager.isPrivacyOptionsRequired(requireContext());
+        boolean required = AdConsent.isPrivacyOptionsRequired(requireContext());
         binding.rowPrivacy.getRoot().setVisibility(required ? View.VISIBLE : View.GONE);
         row(binding.rowPrivacy, R.drawable.ic_privacy, getString(R.string.ad_privacy), getString(R.string.ad_privacy_desc),
-                v -> AdManager.showPrivacyOptions(requireActivity(), null));
+                v -> AdConsent.showPrivacyOptions(requireActivity(), null));
     }
 
     private void bindReminder() {

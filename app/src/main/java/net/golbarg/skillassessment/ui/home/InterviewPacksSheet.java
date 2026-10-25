@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.ui.question.TestAds;
 import net.golbarg.skillassessment.databinding.ItemTopicProgressBinding;
 import net.golbarg.skillassessment.databinding.SheetInterviewPacksBinding;
 import net.golbarg.skillassessment.db.QuizRepository;
@@ -81,7 +81,7 @@ public class InterviewPacksSheet extends AppBottomSheet {
                 Toast.makeText(requireContext(), getString(R.string.pack_locked, TextUtils.join(", ", names)), Toast.LENGTH_LONG).show();
                 return;
             }
-            AdManager.startTest(requireActivity(), QuestionActivity.packIntent(requireContext(), s.pack));
+            TestAds.startTest(requireActivity(), QuestionActivity.packIntent(requireContext(), s.pack));
             dismissAllowingStateLoss();
         });
         binding.listPacks.addView(row.getRoot());

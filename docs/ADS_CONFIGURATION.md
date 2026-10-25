@@ -14,7 +14,7 @@ This document details all advertising placements, ad unit identifiers, formats, 
 | **Primary Ad Network** | Google AdMob (`com.google.android.gms:play-services-ads`) |
 | **Consent Management** | Google User Messaging Platform (UMP SDK) |
 | **Max Ad Content Rating** | `MAX_AD_CONTENT_RATING_PG` (Family/Safe content) |
-| **Ad Switches** | At the top of `AdManager.java`: `ADS_ENABLED` (false = no ads at all; rewards are granted without a video) and `USE_TEST_ADS` (true = Google test units, false = the real units below). The same values apply to debug and release builds. |
+| **Ad Switches** | In `ads/AdConfig.java`, the only file to edit for ads (the standard ads package shared by all Golbarg apps, see `docs/ads` in the MobileApps workspace): `ADS_ENABLED` (false = no ads at all; rewards are granted without a video), `USE_TEST_ADS` (true = Google test units, false = the real units below), and one line per placement with `ON`/`OFF` and its real unit ID. The same values apply to debug and release builds. |
 
 ---
 
@@ -47,14 +47,14 @@ This document details all advertising placements, ad unit identifiers, formats, 
 ---
 
 ### 2. Pre-Test & Post-Test Interstitial Ads
-- **Component**: `AdManager.java` -> `showInterstitialBeforeTest()` / `startTest()` and `showInterstitialAfterTest()`
+- **Component**: `ui/question/TestAds.java` -> `showBeforeTest()` / `startTest()` and `showAfterTest()`, on top of `ads/InterstitialAds`
 - **Natural Break Guarantee**: Google Play policy strictly mandates interstitials only at natural transition points. The pre-test ad shows after the user has chosen a test and before its first question; the post-test ad shows after the test is completed, before the result page.
 - **Pre-test triggers**: Test setup sheet (topics, mixed practice, saved questions), daily challenge, review, sprint, interview packs, learning-path levels, focus practice, and Retry / Practice mistakes on the result screen. Never when resuming a saved test, previewing a locked topic, or opening a test from the widget or a reminder notification.
 - **Rules & Frequency Capping** (shared by both placements, so they never add up to more interstitials):
   1. **New User Grace Period**: First **2 tests** are 100% ad-free (`GRACE_TESTS = 2`).
   2. **Test Spacing**: At least **2 finished tests** must occur between any two interstitial displays, whichever placement showed them (`TESTS_BETWEEN_INTERSTITIALS = 2`).
   3. **Meaningful Effort Rule**: The post-test ad is never shown if a user abandons a test early or answered fewer than 3 questions (`MIN_ANSWERED_FOR_INTERSTITIAL = 3`).
-  4. **Cooldown Timer**: Enforces a strict minimum **3-minute gap** (`3 * 60 * 1000 ms`) after any full-screen ad (interstitial or rewarded).
+  4. **Cooldown Timer**: Enforces a strict minimum **3-minute gap** (`AdConfig.FULLSCREEN_MIN_GAP_MS`) after any full-screen ad (interstitial or rewarded).
   5. **Pre-loading & Expiry**: Interstitials are preloaded in the background and discarded if older than **1 hour** to maintain fresh bids.
 
 ---
@@ -72,9 +72,9 @@ This document details all advertising placements, ad unit identifiers, formats, 
 
 ## 4. Privacy, Compliance & Consent (GDPR / UMP / CCPA)
 
-- **Consent Framework**: Implemented via Google User Messaging Platform (UMP) SDK in [AdManager.java](file:///d:/work/codes/mine/SkillAssessment/app/src/main/java/net/golbarg/skillassessment/ads/AdManager.java).
+- **Consent Framework**: Implemented via Google User Messaging Platform (UMP) SDK in `ads/AdConsent.java`.
 - **Consent Gathering Flow**:
-  - `AdManager.gatherConsent(activity)` runs upon startup in `MainActivity`.
+  - `AdConsent.gather(activity)` runs upon startup in `MainActivity`.
   - In EEA/UK and applicable US regions, Google's certified CMP consent form is presented automatically.
   - No ads are requested or initialized until UMP `canRequestAds()` returns `true`.
 - **Ad Privacy Settings Button**:
@@ -91,4 +91,6 @@ This document details all advertising placements, ad unit identifiers, formats, 
   - When `BillingManager.isPremium()` is active:
     - Banners are hidden and never requested.
     - Interstitials are bypassed completely.
+    - Rewarded features (coins, 50/50 hint, streak restore) are granted without a video.
+    - This is wired through `AdManager.userIsAdFree()`; `BillingManager` calls `AdManager.refresh()` whenever Premium changes, so ads disappear at once.
     - All 58 topics are unlocked for free without needing coins or rewarded videos.

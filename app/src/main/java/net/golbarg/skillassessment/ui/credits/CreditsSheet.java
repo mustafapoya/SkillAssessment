@@ -12,7 +12,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.ads.AdConfig;
+import net.golbarg.skillassessment.ads.RewardedAds;
 import net.golbarg.skillassessment.billing.BillingManager;
 import net.golbarg.skillassessment.databinding.SheetCreditsBinding;
 import net.golbarg.skillassessment.db.QuizRepository;
@@ -30,7 +31,7 @@ public class CreditsSheet extends AppBottomSheet {
     private SheetCreditsBinding binding;
     private QuizRepository repository;
     private boolean earnedThisSession;
-    private final AdManager.RewardedListener rewardedListener = this::onRewardedLoaded;
+    private final RewardedAds.LoadListener rewardedListener = this::onRewardedLoaded;
 
     @Nullable
     @Override
@@ -87,14 +88,14 @@ public class CreditsSheet extends AppBottomSheet {
     }
 
     private void requestAd() {
-        if (AdManager.isRewardedReady(AdManager.Rewarded.COINS)) {
+        if (RewardedAds.isReady(requireContext(), AdConfig.Placement.COINS_REWARDED)) {
             showReady();
             return;
         }
         binding.btnWatch.setEnabled(false);
         binding.btnWatch.setText(R.string.loading_ad);
         if (!earnedThisSession) binding.txtStatus.setVisibility(View.GONE);
-        AdManager.loadRewarded(requireContext(), AdManager.Rewarded.COINS, rewardedListener);
+        RewardedAds.load(requireContext(), AdConfig.Placement.COINS_REWARDED, rewardedListener);
     }
 
     private void onRewardedLoaded(boolean available) {
@@ -116,14 +117,14 @@ public class CreditsSheet extends AppBottomSheet {
     }
 
     private void watch() {
-        if (!AdManager.isRewardedReady(AdManager.Rewarded.COINS)) {
+        if (!RewardedAds.isReady(requireContext(), AdConfig.Placement.COINS_REWARDED)) {
             requestAd();
             return;
         }
         binding.btnWatch.setEnabled(false);
         // Captured now: the reward can arrive after the sheet has been dismissed.
         FragmentManager parent = getParentFragmentManager();
-        AdManager.showRewarded(requireActivity(), AdManager.Rewarded.COINS, () -> Async.run(null, () -> repository.addCredits(QuizRepository.REWARD_CREDIT), credits -> {
+        RewardedAds.show(requireActivity(), AdConfig.Placement.COINS_REWARDED, () -> Async.run(null, () -> repository.addCredits(QuizRepository.REWARD_CREDIT), credits -> {
             if (!parent.isDestroyed()) parent.setFragmentResult(RESULT_KEY, new Bundle());
             Feedback.play(Feedback.Sound.COIN);
             if (binding == null || credits == null) return;
@@ -143,7 +144,7 @@ public class CreditsSheet extends AppBottomSheet {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        AdManager.cancelRewardedListener(rewardedListener);
+        RewardedAds.cancel(rewardedListener);
         binding = null;
     }
 }

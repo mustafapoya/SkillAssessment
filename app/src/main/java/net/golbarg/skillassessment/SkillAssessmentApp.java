@@ -4,7 +4,6 @@ import android.app.Application;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
-import net.golbarg.skillassessment.ads.AdManager;
 import net.golbarg.skillassessment.billing.BillingManager;
 import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.reminder.ReminderScheduler;
@@ -19,7 +18,6 @@ public class SkillAssessmentApp extends Application {
         super.onCreate();
         AppCompatDelegate.setDefaultNightMode(Prefs.getThemeMode(this));
         CategoryNames.init(this);
-        AdManager.init(this);
         Feedback.init(this);
         BillingManager.get(this).refresh();
         ReminderScheduler.createChannel(this);

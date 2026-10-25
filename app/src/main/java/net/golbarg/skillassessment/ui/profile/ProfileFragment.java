@@ -22,7 +22,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.ads.AdConfig;
+import net.golbarg.skillassessment.ads.BannerAds;
+import net.golbarg.skillassessment.ui.question.TestAds;
 import net.golbarg.skillassessment.databinding.DialogEditNameBinding;
 import net.golbarg.skillassessment.databinding.FragmentProfileBinding;
 import net.golbarg.skillassessment.databinding.ItemAchievementBinding;
@@ -107,8 +109,8 @@ public class ProfileFragment extends Fragment {
         legendDot(header.txtLegendWrong, ContextCompat.getColor(requireContext(), R.color.wrong));
         legendDot(header.txtLegendSkipped, ContextCompat.getColor(requireContext(), R.color.skipped));
 
-        AdManager.loadBanner(getViewLifecycleOwner(), binding.adContainer, AdManager.Banner.PROFILE);
-        AdManager.preloadInterstitial(requireContext(), AdManager.Interstitial.TEST_START);
+        BannerAds.attach(binding.adContainer, getViewLifecycleOwner(), AdConfig.Placement.PROFILE_BANNER);
+        TestAds.preloadBeforeTest(requireContext());
     }
 
     @Override
@@ -249,7 +251,7 @@ public class ProfileFragment extends Fragment {
                     + ", " + row.txtSubtitle.getText());
             row.getRoot().setOnClickListener(v -> {
                 if (t.toFix > 0) {
-                    AdManager.startTest(requireActivity(), QuestionActivity.focusIntent(requireContext(), c.getId(), Prefs.isTimerEnabled(requireContext())));
+                    TestAds.startTest(requireActivity(), QuestionActivity.focusIntent(requireContext(), c.getId(), Prefs.isTimerEnabled(requireContext())));
                 } else if (getChildFragmentManager().findFragmentByTag(TestSetupSheet.TAG) == null) {
                     TestSetupSheet.newInstance(c).show(getChildFragmentManager(), TestSetupSheet.TAG);
                 }

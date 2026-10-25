@@ -4,7 +4,7 @@ Everything to enter in Google Play Console for **CodeQuiz** (`net.golbarg.skilla
 
 > **Open items before submitting**
 > - ⚠️ **Privacy policy URL**: publish [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md) (or [`privacy_policy.json`](privacy_policy.json) on the website) and enter its address below. The address used before, `https://golbarg.net/privacy/skillassessment`, returns 404, and Play rejects apps with ads whose policy link is broken.
-> - ⚠️ **Ads switch**: `AdManager.ADS_ENABLED` is `false` in the working copy. The answers below assume ads are on (`true`). If you release with ads off, answer **No** to "Contains ads", and in Data safety declare only what Google Play itself needs (nothing from the app).
+> - ⚠️ **Ads switch**: `AdConfig.ADS_ENABLED` (in `ads/AdConfig.java`) decides whether ads ship; check it before every release. The answers below assume ads are on (`true`). If you release with ads off, answer **No** to "Contains ads", and in Data safety declare only what Google Play itself needs (nothing from the app).
 > - ⚠️ **GDPR consent message**: publish one in AdMob → Privacy & messaging. Without it the app can't ask users in the EEA, UK and Switzerland for consent, and they get few or no ads.
 
 ---

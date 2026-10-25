@@ -16,7 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.ads.AdConfig;
+import net.golbarg.skillassessment.ads.BannerAds;
 import net.golbarg.skillassessment.databinding.FragmentBookmarkBinding;
 import net.golbarg.skillassessment.db.QuizRepository;
 import net.golbarg.skillassessment.models.Bookmark;
@@ -66,7 +67,7 @@ public class BookmarkFragment extends Fragment {
         binding.btnPracticeSaved.setOnClickListener(v -> startPractice());
         binding.cardPracticeSaved.setOnClickListener(v -> startPractice());
 
-        AdManager.loadBanner(getViewLifecycleOwner(), binding.adContainer, AdManager.Banner.BOOKMARK);
+        BannerAds.attach(binding.adContainer, getViewLifecycleOwner(), AdConfig.Placement.BOOKMARK_BANNER);
     }
 
     private void startPractice() {

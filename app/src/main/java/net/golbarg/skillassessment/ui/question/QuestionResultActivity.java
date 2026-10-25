@@ -16,7 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.ads.AdConfig;
+import net.golbarg.skillassessment.ads.BannerAds;
 import net.golbarg.skillassessment.databinding.ActivityQuestionResultBinding;
 import net.golbarg.skillassessment.databinding.DialogEditNameBinding;
 import net.golbarg.skillassessment.databinding.ItemResultHeaderBinding;
@@ -136,8 +137,8 @@ public class QuestionResultActivity extends AppCompatActivity {
             });
         });
 
-        AdManager.loadBanner(this, binding.adContainer, AdManager.Banner.RESULT);
-        AdManager.preloadInterstitial(this, AdManager.Interstitial.TEST_START);
+        BannerAds.attach(binding.adContainer, this, AdConfig.Placement.RESULT_BANNER);
+        TestAds.preloadBeforeTest(this);
     }
 
     private void bind(Data data, boolean animate) {
@@ -183,7 +184,7 @@ public class QuestionResultActivity extends AppCompatActivity {
 
         boolean hasMistakes = r.getWrongAnswer() + r.getNoAnswer() > 0;
         header.btnPracticeMistakes.setVisibility(hasMistakes ? View.VISIBLE : View.GONE);
-        header.btnPracticeMistakes.setOnClickListener(v -> AdManager.showInterstitialBeforeTest(this, () -> {
+        header.btnPracticeMistakes.setOnClickListener(v -> TestAds.showBeforeTest(this, () -> {
             startActivity(QuestionActivity.intent(this, Category.REVIEW, 0, Prefs.isTimerEnabled(this), false));
             finish();
         }));
@@ -203,7 +204,7 @@ public class QuestionResultActivity extends AppCompatActivity {
                 retry = QuestionActivity.intent(this, data.category.getId(), Prefs.getTestLength(this),
                         Prefs.isTimerEnabled(this), Prefs.isShuffleEnabled(this));
             }
-            AdManager.showInterstitialBeforeTest(this, () -> {
+            TestAds.showBeforeTest(this, () -> {
                 startActivity(retry);
                 finish();
             });

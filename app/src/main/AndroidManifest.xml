@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SkillAssessment">
 
-        <!-- AdMob app ID. Ad unit IDs live in ads/AdManager (test units are used automatically in debug builds). -->
+        <!-- Real AdMob App ID. Test vs real ads is switched in ads/AdConfig (demo units work under the real App ID). -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8976959600358837~4153212745" />

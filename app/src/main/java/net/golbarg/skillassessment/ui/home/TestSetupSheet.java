@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import net.golbarg.skillassessment.R;
-import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.ui.question.TestAds;
 import net.golbarg.skillassessment.databinding.SheetTestSetupBinding;
 import net.golbarg.skillassessment.models.Category;
 import net.golbarg.skillassessment.ui.path.PathActivity;
@@ -119,7 +119,7 @@ public class TestSetupSheet extends AppBottomSheet {
         });
         bindMode(false);
 
-        AdManager.preloadInterstitial(requireContext(), AdManager.Interstitial.TEST_START);
+        TestAds.preloadBeforeTest(requireContext());
         binding.btnStart.setOnClickListener(v -> {
             int checked = binding.toggleLength.getCheckedButtonId();
             int length = checked == R.id.btn_len_express ? EXPRESS : checked == R.id.btn_len_quick ? QUICK : checked == R.id.btn_len_standard ? STANDARD : 0;
@@ -131,7 +131,7 @@ public class TestSetupSheet extends AppBottomSheet {
             // own default length (15 for mixed practice), so it gets the count explicitly.
             int requested = length == 0 && categoryId < 0 ? count : length;
             // The switch is hidden for pseudo topics; saved questions are always drawn at random.
-            AdManager.startTest(requireActivity(), QuestionActivity.intent(requireContext(), categoryId, requested, timer, shuffle || categoryId < 0, exam));
+            TestAds.startTest(requireActivity(), QuestionActivity.intent(requireContext(), categoryId, requested, timer, shuffle || categoryId < 0, exam));
             dismissAllowingStateLoss();
         });
 

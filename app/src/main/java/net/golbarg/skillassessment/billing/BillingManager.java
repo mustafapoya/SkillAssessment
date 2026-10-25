@@ -21,6 +21,8 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
 
+import net.golbarg.skillassessment.ads.AdManager;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -202,6 +204,8 @@ public final class BillingManager {
         SharedPreferences prefs = appContext.getSharedPreferences(FILE, Context.MODE_PRIVATE);
         prefs.edit().putBoolean(KEY_PREMIUM, premium).apply();
         publish();
+        // Premium hides every ad at once (and brings them back if a purchase is refunded)
+        AdManager.refresh(appContext);
     }
 
     private void publish() {

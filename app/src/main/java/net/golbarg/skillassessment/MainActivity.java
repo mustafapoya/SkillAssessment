@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
-import net.golbarg.skillassessment.ads.AdManager;
+import net.golbarg.skillassessment.ads.AdConsent;
 import net.golbarg.skillassessment.databinding.ActivityMainBinding;
 import net.golbarg.skillassessment.util.UiUtils;
 
@@ -26,6 +26,6 @@ public class MainActivity extends AppCompatActivity {
             binding.navView.setupWithNavController(navController);
         }
         // Asks for ad consent where the law requires it; banners wait until this resolves.
-        AdManager.gatherConsent(this);
+        AdConsent.gather(this);
     }
 }
